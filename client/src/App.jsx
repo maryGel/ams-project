@@ -5,13 +5,27 @@ import Header from './components/header.jsx';
 import HomePage from './pages/HomePage.jsx'; 
 import LoginPage from './pages/LoginPage.jsx';
 import AssetMasterlist from './assetMaster/assterMasterlist.jsx';
+import AssetGrouplist from './assetMaster/assetGrouplist.jsx';
 
 
 
 
 function App() {
 
-  const [ headerTitle, setHeaderTitle] = useState(HeaderTitle.DEFAULT);
+// To initialize the header title based on the current page
+  const getInitialTitle = () => {
+    const savedTitle = localStorage.getItem('currentHeaderTitle');
+    return savedTitle ? savedTitle : HeaderTitle.DEFAULT;
+  }
+
+  const [ headerTitle, setHeaderTitle] = useState(getInitialTitle);
+
+// To save the header title to localStorage whenever it changes
+  const saveTitleUpdate = (newTitle) => {
+    localStorage.setItem('currentHeaderTitle', newTitle);
+    setHeaderTitle(newTitle);
+  }
+
 
   return (
   <div className="App">
@@ -19,21 +33,29 @@ function App() {
 
       <Header 
         headerTitle={headerTitle}
-        setHeaderTitle={setHeaderTitle}
+        setHeaderTitle={saveTitleUpdate}
       />
       
       <Routes> {/* This container now works because of BrowserRouter in main.jsx */}
         <Route  path="/" 
                 element={<HomePage
                           headerTitle ={headerTitle}
-                          setHeaderTitle={setHeaderTitle}
-                        
-                        />} /> 
-        <Route path="/loginpage" element={<LoginPage />} />
+                          setHeaderTitle={saveTitleUpdate}
+                        />} 
+        /> 
+        <Route path="/loginpage" 
+                element={<LoginPage />} 
+        />
         <Route path="/assetFolder/assetMasterData" 
                 element={<AssetMasterlist 
-                          setHeaderTitle={setHeaderTitle}
-                        />} />
+                          setHeaderTitle={saveTitleUpdate}
+                        />} 
+        />
+        <Route path="/assetFolder/assetGrouplist" 
+                element={<AssetGrouplist
+                          setHeaderTitle={saveTitleUpdate}
+                        />} 
+        />
 
 
 
