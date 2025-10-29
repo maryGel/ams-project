@@ -6,9 +6,7 @@ import HomePage from './pages/HomePage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import AssetMasterlist from './assetMaster/assterMasterlist.jsx';
 import AssetGrouplist from './assetMaster/assetGrouplist.jsx';
-
-
-
+import CreateAsset from './assetMaster/createAsset.jsx';
 
 function App() {
 
@@ -46,8 +44,14 @@ function App() {
         <Route path="/loginpage" 
                 element={<LoginPage />} 
         />
+        
         <Route path="/assetFolder/assetMasterData" 
                 element={<AssetMasterlist 
+                          setHeaderTitle={saveTitleUpdate}
+                        />} 
+        />
+        <Route path="/assetFolder/createAsset" 
+                element={<CreateAsset
                           setHeaderTitle={saveTitleUpdate}
                         />} 
         />
