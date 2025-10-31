@@ -60,34 +60,40 @@ const headCells = [
     id: 3,
     numeric: true,
     disablePadding: false,
-    label: 'Asset Group',
+    label: 'Asset Class',
   },
   {
     id: 4,
     numeric: true,
     disablePadding: false,
-    label: 'Quantity',
+    label: 'Asset Group',
   },
   {
     id: 5,
     numeric: true,
     disablePadding: false,
-    label: 'UOM',
+    label: 'Quantity',
   },
   {
     id: 6,
     numeric: true,
     disablePadding: false,
-    label: 'Location',
+    label: 'UOM',
   },
   {
     id: 7,
     numeric: true,
     disablePadding: false,
-    label: 'Department',
+    label: 'Location',
   },
   {
     id: 8,
+    numeric: true,
+    disablePadding: false,
+    label: 'Department',
+  },
+  {
+    id: 9,
     numeric: true,
     disablePadding: false,
     label: 'Status',
@@ -387,11 +393,13 @@ const rows = itemList;
                     </TableCell>
                     <TableCell align="left">{row.FacName}</TableCell>
                     <TableCell align="left">{row.ItemClass}</TableCell>
+                    <TableCell align="left">{row.CATEGORY}</TableCell>
                     <TableCell align="left">{row.balance_unit}</TableCell>
                     <TableCell align="left">{row.Unit}</TableCell>
                     <TableCell align="left">{row.ItemLocation}</TableCell>
                     <TableCell align="left">{row.Department}</TableCell>
                     <TableCell align="left">{row.status}</TableCell>
+                    
                   </TableRow>
                 );
               })}

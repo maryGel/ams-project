@@ -1,28 +1,29 @@
-import * as React from 'react';
+import React, {useState} from 'react';
 import {
   Stepper,
   Step,
   StepLabel,
   Button,
   Typography,
-  Box,
-  TextField, // Example form fields
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
+  Box
 } from '@mui/material';
+//import Asset Fields
+import AsstGenInfo from './asstGenInfo';
+import AsstAcctAsgmnt from './asstAcctAsgmt';
+
+
+
 
 // 1. Define your step labels
 const steps = ['General Info', 'Account Assignment', 'Upload Picture'];
 
 // 2. Component for the entire multi-step form
 export default function CreateAsset() {
-  const [activeStep, setActiveStep] = React.useState(0);
+  const [activeStep, setActiveStep] = useState(0);
   // const [skipped, setSkipped] = React.useState(new Set());
 
   // 3. State to hold all form data
-  const [assetData, setAssetData] = React.useState({
+  const [assetData, setAssetData] = useState({
     generalInfo: { assetName: '', assetGroup: '' },
     accountAssignment: { department: '', location: '' },
     uploadPicture: { file: null, preview: '' },
@@ -54,74 +55,17 @@ export default function CreateAsset() {
     switch (step) {
       case 0:
         return (
-          <Box sx={{ p: 4 }}>
-            <Typography variant="h6" gutterBottom>
-              General Information
-            </Typography>
-            <TextField
-              label="Asset Name"
-              fullWidth
-              margin="normal"
-              value={assetData.generalInfo.assetName}
-              onChange={(e) =>
-                setAssetData({
-                  ...assetData,
-                  generalInfo: { ...assetData.generalInfo, assetName: e.target.value },
-                })
-              }
-            />
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Asset Group</InputLabel>
-              <Select
-                value={assetData.generalInfo.assetGroup}
-                label="Asset Group"
-                onChange={(e) =>
-                  setAssetData({
-                    ...assetData,
-                    generalInfo: { ...assetData.generalInfo, assetGroup: e.target.value },
-                  })
-                }
-              >
-                <MenuItem value="Vehicle">Vehicle</MenuItem>
-                <MenuItem value="Office Equipment">Office Equipment</MenuItem>
-                <MenuItem value="Machinery & Equipment">Machinery & Equipment</MenuItem>
-              </Select>
-            </FormControl>
-            {/* ... other general info fields */}
-          </Box>
+          <AsstGenInfo
+            assetData = {assetData}
+            setAssetData = {setAssetData}
+          />
         );
       case 1:
         return (
-          <Box sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Account Assignment
-            </Typography>
-            <TextField
-              label="Department"
-              fullWidth
-              margin="normal"
-              value={assetData.accountAssignment.department}
-              onChange={(e) =>
-                setAssetData({
-                  ...assetData,
-                  accountAssignment: { ...assetData.accountAssignment, department: e.target.value },
-                })
-              }
-            />
-            <TextField
-              label="Location"
-              fullWidth
-              margin="normal"
-              value={assetData.accountAssignment.location}
-              onChange={(e) =>
-                setAssetData({
-                  ...assetData,
-                  accountAssignment: { ...assetData.accountAssignment, location: e.target.value },
-                })
-              }
-            />
-            {/* ... other account assignment fields */}
-          </Box>
+          <AsstAcctAsgmnt
+            assetData = {assetData}
+            setAssetData = {setAssetData}            
+          />
         );
       case 2:
         return (
