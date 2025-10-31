@@ -119,7 +119,7 @@ function AssetMasterlist({setHeaderTitle}) {
         />     
       </form>
 
-      {/* Filter button */}
+      {/* Filter buttons */}
       <div className='flex w-full h-auto gap-0.5 p-2 pr-5 ml-auto bg-gray-100 place-content-end'>
         {/* Asset Group List Table to be implemented here */}
         <button 
@@ -150,9 +150,6 @@ function AssetMasterlist({setHeaderTitle}) {
        {/* Filter table */}
        <div>
         <EnhancedTable />
-
-
-
        </div>
     </div>
   )

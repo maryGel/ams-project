@@ -2,13 +2,17 @@ import express from 'express';
 import mysql from 'mysql2';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import userRouter from './routes/users.js';
 
-const db = mysql.createPool({
+// routes for table
+import userRouter from './routes/users.js';
+import useItemlist from './routes/asstMasterlist.js';
+
+// Express Pool
+export const db = mysql.createPool({
     host: 'localhost',
     user: 'root',
     password: 'adminGel',
-    database: 'AMSDataBase',
+    database: 'ams1',
 })
 
 const app = express();
@@ -23,8 +27,9 @@ app.use(cors());
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// to route /api/
+// API routes
 app.use('/login', userRouter);
+app.use('/itemlist', useItemlist);
 
 app.listen(3000, () => {
     console.log('Server is running on 3000');

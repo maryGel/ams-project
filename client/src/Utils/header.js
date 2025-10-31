@@ -1,4 +1,4 @@
 export function HeaderTitle(title){
 
-  return title;
+  return title('Asset Management System');
 }

@@ -1,56 +1,31 @@
 import * as React from 'react';
+import  {useState, useEffect, useMemo}  from 'react';
 import PropTypes from 'prop-types';
 import { alpha } from '@mui/material/styles';
-import Box from '@mui/material/Box';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
-import TableRow from '@mui/material/TableRow';
-import TableSortLabel from '@mui/material/TableSortLabel';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Paper from '@mui/material/Paper';
-import Checkbox from '@mui/material/Checkbox';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Switch from '@mui/material/Switch';
+import {
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableSortLabel,
+  Toolbar,
+  Typography,
+  Paper,
+  Checkbox,
+  IconButton,
+  Tooltip,
+  FormControlLabel,
+  Switch,
+} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
 
-function createData(id,asstnum, asstname, asstgrp, qty, uom, location, department,status) {
-  return {
-    id,
-    asstnum,
-    asstname,
-    asstgrp,
-    qty,
-    uom,
-    location,
-    department,
-    status
-  };
-}
 
-const rows = [
-  createData(1,239423, 'Hamper', 'Machinery & Equipment', 7, 'pc', 'Tower-1 Makati', 'Production', 'Active'),
-  createData(2,213453, 'Toyota Hiace', 'Vehicle', 25, 'pc', 'Tower-1 Makati', 'Production', 'Under Repair'),
-  createData(3, 280204,'Printer', 'Office Equipment', 16, 'pc', 'Tower-2 Manila', 'Accounting', 'Active'),
-  createData(4, 450505,'Battery', 'Low-Value Assets', 12, 'pc', 'Tower-2 Manila', 'Marketing', 'Active'),
-  createData(5, 120343,'Iphone 17', 'Mobile', 16, 'pc', 'Tower-2 Manila', 'Sales', 'Inactive'),
-  createData(6, 692923, 'Tables', 'Furniture & Fixtures', 83.2,'pc' , 'Tower-1 Makati', 'Accounting', 'Marked for Disposal'),
-  createData(7, 129341,'Chairs', 'Furniture & Fixtures', 92, 'pc', 'Tower-1 Makati', 'HR', 'Active'),
-  createData(8, 534421,'Desktop HP', 'IT Equipment', 67, 'pc', 'Tower-1 Makati', 'Production', 'Active'),
-  createData(9, 509812,'Macbook 16`','IT Equipment', 18, 'pc', 'Tower-1 Makati', 'Production', 'Active'),
-  createData(10, 899012,'Toolbox','Machinery & Equipment', 32, 'pc', 'Tower-1 Makati', 'Production', 'Active'),
-  createData(11, 281221,'Speaker','Office Equipment', 12, 'pc', 'Tower-1 Makati', 'Production', 'Active'),
-  createData(12, 450293, 'Signage', 'Low-Value Assets',3, 'pc', 'Tower-1 Makati', 'Production', 'Active'),
-  createData(13, 509482,'Aspire','IT Equipment', 7, 'pc', 'Tower-1 Makati', 'Production', 'Active'),
-];
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -70,49 +45,49 @@ function getComparator(order, orderBy) {
 
 const headCells = [
   {
-    id: 'asstnum',
+    id: 1,
     numeric: false,
     disablePadding: true,
     label: 'Asset Number',
   },
   {
-    id: 'calories',
+    id: 2,
     numeric: true,
     disablePadding: false,
     label: 'Asset Name',
   },
   {
-    id: 'calories',
+    id: 3,
     numeric: true,
     disablePadding: false,
     label: 'Asset Group',
   },
   {
-    id: 'fat',
+    id: 4,
     numeric: true,
     disablePadding: false,
     label: 'Quantity',
   },
   {
-    id: 'carbs',
+    id: 5,
     numeric: true,
     disablePadding: false,
     label: 'UOM',
   },
   {
-    id: 'protein',
+    id: 6,
     numeric: true,
     disablePadding: false,
     label: 'Location',
   },
   {
-    id: 'protein',
+    id: 7,
     numeric: true,
     disablePadding: false,
     label: 'Department',
   },
   {
-    id: 'protein',
+    id: 8,
     numeric: true,
     disablePadding: false,
     label: 'Status',
@@ -143,7 +118,7 @@ function EnhancedTableHead(props) {
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
-            align={headCell.numeric ? 'right' : 'left'}
+            align='left'
             padding={headCell.disablePadding ? 'none' : 'normal'}
             sortDirection={orderBy === headCell.id ? order : false}
             sx ={{ fontWeight: 'bold' }}
@@ -178,6 +153,7 @@ EnhancedTableHead.propTypes = {
 
 function EnhancedTableToolbar(props) {
   const { numSelected } = props;
+
   return (
     <Toolbar
       sx={[
@@ -232,12 +208,49 @@ EnhancedTableToolbar.propTypes = {
 };
 
 export default function EnhancedTable() {
-  const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('calories');
-  const [selected, setSelected] = React.useState([]);
-  const [page, setPage] = React.useState(0);
-  const [dense, setDense] = React.useState(false);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  // MUI States
+  const [order, setOrder] = useState('asc');
+  const [orderBy, setOrderBy] = useState('asstnum');
+  const [selected, setSelected] = useState([]);
+  const [page, setPage] = useState(0);
+  const [dense, setDense] = useState(false);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  // New State for API Data
+  const [itemList, setItemList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error] = useState(null);
+
+  // 1. Data fetching for API Data
+  
+  useEffect(() => {
+    const fecthItems = async () => {
+      try {
+        const response = await fetch('/api/itemlist/assetMasterlist');
+        if (!response.ok){
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+
+        // Add unique is to each row for MUI Selection logic
+        const dataWithID = data.map((item, index) => ({
+          ...item,
+          id: item.asstnum || `row-${index}`,
+        }));
+        setItemList(dataWithID);
+        
+      } catch (error){
+        console.error("Error fetching asset master data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fecthItems();
+},[]);
+
+// Replace placeholder rows with API data
+const rows = itemList;
+  
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -247,7 +260,7 @@ export default function EnhancedTable() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelected = rows.map((n) => n.id);
+      const newSelected = itemList.map((n) => n.id);
       setSelected(newSelected);
       return;
     }
@@ -290,14 +303,35 @@ export default function EnhancedTable() {
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-  const visibleRows = React.useMemo(
-    () =>
-      [...rows]
-        .sort(getComparator(order, orderBy))
-        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-    [order, orderBy, page, rowsPerPage],
-  );
+  const visibleRows = useMemo(
+    // 1. The function is the first argument
+    () => { 
+      return [...rows]
+          .sort(getComparator(order, orderBy))
+          .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+    },
+    // 2. The dependency array is the second argument, separated by a comma
+    [order, orderBy, page, rowsPerPage, rows],
+  ); 
 
+  if(loading){
+    return (
+      <Box sx={{ width: '100%',  padding: 2}}>
+        <Typography variant="h6" align="center">
+          Loading Asset Master Data...
+        </Typography>
+      </Box>
+    )
+  }
+
+  if(error){
+    return (
+      <Box sx={{ width: '100%', padding: 2, textAlign: 'center' }}>
+        <Typography>{error}</Typography>
+      </Box>
+    );
+  }
+  
   return (
     <Box sx={{ width: '100%',  padding: 2}}>
       <Paper sx={{ width: '100%', mb: 2 }}>
@@ -340,9 +374,6 @@ export default function EnhancedTable() {
                       <Checkbox
                         color="primary"
                         checked={isItemSelected}
-                        inputProps={{
-                          'aria-labelledby': labelId,
-                        }}
                       />
                     </TableCell>
                     <TableCell
@@ -352,15 +383,15 @@ export default function EnhancedTable() {
                       padding="none"
                       sx={{ fontWeight: 'bold', color: 'primary.main' }}
                     >
-                      {row.asstnum}
+                      {row.FacNO}
                     </TableCell>
-                    <TableCell align="right">{row.asstname}</TableCell>
-                    <TableCell align="right">{row.asstgrp}</TableCell>
-                    <TableCell align="right">{row.qty}</TableCell>
-                    <TableCell align="right">{row.uom}</TableCell>
-                    <TableCell align="right">{row.location}</TableCell>
-                    <TableCell align="right">{row.department}</TableCell>
-                    <TableCell align="right">{row.status}</TableCell>
+                    <TableCell align="left">{row.FacName}</TableCell>
+                    <TableCell align="left">{row.ItemClass}</TableCell>
+                    <TableCell align="left">{row.balance_unit}</TableCell>
+                    <TableCell align="left">{row.Unit}</TableCell>
+                    <TableCell align="left">{row.ItemLocation}</TableCell>
+                    <TableCell align="left">{row.Department}</TableCell>
+                    <TableCell align="left">{row.status}</TableCell>
                   </TableRow>
                 );
               })}
@@ -377,7 +408,7 @@ export default function EnhancedTable() {
           </Table>
         </TableContainer>
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
+          rowsPerPageOptions={[5, 10, 25, 50]}
           component="div"
           count={rows.length}
           rowsPerPage={rowsPerPage}
