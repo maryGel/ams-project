@@ -14,10 +14,10 @@ import AsstAcctAsgmnt from './asstAcctAsgmt';
 
 
 
-// 1. Define your step labels
+  // 1. Define your step labels
 const steps = ['General Info', 'Account Assignment', 'Upload Picture'];
 
-// 2. Component for the entire multi-step form
+  // 2. Component for the entire multi-step form
 export default function CreateAsset() {
   const [activeStep, setActiveStep] = useState(0);
   // const [skipped, setSkipped] = React.useState(new Set());
@@ -117,7 +117,7 @@ export default function CreateAsset() {
   };
 
   return (
-    <Box sx={{ width: '100%', mt: 6, px: 10 }}>
+    <Box sx={{ width: '100%', mt: 6, px: 30 }}>
       <Stepper activeStep={activeStep}>
         {steps.map((label) => {
           const stepProps = {};

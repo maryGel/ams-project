@@ -1,0 +1,87 @@
+import * as React from 'react';
+import PropTypes from 'prop-types';
+import { useTheme } from '@mui/material/styles';
+import AppBar from '@mui/material/AppBar';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+
+//import display tabs fields
+import AssetDisplayGenInfo from './assetDisplayGenInfo';
+import AssetDisplayValue from './assetDisplayValue';
+import AssetDisplayTrans from './assetDisplayTrans';
+
+
+
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`full-width-tabpanel-${index}`}
+      aria-labelledby={`full-width-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
+
+TabPanel.propTypes = {
+  children: PropTypes.node,
+  index: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired,
+};
+
+function a11yProps(index) {
+  return {
+    id: `full-width-tab-${index}`,
+    'aria-controls': `full-width-tabpanel-${index}`,
+  };
+}
+
+export default function AssetDisplayTabs(){
+
+  const theme = useTheme();
+  const [value, setValue] = React.useState(0);
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  }; 
+
+  return (
+    <Box sx={{ bgcolor: 'background.paper', width: '100%', marginTop: 2, borderRadius: 1, boxShadow: 3 }}>
+      <AppBar position="static" sx ={{  borderRadius: 2, boxShadow: 3 }}>
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          sx={{ bgcolor: '#01579b', color: 'white', fontFamily: 'Roboto'}}
+          indicatorColor="secondary"
+          textColor="inherit"
+          aria-label="full width tabs example"
+          
+        >
+          <Tab label="General Info" {...a11yProps(0)} />
+          <Tab label="Asset Value" {...a11yProps(1)} />
+          <Tab label="Transaction" {...a11yProps(2)} />
+        </Tabs>
+      </AppBar>
+      <TabPanel value={value} index={0} dir={theme.direction} sx={{ width: '100%' }}>
+        <AssetDisplayGenInfo/>
+      </TabPanel>
+      <TabPanel value={value} index={1} dir={theme.direction}>
+        <AssetDisplayValue/>
+      </TabPanel>
+      <TabPanel value={value} index={2} dir={theme.direction}>
+        <AssetDisplayTrans/>
+      </TabPanel>
+    </Box>
+  );
+}
