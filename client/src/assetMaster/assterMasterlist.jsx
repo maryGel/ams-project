@@ -7,15 +7,13 @@ import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import {top100Films} from './assetlist';
-import EnhancedTable from './assetMasterTable';
+import AssetMasterTable from './assetMasterTable';
 import { NavLink } from 'react-router-dom';
 
 
 
 
 function AssetMasterlist({setHeaderTitle}) {
-
-
 
 
   return (
@@ -151,7 +149,7 @@ function AssetMasterlist({setHeaderTitle}) {
 
        {/* Filter table */}
        <div>
-        <EnhancedTable />
+        <AssetMasterTable />
        </div>
     </div>
   )

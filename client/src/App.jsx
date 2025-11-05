@@ -8,6 +8,7 @@ import AssetMasterlist from './assetMaster/assterMasterlist.jsx';
 import AssetGrouplist from './assetMaster/assetGrouplist.jsx';
 import CreateAsset from './assetMaster/createAsset.jsx';
 import AssetMasterDisplay from './assetMaster/assetDisplay.jsx';
+import Practice from './components/practice.jsx';
 
 function App() {
 
@@ -68,6 +69,13 @@ function App() {
         />
 
 
+
+
+
+        <Route path="/practiceJsx" 
+                element={<Practice
+                        />} 
+        />
 
         {/* If you add a register page, define its route here: */}
         {/* <Route path="/registerpage" element={<RegisterPage />} /> */}

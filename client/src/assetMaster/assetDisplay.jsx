@@ -1,9 +1,17 @@
 import AssetDisplayTabs from './assetDisplayTabs'
+import GroupBtns from '../components/groupbtns'
 
 export default function AssetMasterDisplay(){
 
   return(
     <>
+      <div className='flex justify-end m-5 mr-10'>
+        {/* Primary Button */}
+        <GroupBtns onClick={() => console.log('Clicked Primary')}>
+          Edit
+        </GroupBtns>
+
+      </div>
       <div className='grid p-10 border rounded-lg border-spacing-x-3 bg-gray-50'>
         <p
           className='p-3 pl-16 text-xl font-medium tracking-wide bg-white border rounded-md shadow-md shadow-slate-300 border-slate-300 text-slate-800'

@@ -24,6 +24,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
+import { useNavigate } from 'react-router-dom';
 
 
 
@@ -213,7 +214,10 @@ EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
 };
 
-export default function EnhancedTable() {
+
+
+
+export default function AssetMasterTable() {
   // MUI States
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('asstnum');
@@ -229,6 +233,9 @@ export default function EnhancedTable() {
 
   // 1. Data fetching for API Data
   
+
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fecthItems = async () => {
       try {
@@ -337,6 +344,12 @@ const rows = itemList;
       </Box>
     );
   }
+
+
+const handleDoubleClick = (row) => {
+  navigate(`/assetmasterTable/display/${row.asstnum}`);
+}
+
   
   return (
     <Box sx={{ width: '100%',  padding: 2}}>
@@ -366,6 +379,7 @@ const rows = itemList;
                   <TableRow
                     hover
                     onClick={(event) => handleClick(event, row.id)}
+                    onDoubleClick = {() => handleDoubleClick(row)}
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
