@@ -47,7 +47,7 @@ function a11yProps(index) {
   };
 }
 
-export default function AssetDisplayTabs(){
+export default function AssetDisplayTabs({asset}){
 
   const theme = useTheme();
   const [value, setValue] = React.useState(0);
@@ -74,7 +74,9 @@ export default function AssetDisplayTabs(){
         </Tabs>
       </AppBar>
       <TabPanel value={value} index={0} dir={theme.direction} sx={{ width: '100%' }}>
-        <AssetDisplayGenInfo/>
+        <AssetDisplayGenInfo
+          asset={asset}
+        />
       </TabPanel>
       <TabPanel value={value} index={1} dir={theme.direction}>
         <AssetDisplayValue/>

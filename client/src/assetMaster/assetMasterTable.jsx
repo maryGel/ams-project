@@ -220,7 +220,7 @@ EnhancedTableToolbar.propTypes = {
 export default function AssetMasterTable() {
   // MUI States
   const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState('asstnum');
+  const [orderBy, setOrderBy] = useState('');
   const [selected, setSelected] = useState([]);
   const [page, setPage] = useState(0);
   const [dense, setDense] = useState(false);
@@ -231,9 +231,8 @@ export default function AssetMasterTable() {
   const [loading, setLoading] = useState(true);
   const [error] = useState(null);
 
-  // 1. Data fetching for API Data
-  
 
+  // 1. Data fetching for API Data 
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -248,7 +247,7 @@ export default function AssetMasterTable() {
         // Add unique is to each row for MUI Selection logic
         const dataWithID = data.map((item, index) => ({
           ...item,
-          id: item.asstnum || `row-${index}`,
+          id: item.FacNO || `row-${index}`,
         }));
         setItemList(dataWithID);
         
@@ -261,8 +260,9 @@ export default function AssetMasterTable() {
     fecthItems();
 },[]);
 
+
 // Replace placeholder rows with API data
-const rows = itemList;
+  const rows = itemList;
   
 
   const handleRequestSort = (event, property) => {
@@ -312,6 +312,20 @@ const rows = itemList;
     setDense(event.target.checked);
   };
 
+  const handleRowClick = (row) => {
+    const facNo = row.FacNO || row.FacNo;
+
+    // Save to localStorage
+    localStorage.setItem('selectedFacNO', facNo);
+  
+    console.log("Clicked Asset Number:", facNo);
+  
+    // Navigate to display page
+    navigate(`/assetFolder/assetMasterDisplay`);
+  };
+  
+
+
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
@@ -344,12 +358,6 @@ const rows = itemList;
       </Box>
     );
   }
-
-
-const handleDoubleClick = (row) => {
-  navigate(`/assetmasterTable/display/${row.asstnum}`);
-}
-
   
   return (
     <Box sx={{ width: '100%',  padding: 2}}>
@@ -378,8 +386,8 @@ const handleDoubleClick = (row) => {
                 return (
                   <TableRow
                     hover
-                    onClick={(event) => handleClick(event, row.id)}
-                    onDoubleClick = {() => handleDoubleClick(row)}
+                    // onClick={(event) => handleClick(event, row.id)}
+                    onClick={() => handleRowClick(row)}
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
@@ -394,6 +402,7 @@ const handleDoubleClick = (row) => {
                       <Checkbox
                         color="primary"
                         checked={isItemSelected}
+                        onClick={(event) => handleClick(event, row.id)}
                       />
                     </TableCell>
                     <TableCell

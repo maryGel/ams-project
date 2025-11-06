@@ -149,7 +149,8 @@ function AssetMasterlist({setHeaderTitle}) {
 
        {/* Filter table */}
        <div>
-        <AssetMasterTable />
+        <AssetMasterTable 
+        />
        </div>
     </div>
   )

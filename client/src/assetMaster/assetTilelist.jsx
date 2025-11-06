@@ -2,7 +2,7 @@ export const assetTileList = [
   {
     id: 1,
     title: 'Asset Master',
-    link: '/assetFolder/assetMasterData',
+    link: '/assetFolder/assetMasterList',
     imgSrc: '/icons/menu_icons/asset.png',
     headerTitle: 'Asset Master List',
   },

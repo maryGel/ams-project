@@ -26,7 +26,6 @@ function App() {
     setHeaderTitle(newTitle);
   }
 
-
   return (
   <div className="App">
     {/* You can add a NavLink/Link component here for navigation */}
@@ -47,7 +46,7 @@ function App() {
                 element={<LoginPage />} 
         />
         
-        <Route path="/assetFolder/assetMasterData" 
+        <Route path="/assetFolder/assetMasterList" 
                 element={<AssetMasterlist 
                           setHeaderTitle={saveTitleUpdate}
                         />} 
