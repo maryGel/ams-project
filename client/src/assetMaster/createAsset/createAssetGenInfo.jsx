@@ -14,7 +14,7 @@ import {
 
 
 
-export default function AsstGenInfo() {
+export default function CreateAssetGenInfo() {
 
 
 

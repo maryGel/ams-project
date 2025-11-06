@@ -9,7 +9,7 @@ import Box from '@mui/material/Box';
 
 // TabPanel component to render the content of each tab
 
-import AssetMasterTile from '../assetMaster/assetMasterTile';
+import AssetMasterTile from '../assetMaster/assetMaster/assetMasterTile'
 import AssetMovement from '../assetMovement/assetMove';
 
 function TabPanel(props) {

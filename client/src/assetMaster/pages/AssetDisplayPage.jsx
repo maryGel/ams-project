@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react'
-import AssetDisplayTabs from './assetDisplayTabs'
-import GroupBtns from '../components/groupbtns'
+import AssetDisplayTabs from '../assetDisplay/assetDisplayTabs'
+import GroupBtns from '../../components/groupbtns'
 
 
 export default function AssetMasterDisplay({selectedItem}){

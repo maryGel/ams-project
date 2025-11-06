@@ -11,9 +11,7 @@ import {
 } from '@mui/material';
 
 
-export default function AsstAcctAsgmnt() {
-
-
+export default function CreateAssetAcctAsgmnt() {
  
       return (
         <div className='grid justify-center gap-2 mt-10'>

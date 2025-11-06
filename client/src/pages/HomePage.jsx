@@ -1,7 +1,8 @@
 import React from 'react';
 import { Menu } from '@mui/material';
+
 // import Header from '../components/header';
-import TabPanel from '../components/Tabpanel';
+import TabPanel from '../components/TabPanel'
 
 function HomePage({
   headerTitle,

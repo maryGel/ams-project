@@ -8,11 +8,8 @@ import {
   Box
 } from '@mui/material';
 //import Asset Fields
-import AsstGenInfo from './asstGenInfo';
-import AsstAcctAsgmnt from './asstAcctAsgmt';
-
-
-
+import CreateAssetGenInfo from '../createAsset/createAssetGenInfo';
+import CreateAssetAcctAsgmnt from '../createAsset/createAssetAcctAsgmnt';
 
   // 1. Define your step labels
 const steps = ['General Info', 'Account Assignment', 'Upload Picture'];
@@ -55,14 +52,14 @@ export default function CreateAsset() {
     switch (step) {
       case 0:
         return (
-          <AsstGenInfo
+          <CreateAssetGenInfo
             assetData = {assetData}
             setAssetData = {setAssetData}
           />
         );
       case 1:
         return (
-          <AsstAcctAsgmnt
+          <CreateAssetAcctAsgmnt
             assetData = {assetData}
             setAssetData = {setAssetData}            
           />

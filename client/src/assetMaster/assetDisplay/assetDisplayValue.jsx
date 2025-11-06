@@ -1,4 +1,4 @@
-import AssetDisplayDepTabs from './assetDisplayDepTabs';
+import AssetDisplayDepTabs from './assetDisplayDepTabs'
 
 export default function AssetDisplayValue(){
   return(

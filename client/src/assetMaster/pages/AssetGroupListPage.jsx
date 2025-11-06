@@ -4,11 +4,11 @@ import TextField from '@mui/material/TextField';
 import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
-import {top100Films} from './assetlist';
+import {top100Films} from '../hooks/assetlist';
 
 
 
-function AssetGrouplist() {
+function AssetGroupListPage() {
 
   return (
     <>
@@ -81,4 +81,4 @@ function AssetGrouplist() {
   )
 }
 
-export default AssetGrouplist ;
+export default AssetGroupListPage ;

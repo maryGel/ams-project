@@ -1,19 +1,22 @@
-import Header from '../components/header';
+import Header from '../../components/header';
 import * as React from 'react';
-// import {useState, useEffect} from 'react';
+
+// MUI import
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
-import {top100Films} from './assetlist';
-import AssetMasterTable from './assetMasterTable';
+
+//Component/pages import
+import {top100Films} from '../hooks/assetlist';
+import AssetMasterTable from '../assetMaster/assetMasterTable'
 import { NavLink } from 'react-router-dom';
 
 
 
 
-function AssetMasterlist({setHeaderTitle}) {
+function AssetMasterListPage({setHeaderTitle}) {
 
 
   return (
@@ -25,7 +28,7 @@ function AssetMasterlist({setHeaderTitle}) {
           limitTags={1}
           id="size-small-filled-multi"
           size="small"              
-          options={top100Films}
+          optons={top100Films}
           getOptionLabel={(option) => option.title}
           defaultValue={[]}
           renderInput={(params) => (
@@ -156,4 +159,4 @@ function AssetMasterlist({setHeaderTitle}) {
   )
 }
 
-export default AssetMasterlist ;
+export default AssetMasterListPage ;

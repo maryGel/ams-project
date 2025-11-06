@@ -27,7 +27,6 @@ import { visuallyHidden } from '@mui/utils';
 import { useNavigate } from 'react-router-dom';
 
 
-
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
     return -1;
@@ -312,7 +311,7 @@ export default function AssetMasterTable() {
     setDense(event.target.checked);
   };
 
-  const handleRowClick = (row) => {
+  const handleSelectItem = (row) => {
     const facNo = row.FacNO || row.FacNo;
 
     // Save to localStorage
@@ -322,8 +321,7 @@ export default function AssetMasterTable() {
   
     // Navigate to display page
     navigate(`/assetFolder/assetMasterDisplay`);
-  };
-  
+  }; 
 
 
   // Avoid a layout jump when reaching the last page with empty rows.
@@ -386,8 +384,7 @@ export default function AssetMasterTable() {
                 return (
                   <TableRow
                     hover
-                    // onClick={(event) => handleClick(event, row.id)}
-                    onClick={() => handleRowClick(row)}
+                    onClick={(event) => handleClick(event, row.id)}                    
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
@@ -398,6 +395,8 @@ export default function AssetMasterTable() {
                     <TableCell 
                       padding="checkbox"
                       sx={{ width: 25 }}
+                      // onDoubleClick={() => handleDoubleClick(row)}
+                      onClick={(event) => handleClick(event, row.id)}
                     >
                       <Checkbox
                         color="primary"
@@ -410,7 +409,8 @@ export default function AssetMasterTable() {
                       id={labelId}
                       scope="row"
                       padding="none"
-                      sx={{ fontWeight: 'bold', color: 'primary.main' }}
+                      sx={{ fontWeight: 'bold', color: 'primary.main', textDecoration: 'underline'}}
+                      onClick={() => handleSelectItem(row)}
                     >
                       {row.FacNO}
                     </TableCell>
@@ -421,8 +421,7 @@ export default function AssetMasterTable() {
                     <TableCell align="left">{row.Unit}</TableCell>
                     <TableCell align="left">{row.ItemLocation}</TableCell>
                     <TableCell align="left">{row.Department}</TableCell>
-                    <TableCell align="left">{row.status}</TableCell>
-                    
+                    <TableCell align="left">{row.status}</TableCell>                    
                   </TableRow>
                 );
               })}

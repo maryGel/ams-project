@@ -4,10 +4,11 @@ import { HeaderTitle } from './Utils/header.js';
 import Header from './components/header.jsx';
 import HomePage from './pages/HomePage.jsx'; 
 import LoginPage from './pages/LoginPage.jsx';
-import AssetMasterlist from './assetMaster/assterMasterlist.jsx';
-import AssetGrouplist from './assetMaster/assetGrouplist.jsx';
-import CreateAsset from './assetMaster/createAsset.jsx';
-import AssetMasterDisplay from './assetMaster/assetDisplay.jsx';
+
+import AssetMasterListPage from './assetMaster/pages/AssetMasterListPage.jsx';
+import AssetGroupListPage from './assetMaster/pages/AssetGroupListPage.jsx'
+import CreateAssetPage from './assetMaster/pages/CreateAssetPage.jsx';
+import AssetMasterDisplay from './assetMaster/pages/AssetDisplayPage.jsx';
 import Practice from './components/practice.jsx';
 
 function App() {
@@ -47,17 +48,17 @@ function App() {
         />
         
         <Route path="/assetFolder/assetMasterList" 
-                element={<AssetMasterlist 
+                element={<AssetMasterListPage 
                           setHeaderTitle={saveTitleUpdate}
                         />} 
         />
         <Route path="/assetFolder/createAsset" 
-                element={<CreateAsset
+                element={<CreateAssetPage
                           setHeaderTitle={saveTitleUpdate}
                         />} 
         />
         <Route path="/assetFolder/assetGrouplist" 
-                element={<AssetGrouplist
+                element={<AssetGroupListPage
                           setHeaderTitle={saveTitleUpdate}
                         />} 
         />
@@ -66,9 +67,6 @@ function App() {
                           setHeaderTitle={saveTitleUpdate}
                         />} 
         />
-
-
-
 
 
         <Route path="/practiceJsx" 
