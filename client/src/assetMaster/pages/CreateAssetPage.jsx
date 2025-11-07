@@ -11,26 +11,26 @@ import {
 import CreateAssetGenInfo from '../createAsset/createAssetGenInfo';
 import CreateAssetAcctAsgmnt from '../createAsset/createAssetAcctAsgmnt';
 
-  // 1. Define your step labels
+  // Define your step labels
 const steps = ['General Info', 'Account Assignment', 'Upload Picture'];
 
-  // 2. Component for the entire multi-step form
+
+
+  //  ************ COMPONENT CREATE ASSET ****************
+
+  // Component for the entire multi-step form
 export default function CreateAsset() {
   const [activeStep, setActiveStep] = useState(0);
   // const [skipped, setSkipped] = React.useState(new Set());
 
-  // 3. State to hold all form data
+  // State to hold all form data
   const [assetData, setAssetData] = useState({
-    generalInfo: { assetName: '', assetGroup: '' },
-    accountAssignment: { department: '', location: '' },
-    uploadPicture: { file: null, preview: '' },
+    generalInfo: { },
+    accountAssignment: { },
+    uploadPicture: { file: null, preview: '' }
   });
 
   const handleNext = () => {
-    // Optional: Add validation logic for the current step before proceeding
-    // For example: if activeStep === 0, validate generalInfo fields
-    // if (!validateStep(activeStep)) return; 
-
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
@@ -96,7 +96,6 @@ export default function CreateAsset() {
                 />
               </Box>
             )}
-            {/* ... other upload fields */}
           </Box>
         );
       default:

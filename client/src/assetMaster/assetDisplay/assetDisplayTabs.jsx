@@ -66,7 +66,6 @@ export default function AssetDisplayTabs({asset}){
           indicatorColor="secondary"
           textColor="inherit"
           aria-label="full width tabs example"
-          
         >
           <Tab label="General Info" {...a11yProps(0)} />
           <Tab label="Asset Value" {...a11yProps(1)} />

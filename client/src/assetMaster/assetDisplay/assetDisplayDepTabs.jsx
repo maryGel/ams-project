@@ -13,7 +13,6 @@ import AssetDisplayDepSched from './assetDisplayDepSched';
 import AssetDisplayDepDocs from './assetDisplayDepDocs';
 
 
-
 const Accordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(({ theme }) => ({
@@ -51,8 +50,12 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   borderTop: '1px solid rgba(0, 0, 0, .125)',
 }));
 
-export default function AssetDisplayDepTabs(){
 
+
+
+
+// ******************* COMPONENT ASSET DISPLAY
+export default function AssetDisplayDepTabs(){
 
   const [expanded, setExpanded] = React.useState([]); // Initialize with null or false for all closed
 

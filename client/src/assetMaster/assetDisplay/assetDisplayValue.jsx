@@ -8,26 +8,26 @@ export default function AssetDisplayValue(){
         <p className='pl-5 mb-2 text-blue-800'>Costing Information</p>
 
         <div className='grid grid-cols-[15rem_1fr] mt-5 ml-0 text-base bg-gray-50'>
-          <p className='p-2 pl-5 text-base tracking-wider text-gray-500'>Capitalization Type</p>
-          <p className='p-2 text-base'>1. Acquisition - by Purchase</p>
-          <p className='p-2 pl-5 text-base tracking-wider text-gray-500'>Currency:</p>
-          <p className='p-2 text-base'>Php</p>
-          <p className='p-2 pl-5 text-base tracking-wider text-gray-500'>Unit Cost:</p>
-          <p className='p-2 text-base'>85,000.00</p>
-          <p className='p-2 pl-5 text-base tracking-wider text-gray-500'>Capitalized on:</p>
-          <p className='p-2 text-base'>01/31/2024</p>
-          <p className='p-2 pl-5 text-base tracking-wider text-gray-500'>First Acquisition Date:</p>
-          <p className='p-2 text-base'>01/31/2024</p>
-          <p className='p-2 pl-5 text-base tracking-wider text-gray-500'>Capitalized year:</p>
-          <p className='p-2 text-base'>2024</p>
-          <p className='p-2 pl-5 text-base tracking-wider text-gray-500'>Period:</p>
-          <p className='p-2 text-base'>01</p>
-          <p className='p-2 pl-5 text-base tracking-wider text-gray-500'>Deactivation on:</p>
-          <p className='p-2 text-base'>01/24/2025</p>
-          <p className='p-2 pl-5 text-base tracking-wider text-gray-500'>Book Value:</p>
-          <p className='p-2 text-base'>25,000.00</p>
-          <p className='p-2 pl-5 text-base tracking-wider text-gray-500'>Depreciation Type:</p>
-          <p className='p-2 text-base'>Straight Line</p>
+          <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Capitalization Type</span>
+          <span className='p-2 text-base'>1. Acquisition - by Purchase</span>
+          <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Currency:</span>
+          <span className='p-2 text-base'>Php</span>
+          <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Unit Cost:</span>
+          <span className='p-2 text-base'>85,000.00</span>
+          <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Capitalized on:</span>
+          <span className='p-2 text-base'>01/31/2024</span>
+          <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>First Acquisition Date:</span>
+          <span className='p-2 text-base'>01/31/2024</span>
+          <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Capitalized year:</span>
+          <span className='p-2 text-base'>2024</span>
+          <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Period:</span>
+          <span className='p-2 text-base'>01</span>
+          <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Deactivation on:</span>
+          <span className='p-2 text-base'>01/24/2025</span>
+          <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Book Value:</span>
+          <span className='p-2 text-base'>25,000.00</span>
+          <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Depreciation Type:</span>
+          <span className='p-2 text-base'>Straight Line</span>
         </div>      
       </div>
       <AssetDisplayDepTabs/>

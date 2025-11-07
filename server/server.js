@@ -6,6 +6,8 @@ import cors from 'cors';
 // routes for table
 import userRouter from './routes/users.js';
 import useItemlist from './routes/asstMasterlist.js';
+import referentialsRoute from './routes/referentials.js';
+
 
 // Express Pool
 export const db = mysql.createPool({
@@ -30,6 +32,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // API routes
 app.use('/login', userRouter);
 app.use('/itemlist', useItemlist);
+app.use('/referentials', referentialsRoute);
 
 app.listen(3000, () => {
     console.log('Server is running on 3000');

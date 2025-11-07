@@ -7,11 +7,6 @@ export default function AssetMasterDisplay({selectedItem}){
 
   // State to hold API Asset data
   const [asset, setAsset] = useState({});
-  const targetFacNo = localStorage.getItem('selectedFacNO');
-  console.log("Target FacNO in AssetMasterDisplay:", targetFacNo);
-
-
-
 
   // Fetch Asset data from API on component mount
   useEffect(() => {
@@ -26,7 +21,6 @@ export default function AssetMasterDisplay({selectedItem}){
         
           // Set your clean target value
         const targetFacNo = localStorage.getItem('selectedFacNO');
-        console.log("Target FacNO in AssetMasterDisplay:", targetFacNo);
 
         const matchingAssets = data.filter(item => {            
             // Ensure FacNo exists and is a string before attempting to clean
@@ -92,17 +86,17 @@ export default function AssetMasterDisplay({selectedItem}){
               <div className='grid grid-cols-[2fr_1fr] mt-10 shadow-md shadow-slate-300 bg-white border rounded-md border-slate-300 text-slate-800'>
                 {/* Column 1: Asset Name and Description */}
                 <div className='mt-10'>
-                  <div className='grid grid-cols-[10rem_2fr] shadow-sm shadow-slate-200 mt-5 ml-16 text-base bg-gray-50'>
-                    <p className='p-2 pl-5 text-base tracking-wider text-gray-500'>Asset Name:</p>
-                    <p className='p-2 text-base font-semibold'>{asset.FacName}</p>
+                  <div className='grid grid-cols-[10rem_2fr] shadow-sm shadow-slate-200 mt-5 ml-16 py-2 text-base bg-gray-50'>
+                    <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Asset Name:</span>
+                    <input type="text" className='p-2 text-base' disabled value={asset.FacName || ''} readOnly />
                   </div>
-                  <div className='grid grid-cols-[10rem_2fr] shadow-sm shadow-slate-200 mt-5 ml-16 text-base bg-gray-50'>
-                    <p className='p-2 pl-5 text-base tracking-wider text-gray-500'>Description:</p>
-                    <p className='p-2 text-base'>{asset.Description}</p>
+                  <div className='grid grid-cols-[10rem_2fr] shadow-sm shadow-slate-200 mt-5 ml-16 py-2 text-base bg-gray-50'>
+                    <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Description:</span>
+                    <input type="text" className='p-2 text-base' disabled value={asset.Description || ''} readOnly />
                   </div>  
-                  <div className='grid grid-cols-[10rem_2fr] shadow-sm shadow-slate-200 mt-5 ml-16 text-base bg-gray-50'>
-                    <p className='p-2 pl-5 text-base tracking-wider text-gray-500'>Status:</p>
-                    <p className='p-2 text-base font-semibold tracking-wider text-green-600'>Active</p>
+                  <div className='grid grid-cols-[10rem_2fr] shadow-sm shadow-slate-200 mt-5 ml-16 py-2 text-base bg-gray-50'>
+                    <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Status:</span>
+                    <input type="text" className='p-2 text-base font-semibold tracking-wider text-green-600' disabled value={asset.xStatus || 'Active'} readOnly />
                   </div>          
                 </div>
       

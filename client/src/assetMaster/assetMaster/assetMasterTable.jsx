@@ -214,8 +214,6 @@ EnhancedTableToolbar.propTypes = {
 };
 
 
-
-
 export default function AssetMasterTable() {
   // MUI States
   const [order, setOrder] = useState('asc');
@@ -316,9 +314,7 @@ export default function AssetMasterTable() {
 
     // Save to localStorage
     localStorage.setItem('selectedFacNO', facNo);
-  
-    console.log("Clicked Asset Number:", facNo);
-  
+ 
     // Navigate to display page
     navigate(`/assetFolder/assetMasterDisplay`);
   }; 
@@ -409,7 +405,10 @@ export default function AssetMasterTable() {
                       id={labelId}
                       scope="row"
                       padding="none"
-                      sx={{ fontWeight: 'bold', color: 'primary.main', textDecoration: 'underline'}}
+                      sx={{ 
+                        fontWeight: 'bold', color: 'primary.main', textDecoration: 'underline',                      
+                        '&:Hover': {fontSize: '1rem', color: 'red'}
+                      }}
                       onClick={() => handleSelectItem(row)}
                     >
                       {row.FacNO}
@@ -422,7 +421,7 @@ export default function AssetMasterTable() {
                     <TableCell align="left">{row.ItemLocation}</TableCell>
                     <TableCell align="left">{row.Department}</TableCell>
                     <TableCell align="left">{row.status}</TableCell>                    
-                  </TableRow>
+                  </TableRow> 
                 );
               })}
               {emptyRows > 0 && (

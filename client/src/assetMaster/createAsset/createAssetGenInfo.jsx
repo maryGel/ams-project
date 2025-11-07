@@ -16,8 +16,6 @@ import {
 
 export default function CreateAssetGenInfo() {
 
-
-
       return (
         <div className='flex justify-center p-4 m-4'>
 
