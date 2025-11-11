@@ -125,36 +125,32 @@ function AssetMasterListPage({setHeaderTitle}) {
       {/* Filter buttons */}
       <div className='flex w-full h-auto gap-0.5 p-2 pr-5 ml-auto bg-gray-100 place-content-end'>
         {/* Asset Group List Table to be implemented here */}
-        <button 
-          className='pt-1 pb-1 pl-2 pr-3 mr-4 border border-solid rounded-full border-slate-900'
-        >
+        <button className='pt-1 pb-1 pl-2 pr-3 mr-4 border border-solid rounded-full border-slate-900'>
           <ClearAllIcon/>
           Clear   
         </button>
         
-        <button 
-          className='pt-1 pb-1 pl-2 pr-3 mr-4 text-white bg-green-400 rounded-full'
-        >
+        <button className='pt-1 pb-1 pl-2 pr-3 mr-4 text-white bg-green-400 rounded-full'>
           <CheckIcon/>  
           Go  
         </button>
         
-      <NavLink to="/assetFolder/createAsset">
-        <button 
-          className='pt-1 pb-1 pl-2 pr-3 mr-4 border border-solid rounded-full border-slate-900'
-          onClick={() => setHeaderTitle('Create Asset')}
-        >
-          <AddIcon />
-          Create
-        </button>
-      </NavLink>
+        <NavLink to="/assetFolder/createAsset">
+          <button 
+            className='pt-1 pb-1 pl-2 pr-3 mr-4 border border-solid rounded-full border-slate-900'
+            onClick={() => setHeaderTitle('Create Asset')}
+          >
+            <AddIcon />
+            Create
+          </button>
+        </NavLink>
       </div>
 
        {/* Filter table */}
-       <div>
+      <div>
         <AssetMasterTable 
         />
-       </div>
+      </div>
     </div>
   )
 }

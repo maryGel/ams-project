@@ -17,7 +17,7 @@ export default function AssetDisplayGenInfo({asset}){
           </div>
           <div className='grid grid-cols-[10rem_1fr] mt-5 ml-0 text-base bg-gray-50'>
             <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Brand:</span>
-            <input type= 'text' className='p-2 text-base' value={asset.brand} disabled/>
+            <input type= 'text' className='p-2 text-base' value={asset.Brand} disabled/>
             <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Serial Number:</span>
             <input type= 'text' className='p-2 text-base' value={asset.serialNo} disabled/>
             <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Supplier:</span>

@@ -6,10 +6,10 @@ import HomePage from './pages/HomePage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 
 import AssetMasterListPage from './assetMaster/pages/AssetMasterListPage.jsx';
-import AssetGroupListPage from './assetMaster/pages/AssetGroupListPage.jsx'
 import CreateAssetPage from './assetMaster/pages/CreateAssetPage.jsx';
 import AssetMasterDisplay from './assetMaster/pages/AssetDisplayPage.jsx';
 import Practice from './components/practice.jsx';
+import ReferentialPage from './assetMaster/pages/ReferentialPage.jsx';
 
 function App() {
 
@@ -47,7 +47,7 @@ function App() {
                 element={<LoginPage />} 
         />
         
-        <Route path="/assetFolder/assetMasterList" 
+        <Route path="/assetFolder/pages/assetMasterList" 
                 element={<AssetMasterListPage 
                           setHeaderTitle={saveTitleUpdate}
                         />} 
@@ -57,8 +57,8 @@ function App() {
                           setHeaderTitle={saveTitleUpdate}
                         />} 
         />
-        <Route path="/assetFolder/assetGrouplist" 
-                element={<AssetGroupListPage
+        <Route path="/assetFolder/pages/referentialPage" 
+                element={<ReferentialPage
                           setHeaderTitle={saveTitleUpdate}
                         />} 
         />

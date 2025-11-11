@@ -1,5 +1,5 @@
 import * as React from 'react';
-import  {useState, useEffect, useMemo}  from 'react';
+import  {useState, useMemo}  from 'react';
 import PropTypes from 'prop-types';
 import { alpha } from '@mui/material/styles';
 import {
@@ -25,6 +25,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
 import { useNavigate } from 'react-router-dom';
+
+// useEffect (fetched API)
+import {useAssetMasterData} from '../../hooks/assetMasterHooks'
 
 
 function descendingComparator(a, b, orderBy) {
@@ -214,7 +217,7 @@ EnhancedTableToolbar.propTypes = {
 };
 
 
-export default function AssetMasterTable() {
+export default function AssetMasterTable({assetProps}) {
   // MUI States
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('');
@@ -224,43 +227,14 @@ export default function AssetMasterTable() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   // New State for API Data
-  const [itemList, setItemList] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error] = useState(null);
+  const {itemList, loading, error} = useAssetMasterData(assetProps)
 
 
-  // 1. Data fetching for API Data 
+  //Data fetching for API Data 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fecthItems = async () => {
-      try {
-        const response = await fetch('/api/itemlist/assetMasterlist');
-        if (!response.ok){
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-
-        // Add unique is to each row for MUI Selection logic
-        const dataWithID = data.map((item, index) => ({
-          ...item,
-          id: item.FacNO || `row-${index}`,
-        }));
-        setItemList(dataWithID);
-        
-      } catch (error){
-        console.error("Error fetching asset master data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fecthItems();
-},[]);
-
-
-// Replace placeholder rows with API data
-  const rows = itemList;
-  
+   // Replace placeholder rows with API data
+  const rows = itemList;  
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -407,7 +381,7 @@ export default function AssetMasterTable() {
                       padding="none"
                       sx={{ 
                         fontWeight: 'bold', color: 'primary.main', textDecoration: 'underline',                      
-                        '&:Hover': {fontSize: '1rem', color: 'red'}
+                        '&:Hover': {fontSize: '1rem', color: '#283593'}
                       }}
                       onClick={() => handleSelectItem(row)}
                     >

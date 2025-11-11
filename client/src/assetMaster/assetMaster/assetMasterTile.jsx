@@ -9,22 +9,20 @@ function AssetMasterTile({setHeaderTitle}) {
 
   return (
     <div className='grid items-start w-full h-full grid-cols-10 gap-1'>
-
       {assetTileList.map((asset) => (
         <div key= {asset.id} className='flex flex-col items-center justify-center w-full h-full'>
           <NavLink  to = {asset.link} >
-            <button className='w-32 h-32 p-4 mb-3 bg-white border border-blue-800 border-solid rounded-lg shadow-lg text-slate-800 group hover:shadow-none hover:border-gray-800 hover:bg-slate-700'
+            <button className='w-32 h-32 p-4 mb-3 bg-white border border-blue-100 border-solid rounded-lg shadow-lg text-sky-900 group hover:shadow-none hover:border-gray-800 hover:bg-gray-50 hover:text-sky-600 hover:font-semibold'
               onClick={() => setHeaderTitle(asset.headerTitle)}
             >
-              <img src = {asset.imgSrc} alt= {asset.title} />
+              <img className='w-2/3 mb-2' src = {asset.imgSrc} alt= {asset.title} />
+              <span className='text-sm text-center'>
+                {asset.title}
+              </span> 
             </button>
-            <h2 className='text-base tracking-wider text-center'>
-              {asset.title}
-            </h2> 
           </NavLink>
         </div>
       ))}
-    
     </div>
   )
 }

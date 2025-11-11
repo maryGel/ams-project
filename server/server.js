@@ -20,7 +20,6 @@ export const db = mysql.createPool({
 const app = express();
 
 // to hande localhost:3000
-// server.js (Cleaned up)
 app.get('/', (req, res) => {
     res.send('Server is up and running!');
   });
