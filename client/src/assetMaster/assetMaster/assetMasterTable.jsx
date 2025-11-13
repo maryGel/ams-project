@@ -26,7 +26,7 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
 import { useNavigate } from 'react-router-dom';
 
-// useEffect (fetched API)
+// useEffect (fetch API using axios)
 import {useAssetMasterData} from '../../hooks/assetMasterHooks'
 
 

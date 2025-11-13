@@ -8,7 +8,7 @@ export const useAssetMasterData = () => {
   const [error, setError] = useState(null);
   
   useEffect(()=> {
-    const fetchItems = async () => {
+    const pullItems = async () => {
       try{
         const response = await axios.get('/api/itemlist/assetMasterlist');
 
@@ -27,7 +27,7 @@ export const useAssetMasterData = () => {
         setError(null);
       }
     };
-    fetchItems()
+    pullItems()
   },[])
 
   return {itemList, loading, error}

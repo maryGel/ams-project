@@ -40,9 +40,6 @@ export default function AssetMasterDisplay({selectedItem}){
                 
                 const isMatch = itemFacNoClean === targetFacNoClean;
 
-
-                // You can remove this console.log now that we've diagnosed the issue
-
                 return isMatch;
                 });
         
@@ -69,7 +66,7 @@ export default function AssetMasterDisplay({selectedItem}){
 
   return(
     <>
-      <div className='flex justify-end m-5 mr-10'>
+      <div className='flex justify-end m-2 mr-10'>
         {/* Primary Button */}
         <GroupBtns onClick={() => console.log('Clicked Primary')}>
           Edit
