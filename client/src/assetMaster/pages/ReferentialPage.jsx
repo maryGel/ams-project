@@ -2,6 +2,7 @@ import {useState} from 'react';
 import RefTabs from '../referentials/refTabs';
 import RefUom from '../referentials/refUom';
 import RefBrand from '../referentials/refBrand';
+import RefCategory from '../referentials/refCategory';
 
 function ReferentialPage() {
 
@@ -21,6 +22,9 @@ function ReferentialPage() {
           openTab = {openTab}
         />
         <RefBrand 
+          openTab = {openTab}
+        />
+        <RefCategory
           openTab = {openTab}
         />
       </div>

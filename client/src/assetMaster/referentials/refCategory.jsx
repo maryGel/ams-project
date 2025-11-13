@@ -11,30 +11,31 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 
-
-import { IconButton, ThemeProvider, TextField  } from '@mui/material';
+import { IconButton, ThemeProvider, TextField, TablePagination  } from '@mui/material';
 
 // Custom hooks
-import { useRefBrand } from '../../hooks/refBrand';
+import { useRefCategory } from '../../hooks/refCategory';
 
 // Custom table utilities & theme
 import { customTheme, resizeColumn } from '../../components/customTable';
 import useColumnWidths from '../../components/customTable';
 
 
-export default function RefBrand({useProps, openTab,}) {
-  const {refBrandData, loading, error} = useRefBrand(useProps); 
+export default function RefCategory({useProps, openTab,}) {
+  const {refCategoryData, loading, error} = useRefCategory(useProps); 
   const {handleResizeMouseDown, theaderStyle, tbodyStyle} = useColumnWidths();
-  const [rows, setRows] = useState(refBrandData || []); // To hold the refBrand Data
-  const [temporaryData, setTemporaryData] = useState(refBrandData || []);
+  const [rows, setRows] = useState(refCategoryData || []); // To hold the refBrand Data
+  const [temporaryData, setTemporaryData] = useState(refCategoryData || []);
   const [editMode, setEditMode] = useState(false); 
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [page, setPage] = useState(0);
 
 
   useEffect(() => {
-    setRows(refBrandData || []);
-    setTemporaryData(refBrandData || []);
-  }, [refBrandData]);
+    setRows(refCategoryData || []);
+    setTemporaryData(refCategoryData || []);
+  }, [refCategoryData]);
 
   const handleEditRow = () => {
     if (editMode) {
@@ -92,24 +93,42 @@ export default function RefBrand({useProps, openTab,}) {
     }
   
     setSortConfig({ key: columnKey, direction });
+    setPage(0);
   };
   
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const displayedData = editMode ? temporaryData : rows;
+
+  const paginatedRows = displayedData.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
 
   if (loading) return <div className="p-4 text-gray-600">Loading data...</div>;
   if (error) return <div className="p-4 text-red-600">Error loading data.. {error.message}</div>;
 
+  
+
   return (
     <>
-      {openTab === 'Brand' &&
+      {openTab === 'Asset Group' &&
         <ThemeProvider theme={customTheme}>
-          <div className='w-auto p-4 h-full min-h-[600px] bg-white rounded-xl shadow-lg'>
+          <div className='w-auto h-full p-4 bg-white shadow-lg rounded-xl'>
 
             {/* ---------------Title and Buttons --------------- */}
             <div className='flex justify-end p-2 mb-3 w-100'>
               <Autocomplete
                 id="free-solo-demo"
                 freeSolo
-                options={refBrandData.map((item) => item.BrandName)}
+                options={refCategoryData.map((item) => item.category)}
                 renderInput={(params) => 
                   <TextField {...params} label="Search here" 
                     sx={{
@@ -127,7 +146,7 @@ export default function RefBrand({useProps, openTab,}) {
             </div>
             
             <div className='flex items-center justify-between mt-6 mb-4'>
-              <h1 className='text-xl font-semibold text-gray-800'>Brand List</h1>
+              <h1 className='text-xl font-semibold text-gray-800'>Asset Group List</h1>
                 <div className="flex space-x-2">
                   <IconButton
                     aria-label={editMode ? "cancel" : "edit"}
@@ -162,13 +181,13 @@ export default function RefBrand({useProps, openTab,}) {
             {/* ----------------------------------------------------------- */}
 
             <div
-              className='overflow-x-auto border border-gray-300 rounded-lg w-500'
-              style={{ height: 400 }}
+              className='w-auto h-auto overflow-x-auto border border-gray-300 rounded-lg'
+              
             >
               {/* ----------------------- TABLE STARTS HERE --------------------------- */}
               <table
-                className="border-collapse w-100"
-                style={{ tableLayout: 'fixed' /* important so column widths are respected */, }}
+                className="border-collapse"
+                style={{ tableLayout: 'fixed' /* important so column widths are respected */ }}
               >
 
                 {/* ----------------------- > TABLE HEADER */}
@@ -183,7 +202,7 @@ export default function RefBrand({useProps, openTab,}) {
                     >
                       ID
                       <span className="ml-1 text-gray-500">
-                        {sortConfig.key === 'BrandName' ? (
+                        {sortConfig.key === 'id' ? (
                           sortConfig.direction === 'asc' ? (
                             <ArrowUpwardIcon fontSize="inherit" sx={{ fontSize: 16 }} />
                           ) : (
@@ -200,15 +219,15 @@ export default function RefBrand({useProps, openTab,}) {
                       />
                     </th>
 
-                    {/* BRAND CODE */}
+                    {/* CATEGORY CODE */}
                     <th
                       className='relative p-2 text-sm font-semibold text-left text-gray-700 border-r border-gray-200'
                       style={theaderStyle('Code')}
-                      onClick={() => handleSort('BrandID')}
+                      onClick={() => handleSort('xCode')}
                     >
-                      Branch Code
+                      Asset Grp Code
                       <span className="ml-8 text-gray-500">
-                        {sortConfig.key === 'BrandID' ? (
+                        {sortConfig.key === 'xCode' ? (
                           sortConfig.direction === 'asc' ? (
                             <ArrowUpwardIcon fontSize="inherit" sx={{ fontSize: 16 }} />
                           ) : (
@@ -219,22 +238,22 @@ export default function RefBrand({useProps, openTab,}) {
                         )}
                       </span>
                       <div
-                        onMouseDown={(e) => handleResizeMouseDown('BrandID', e)}
+                        onMouseDown={(e) => handleResizeMouseDown('xCode', e)}
                         style={resizeColumn }
                         title="Resize column"
                       />
                     </th>
 
-                    {/* BRAND NAME */}
+                    {/* CATEGORY NAME */}
 
                     <th
                       className='relative p-2 text-sm font-semibold text-left text-gray-700'
                       style={theaderStyle('Name')}
-                      onClick={() => handleSort('BrandName')}
+                      onClick={() => handleSort('category')}
                     >
-                      Branch Name
+                      Asset Group
                       <span className="ml-8 text-gray-500">
-                        {sortConfig.key === 'BrandName' ? (
+                        {sortConfig.key === 'category' ? (
                           sortConfig.direction === 'asc' ? (
                             <ArrowUpwardIcon fontSize="inherit" sx={{ fontSize: 16 }} />
                           ) : (
@@ -245,7 +264,7 @@ export default function RefBrand({useProps, openTab,}) {
                         )}
                       </span>
                       <div
-                        onMouseDown={(e) => handleResizeMouseDown('BrandName', e)}
+                        onMouseDown={(e) => handleResizeMouseDown('category', e)}
                         style={resizeColumn }
                         title="Resize column"
                       />
@@ -255,56 +274,62 @@ export default function RefBrand({useProps, openTab,}) {
                 {/* ------------------ Table Header Ends Here */}
 
                 <tbody>
-                  {(editMode ? temporaryData : (rows || []).slice(0, 5)).map((row) => (
+                  {paginatedRows.map((row) => (
                     <tr
-                      key={row.id}
-                      className={`border-b border-gray-200 transition duration-100 ${editMode ? 'bg-indigo-50 hover:bg-indigo-100' : 'hover:bg-gray-50'}`}
-                    >
-                      {/* ID column - not editable */}
-                      <td className="p-2 text-sm bg-white border-r border-gray-200" style={tbodyStyle('id')}>
-                        {row.id}
-                      </td>
+                    key={row.id}
+                    className={`border-b border-gray-200 transition duration-100 ${editMode ? 'bg-indigo-50 hover:bg-indigo-100' : 'hover:bg-gray-50'}`}
+                  >
+                    {/* ID column - not editable */}
+                    <td className="p-2 text-sm bg-white border-r border-gray-200" style={tbodyStyle('id')}>
+                      {row.id}
+                    </td>
 
-                      {/* Brand Code column */}
-                      <td className="p-2 border-r border-gray-200" style={tbodyStyle('BrandID')}>
-                        {editMode ? (
-                          <input
-                            type="text"
-                            value={row.BrandID ?? ''}
-                            onChange={(e) => handleTempChange(row.id, 'BrandID', e.target.value)}
-                            className="w-full text-sm bg-transparent border-b border-gray-400 focus:border-indigo-600 focus:ring-0 focus:outline-none"
-                            style={{ padding: '2px 0' }}
-                            onFocus={(e) => e.target.select()}
-                          />
-                        ) : (
-                          <span className="text-sm">{row.BrandID}</span>
-                        )}
-                      </td>
+                    {/* Category Code column */}
+                    <td className="p-2 border-r border-gray-200" style={tbodyStyle('Code')}>
+                      {editMode ? (
+                        <input
+                          type="text"
+                          value={row.xCode ?? ''}
+                          onChange={(e) => handleTempChange(row.id, 'xCode', e.target.value)}
+                          className="w-full text-sm bg-transparent border-b border-gray-400 focus:border-indigo-600 focus:ring-0 focus:outline-none"
+                          style={{ padding: '2px 0' }}
+                          onFocus={(e) => e.target.select()}
+                        />
+                      ) : (
+                        <span className="text-sm">{row.xCode}</span>
+                      )}
+                    </td>
 
-                      {/* Brand Name column */}
-                      <td className="p-2 border-r border-gray-200" style={tbodyStyle('BrandName')}>
-                        {editMode ? (
-                          <input
-                            type="text"
-                            value={row.BrandName ?? ''}
-                            onChange={(e) => handleTempChange(row.id, 'BrandName', e.target.value)}
-                            className="w-full text-sm bg-transparent border-b border-gray-400 focus:border-indigo-600 focus:ring-0 focus:outline-none"
-                            style={{ padding: '2px 0' }}
-                            onFocus={(e) => e.target.select()}
-                          />
-                        ) : (
-                          <span className="text-sm">{row.BrandName}</span>
-                        )}
-                      </td>
-                    </tr>
+                    {/* Category Name column */}
+                    <td className="p-2 border-r border-gray-200" style={tbodyStyle('category')}>
+                      {editMode ? (
+                        <input
+                          type="text"
+                          value={row.category ?? ''}
+                          onChange={(e) => handleTempChange(row.id, 'category', e.target.value)}
+                          className="w-full text-sm bg-transparent border-b border-gray-400 focus:border-indigo-600 focus:ring-0 focus:outline-none"
+                          style={{ padding: '2px 0' }}
+                          onFocus={(e) => e.target.select()}
+                        />
+                      ) : (
+                        <span className="text-sm">{row.category}</span>
+                      )}
+                    </td>
+                  </tr>
                   ))}
                 </tbody>
               </table>
               {/* ------------------------ TABLE ENDS HERE ---------------------------- */}
 
-              <div className="flex justify-end p-2 text-sm text-gray-600 border-t border-gray-200 bg-gray-50">
-                Showing 1 - 5 of {rows.length} rows
-              </div>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25, 50]}
+                component="div"
+                count={rows.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
             </div>
 
             <p className="mt-4 text-sm text-gray-500">

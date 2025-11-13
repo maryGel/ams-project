@@ -51,10 +51,8 @@ export default function useColumnWidths() {
   const [columnWidths, setColumnWidths] = useState({
     id: 50,
     Code: 250,
-    Name: 300,
-  });
-
-  
+    Name: 500,
+  });  
 
   const theaderStyle = (field) => ({
     width: columnWidths[field],
@@ -111,10 +109,8 @@ export default function useColumnWidths() {
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
   };
-  
 
-  
-  
+
   return {handleResizeMouseDown, theaderStyle, tbodyStyle}
 }
 
