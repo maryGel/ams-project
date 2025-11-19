@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/assetMasterlist', (req, res) => {
 
   const sqlSelect = 'SELECT * FROM itemlist';
-  
+    
   db.getConnection((err, connection) => {
     if (err) {
       console.error('Error getting connection from pool:' + err.stack);

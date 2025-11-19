@@ -286,11 +286,8 @@ export default function AssetMasterTable({assetProps}) {
   const handleSelectItem = (row) => {
     const facNo = row.FacNO || row.FacNo;
 
-    // Save to localStorage
-    localStorage.setItem('selectedFacNO', facNo);
- 
     // Navigate to display page
-    navigate(`/assetFolder/assetMasterDisplay`);
+    navigate(`/assetFolder/assetMasterDisplay/${facNo}`);
   }; 
 
 
@@ -381,9 +378,12 @@ export default function AssetMasterTable({assetProps}) {
                       padding="none"
                       sx={{ 
                         fontWeight: 'bold', color: 'primary.main', textDecoration: 'underline',                      
-                        '&:Hover': {fontSize: '1rem', color: '#283593'}
+                        '&:Hover': {fontSize: '1rem', color: '#43a047'}
                       }}
-                      onClick={() => handleSelectItem(row)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectItem(row)
+                      }}
                     >
                       {row.FacNO}
                     </TableCell>

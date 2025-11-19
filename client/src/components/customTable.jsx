@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
-import { createTheme } from '@mui/material/styles';
+import { createTheme, styled } from '@mui/material/styles';
+import Dialog from '@mui/material/Dialog';
 
 
 
@@ -23,8 +24,8 @@ export const customTheme = createTheme({
           padding: 0,
           '& .MuiInputBase-input': {
             fontSize: '14px',
-            padding: '2px 0',
-            lineHeight: 'normal',
+            padding: '1px 0',
+            lineHeight: 'inherit',
           },
         },
       },
@@ -41,16 +42,23 @@ export const resizeColumn = {
   cursor: 'col-resize',
   transform: 'translateX(50%)',
   zIndex: 10,
-}
+};
 
-
+export const bootstrapDialog = styled(Dialog)(({ theme }) => ({
+  '& .MuiDialogContent-root': {
+    padding: theme.spacing(2),
+  },
+  '& .MuiDialogActions-root': {
+    padding: theme.spacing(1),
+  },
+}));
 
 export default function useColumnWidths() {
 
   
   const [columnWidths, setColumnWidths] = useState({
     id: 50,
-    Code: 250,
+    Code: 200,
     Name: 500,
   });  
 
@@ -113,6 +121,7 @@ export default function useColumnWidths() {
 
   return {handleResizeMouseDown, theaderStyle, tbodyStyle}
 }
+
 
 
 

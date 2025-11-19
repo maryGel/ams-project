@@ -7,6 +7,7 @@ import cors from 'cors';
 import userRouter from './routes/users.js';
 import useItemlist from './routes/asstMasterlist.js';
 import referentialsRoute from './routes/referentials.js';
+import refCategoryRoute from './routes/refCat.js';
 
 
 // Express Pool
@@ -15,6 +16,9 @@ export const db = mysql.createPool({
     user: 'root',
     password: 'adminGel',
     database: 'ams1',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 })
 
 const app = express();
@@ -24,6 +28,7 @@ app.get('/', (req, res) => {
     res.send('Server is up and running!');
   });
 
+//   Middleware
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -32,6 +37,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/login', userRouter);
 app.use('/itemlist', useItemlist);
 app.use('/referentials', referentialsRoute);
+app.use('/api/refCat', refCategoryRoute )
 
 app.listen(3000, () => {
     console.log('Server is running on 3000');

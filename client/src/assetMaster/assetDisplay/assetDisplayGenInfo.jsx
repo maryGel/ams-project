@@ -8,14 +8,14 @@ export default function AssetDisplayGenInfo({asset}){
       <div  className='p-5'>
         <div className='pt-5 pb-5 text-base shadow-sm shadow-slate-200 bg-gray-50'>
           {/* General Information Fields */}
-          <span className='pl-5 mb-2 text-blue-800'>General Information</span>
-          <div key= {asset.id} className='flex mt-5'>
+          <span className='pl-5 mb-5 text-blue-800'>General Information</span>
+          <div key= {asset.id} className='flex mt-2'>
             <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>UOM:</span>
             <input type= 'text' className='p-2 text-base' value={asset.Unit} disabled/>
             <span className='p-2 pl-10 text-base tracking-wider text-gray-500'>Quantity:</span>
             <input type= 'text' className='p-2 text-base' value={asset.balance_unit} disabled/>
           </div>
-          <div className='grid grid-cols-[10rem_1fr] mt-5 ml-0 text-base bg-gray-50'>
+          <div className='grid grid-cols-[10rem_1fr] mt-2 mb-8 ml-0 text-base bg-gray-50'>
             <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Brand:</span>
             <input type= 'text' className='p-2 text-base' value={asset.Brand} disabled/>
             <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Serial Number:</span>
@@ -27,8 +27,8 @@ export default function AssetDisplayGenInfo({asset}){
           </div>
 
           {/* Item Assignment Fields*/}
-          <span className='pl-5 mt-5 text-blue-800'>Item Assignment</span>
-          <div className='grid grid-cols-[10rem_1fr] mb-5 mt-5 ml-0 text-base bg-gray-50'>
+          <span className='pl-5 text-blue-800'>Item Assignment</span>
+          <div className='grid grid-cols-[10rem_1fr] mb-8 mt-2 ml-0 text-base bg-gray-50'>
             <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Asset Class:</span>
             <input type= 'text' className='p-2 text-base' value={asset.ItemClass} disabled/>
             <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Asset Group:</span>
@@ -42,8 +42,8 @@ export default function AssetDisplayGenInfo({asset}){
           </div>
           
           {/* Physical Count Information*/}
-          <span className='pl-5 mt-5 text-blue-800'>Physical Count Details</span>
-          <div className='grid grid-cols-[15rem_1fr]  mt-5 ml-0 text-base bg-gray-50'>
+          <span className='pl-5 text-blue-800'>Physical Count Details</span>
+          <div className='grid grid-cols-[15rem_1fr]  mt-2 ml-0 text-base bg-gray-50'>
             <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Last physical count on:</span>
             <span className='p-2 text-base'>12/31/2024</span>
             <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Inventory count sheet:</span>

@@ -235,18 +235,18 @@ export default function RefUom({useProps, openTab,}) {
                       className={`border-b border-gray-200 transition duration-100 ${editMode ? 'bg-indigo-50 hover:bg-indigo-100' : 'hover:bg-gray-50'}`}
                     >
                       {/* ID column - not editable */}
-                      <td className="p-2 text-sm bg-white border-r border-gray-200" style={tbodyStyle('id')}>
+                      <td className="p-2 border-r border-gray-200 pl-2text-sm bg-gray-50" style={tbodyStyle('id')}>
                         {row.id}
                       </td>
 
                       {/* Unit column */}
-                      <td className="p-2 border-r border-gray-200" style={tbodyStyle('Unit')}>
+                      <td className="p-2 border-r border-gray-200 pl-2text-sm bg-gray-50" style={tbodyStyle('Unit')}>
                         {editMode ? (
                           <input
                             type="text"
                             value={row.Unit ?? ''}
                             onChange={(e) => handleTempChange(row.id, 'Unit', e.target.value)}
-                            className="w-full text-sm bg-transparent border-b border-gray-400 focus:border-indigo-600 focus:ring-0 focus:outline-none"
+                            className="w-full p-2 text-sm bg-white border-b border-gray-400 focus:border-indigo-600 focus:ring-0 focus:outline-none"
                             style={{ padding: '2px 0' }}
                             onFocus={(e) => e.target.select()}
                           />
