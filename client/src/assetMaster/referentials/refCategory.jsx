@@ -135,16 +135,19 @@ export default function RefCategory({useProps, openTab,}) {
   
       // Create new categories
       for (const row of newRows) {
-        await createRefCategory(row.category, row.xCode || '');
+        await createRefCategory(row.category, row.xCode || removeEmptyRows());
+        
       }
   
       // Update existing categories
       for (const row of updatedRows) {
-        await updateRefCategory(row.id, row.category, row.xCode || '');
+        await updateRefCategory(row.id, row.category, row.xCode || removeEmptyRows());
+        
       }
       // Refresh data from server to get actual IDs and consistent state
       await fetchRefCategories();
 
+      
       setEditMode(false);
       showSnackbar('Changes saved successfully!');
       
@@ -211,8 +214,7 @@ export default function RefCategory({useProps, openTab,}) {
       setTemporaryData(sortedData);
     } else {
       setRows(sortedData);
-    }
-  
+    }  
     setSortConfig({ key: columnKey, direction });
     setPage(0);
   };
@@ -361,7 +363,7 @@ export default function RefCategory({useProps, openTab,}) {
                   <tr className='bg-gray-100 border-b border-gray-300 select-none'>
 
                     {/* ID */}
-                    <th
+                    {/* <th
                       className='relative p-2 text-sm font-semibold text-left text-gray-700 border-r border-gray-200'
                       style={theaderStyle('id') }
                       onClick={() => handleSort('id')}
@@ -383,7 +385,7 @@ export default function RefCategory({useProps, openTab,}) {
                         style={resizeColumn}
                         title="Resize column"
                       />
-                    </th>
+                    </th> */}
 
                     {/* CATEGORY CODE */}
                     <th
@@ -446,9 +448,9 @@ export default function RefCategory({useProps, openTab,}) {
                     className={`border-b  border-gray-200 transition duration-100 ${editMode ? 'bg-inherit hover:bg-indigo-50' : 'hover:bg-gray-50'}`}
                   >
                     {/* ID column - not editable */}
-                    <td className="p-2 border-r border-gray-200 pl-2text-sm bg-gray-50" style={tbodyStyle('id')}>
+                    {/* <td className="p-2 border-r border-gray-200 pl-2text-sm bg-gray-50" style={tbodyStyle('id')}>
                       {row.id}
-                    </td>
+                    </td> */}
 
                     {/* Category Code column */}
                     <td className="p-2 border-r border-gray-200 bg-gray-50" style={tbodyStyle('Code')}>
@@ -531,7 +533,7 @@ export default function RefCategory({useProps, openTab,}) {
                     sx: {
                       // Optional: customize dialog paper
                       boxShadow: 1,
-                      // bgcolor: '#fafafa'
+                      bgcolor: '#fafafa'
                     }
                   }}             
                 >

@@ -27,7 +27,7 @@ import { visuallyHidden } from '@mui/utils';
 import { useNavigate } from 'react-router-dom';
 
 // useEffect (fetch API using axios)
-import {useAssetMasterData} from '../../hooks/assetMasterHooks'
+// import {useAssetMasterData} from '../../hooks/assetMasterHooks'
 
 
 function descendingComparator(a, b, orderBy) {
@@ -114,7 +114,8 @@ function EnhancedTableHead(props) {
     <TableHead>
       <TableRow>
         <TableCell padding="checkbox">
-          <Checkbox
+          {props.rowCount > 0 && (
+            <Checkbox
             color="primary"
             indeterminate={numSelected > 0 && numSelected < rowCount}
             checked={rowCount > 0 && numSelected === rowCount}
@@ -123,6 +124,7 @@ function EnhancedTableHead(props) {
               'aria-label': 'select all desserts',
             }}
           />
+          )}
         </TableCell>
         {headCells.map((headCell) => (
           <TableCell
@@ -217,24 +219,51 @@ EnhancedTableToolbar.propTypes = {
 };
 
 
-export default function AssetMasterTable({assetProps}) {
+// ----------------------------------------------------------------
+//                    A S S E T  T A B L E 
+// ----------------------------------------------------------------
+
+
+export default function AssetMasterTable({ 
+    // itemList, 
+    loading, 
+    error,
+    displayedAsset,
+    page,
+    setPage,
+    // searchQuery,
+    isTableActive
+  }) {
   // MUI States
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('');
   const [selected, setSelected] = useState([]);
-  const [page, setPage] = useState(0);
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  // New State for API Data
-  const {itemList, loading, error} = useAssetMasterData(assetProps)
+  // // New State for API Data
+  // const {itemList, loading, error} = useAssetMasterData(assetProps)
 
 
   //Data fetching for API Data 
   const navigate = useNavigate();
 
-   // Replace placeholder rows with API data
-  const rows = itemList;  
+  // const placeholderRows = Array.from({ length: rowsPerPage }).map(() => ({
+  //   id: Math.random(),
+  //   FacNO: "",
+  //   FacName: "",
+  //   ItemClass: "",
+  //   CATEGORY: "",
+  //   balance_unit: "",
+  //   Unit: "",
+  //   ItemLocation: "",
+  //   Department: "",
+  //   status: ""
+  // }));  
+  
+
+  const rows = displayedAsset;
+
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -244,7 +273,7 @@ export default function AssetMasterTable({assetProps}) {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelected = itemList.map((n) => n.id);
+      const newSelected = visibleRows.map((n) => n.FacNO || n.id); // Use FacNO if available, otherwise id    
       setSelected(newSelected);
       return;
     }
@@ -295,16 +324,23 @@ export default function AssetMasterTable({assetProps}) {
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
+
   const visibleRows = useMemo(
-    // 1. The function is the first argument
     () => { 
+      // ➡️ NEW/MODIFIED: If the table is not active, return the placeholders immediately.
+      if (!isTableActive) {
+        return [];
+      }
+      
+      // If the table IS active, proceed with sorting and pagination of the actual data
       return [...rows]
           .sort(getComparator(order, orderBy))
           .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
     },
-    // 2. The dependency array is the second argument, separated by a comma
-    [order, orderBy, page, rowsPerPage, rows],
-  ); 
+  
+    // ➡️ Add the new flag to the dependency array
+    [rows, order, orderBy, page, rowsPerPage, isTableActive] 
+  );
 
   if(loading){
     return (
@@ -323,6 +359,8 @@ export default function AssetMasterTable({assetProps}) {
       </Box>
     );
   }
+
+ 
   
   return (
     <Box sx={{ width: '100%',  padding: 2}}>
@@ -345,30 +383,31 @@ export default function AssetMasterTable({assetProps}) {
             />
             <TableBody>
               {visibleRows.map((row, index) => {
-                const isItemSelected = selected.includes(row.id);
+                const uniqueId = row.FacNO || row.id;
+                const isItemSelected = selected.includes(uniqueId);
                 const labelId = `enhanced-table-checkbox-${index}`;
+                // const isPlaceholder = row.FacNO === "";
 
                 return (
                   <TableRow
-                    hover
-                    onClick={(event) => handleClick(event, row.id)}                    
+                    key = {row.id}
+                    hover   // disable hover for blank rows
+                    onClick={(event) => handleClick(event, uniqueId)}                    
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
-                    key={row.id}
                     selected={isItemSelected}
-                    sx={{ cursor: 'pointer', fontWeight: 'bold' }}
+                    sx={{ cursor: 'pointer' }}
                   >
                     <TableCell 
                       padding="checkbox"
                       sx={{ width: 25 }}
-                      // onDoubleClick={() => handleDoubleClick(row)}
-                      onClick={(event) => handleClick(event, row.id)}
+                      onClick={(event) => handleClick(event, uniqueId)}
                     >
                       <Checkbox
                         color="primary"
                         checked={isItemSelected}
-                        onClick={(event) => handleClick(event, row.id)}
+                        onClick={(event) => handleClick(event, uniqueId)}
                       />
                     </TableCell>
                     <TableCell
@@ -382,10 +421,10 @@ export default function AssetMasterTable({assetProps}) {
                       }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleSelectItem(row)
+                        handleSelectItem(row);
                       }}
                     >
-                      {row.FacNO}
+                      {row.FacNO || ""}
                     </TableCell>
                     <TableCell align="left">{row.FacName}</TableCell>
                     <TableCell align="left">{row.ItemClass}</TableCell>
