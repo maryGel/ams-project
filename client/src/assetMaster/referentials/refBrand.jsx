@@ -1,210 +1,331 @@
 // React
 import { useState, useEffect } from 'react';
 
-// Material UI - Icons & Components
+// Material UI
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import DownloadIcon from '@mui/icons-material/Download';
 import CancelIcon from '@mui/icons-material/Cancel';
 import Autocomplete from '@mui/material/Autocomplete';
+import AddIcon from '@mui/icons-material/Add';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 
-
-import { IconButton, ThemeProvider, TextField  } from '@mui/material';
+import {
+  IconButton, ThemeProvider, TextField,
+  TablePagination, Snackbar, Alert,
+  Dialog, DialogActions, DialogContent,
+  DialogContentText, DialogTitle, Button
+} from '@mui/material';
 
 // Custom hooks
 import { useRefBrand } from '../../hooks/refBrand';
 
 // Custom table utilities & theme
-import { customTheme, resizeColumn } from '../../components/customTable';
+import { customTheme, resizeColumn} from '../../components/customTable';
 import useColumnWidths from '../../components/customTable';
 
 
-export default function RefBrand({useProps, openTab,}) {
-  const {refBrandData, loading, error} = useRefBrand(useProps); 
-  const {handleResizeMouseDown, theaderStyle, tbodyStyle} = useColumnWidths();
-  const [rows, setRows] = useState(refBrandData || []); // To hold the refBrand Data
-  const [temporaryData, setTemporaryData] = useState(refBrandData || []);
-  const [editMode, setEditMode] = useState(false); 
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+// ----------------------------------------------------------------------------
+//                       REF BRAND COMPONENT
+// ----------------------------------------------------------------------------
 
+export default function RefBrand({ useProps, openTab }) {
+  const {
+    refBrandData,
+    loading,
+    error,
+    createrefBrand,
+    updaterefBrand,
+    deleterefBrand,
+    refreshRefBRand,
+  } = useRefBrand(useProps);
+
+  const { handleResizeMouseDown, theaderStyle, tbodyStyle } = useColumnWidths();
+
+  const [rows, setRows] = useState([]);
+  const [temporaryData, setTemporaryData] = useState([]);
+  const [editingRowId, setEditingRowId] = useState(null);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [page, setPage] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [confirmDeleteEmptyOpen, setConfirmDeleteEmptyOpen] = useState(false);
+  const [pendingSaveRow, setPendingSaveRow] = useState(null);
 
   useEffect(() => {
     setRows(refBrandData || []);
     setTemporaryData(refBrandData || []);
   }, [refBrandData]);
 
-  const handleEditRow = () => {
-    if (editMode) {
-      setTemporaryData(rows); // Cancel editing - revert to original data
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  // ✅ Add Row (Only One Editable)
+  const handleAddRow = () => {
+    if (editingRowId !== null) return; // Safety block
+
+    const lastId = rows.length > 0 ? Math.max(...rows.map(row => Number(row.id))) : 0;
+    const newId = lastId + 1;
+
+    const newRow = {
+      id: newId,
+      BrandID: '',
+      BrandName: '',
+      isNew: true
+    };
+
+    setRows(prev => [...prev, newRow]);
+    setTemporaryData(prev => [...prev, newRow]);
+
+    setEditingRowId(newId);
+
+    const totalRows = rows.length + 1;
+    const newLastPage = Math.floor(totalRows / rowsPerPage);
+    setPage(newLastPage);
+  };
+
+  // ✅ Update temp data for editable row
+  const handleTempChange = (id, field, value) => {
+    setTemporaryData(prev =>
+      prev.map(row =>
+        row.id === id ? { ...row, [field]: value } : row
+      )
+    );
+  };
+
+  
+  // ✅ Save One Row Only
+  const handleSave = async () => {
+    const editedRow = temporaryData.find(r => r.id === editingRowId);
+    if (!editedRow) return;
+
+    const empty = !editedRow.BrandID.trim() && !editedRow.BrandName.trim();
+
+    // If row is empty → ask user for confirmation
+    if (empty) {
+      setPendingSaveRow(editedRow);
+      setConfirmDeleteEmptyOpen(true);
+      return;
     }
-    setEditMode(prev => !prev);
+  
+
+    // ❗ Duplicate validation
+    const isDuplicate = rows.some(row =>
+      row.id !== editedRow.id && (
+        row.BrandID.trim().toLowerCase() === editedRow.BrandID.trim().toLowerCase() ||
+        row.BrandName.trim().toLowerCase() === editedRow.BrandName.trim().toLowerCase()
+      )
+    );
+
+    if (isDuplicate) {
+      showSnackbar("Brand Code/Name already exists!", "error");
+      return;
+    }
+
+    try {
+      if (empty) {
+        if (!editedRow.isNew) await deleterefBrand(editedRow.id);
+      } else if (editedRow.isNew) {
+        await createrefBrand(editedRow.BrandID, editedRow.BrandName);
+      } else {
+        await updaterefBrand(editedRow.id, editedRow.BrandID, editedRow.BrandName);
+      }
+
+      await refreshRefBRand();
+      setEditingRowId(null);
+      showSnackbar('Changes has been saved!');
+    } catch (err) {
+      showSnackbar('Save failed: ' + err.message, 'error');
+    }
+  };
+
+  const confirmDeleteEmpty = async () => {
+    if (!pendingSaveRow) return;
+
+    try {
+      // If it's NOT new, emptying = delete row
+      if (!pendingSaveRow.isNew) {
+        await deleterefBrand(pendingSaveRow.id);
+      }
+
+      await refreshRefBRand();
+
+      showSnackbar("Brand has been deleted successfully!");
+    } catch (err) {
+      showSnackbar("Failed: " + err.message, "error");
+    }
+
+    setEditingRowId(null);
+    setPendingSaveRow(null);
+    setConfirmDeleteEmptyOpen(false);
+  };
+
+  const cancelDeleteEmpty = () => {
+    setConfirmDeleteEmptyOpen(false);
+    setPendingSaveRow(null);
+  };
+
+  const removeEmptyRows = () => {
+    const cleaned = rows.filter(row => {
+      const x = row.BrandID?.trim() || "";
+      const c = row.BrandName?.trim() || "";
+      return !(x === "" && c === "");
+    });
+  
+    setRows(cleaned);
+    setTemporaryData(cleaned);
   };
   
+
+  // ✅ Cancel Editing
   const handleCancelEdit = () => {
-    setTemporaryData(rows);
-    setEditMode(false);
+    removeEmptyRows()
+    setEditingRowId(null);
   };
 
-  const handleSave = () => {
-    setRows(temporaryData);
-    setEditMode(false);
-    console.log('Data Saved:', temporaryData);
-    // Add API save logic here
+  // ✅ Enable editing for existing rows
+  const handleEditExistingRow = (id) => {
+    if (editingRowId !== null) return;
+    setEditingRowId(id);
   };
 
-  const handleTempChange = (id, field, value) => {
-    setTemporaryData(prevData => {
-        const rowIndex = prevData.findIndex(row => row.id === id);
-        if (rowIndex === -1) return prevData;
-
-        const newRows = [...prevData];
-        // Create a new row object with the updated field
-        const newRow = { ...newRows[rowIndex], [field]: value };
-        
-        // Replace the old row reference with the new one
-        newRows[rowIndex] = newRow;
-
-        return newRows;
-    });
-  };
-
+  // ✅ Sort
   const handleSort = (columnKey) => {
     let direction = 'asc';
     if (sortConfig.key === columnKey && sortConfig.direction === 'asc') {
       direction = 'desc';
     }
-  
-    const sortedData = [...(editMode ? temporaryData : rows)].sort((a, b) => {
-      const aValue = a[columnKey]?.toString().toLowerCase() ?? '';
-      const bValue = b[columnKey]?.toString().toLowerCase() ?? '';
-      if (aValue < bValue) return direction === 'asc' ? -1 : 1;
-      if (aValue > bValue) return direction === 'asc' ? 1 : -1;
-      return 0;
+
+    const sorted = [...temporaryData].sort((a, b) => {
+      const aVal = a[columnKey]?.toString().toLowerCase() ?? '';
+      const bVal = b[columnKey]?.toString().toLowerCase() ?? '';
+      return direction === 'asc'
+        ? aVal.localeCompare(bVal)
+        : bVal.localeCompare(aVal);
     });
-  
-    if (editMode) {
-      setTemporaryData(sortedData);
-    } else {
-      setRows(sortedData);
-    }
-  
+
+    setTemporaryData(sorted);
     setSortConfig({ key: columnKey, direction });
   };
-  
 
-  if (loading) return <div className="p-4 text-gray-600">Loading data...</div>;
-  if (error) return <div className="p-4 text-red-600">Error loading data.. {error.message}</div>;
+  // ✅ Filter + Paginate
+  const filteredData = temporaryData.filter(item =>
+    item.BrandName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.BrandID?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.id?.toString().includes(searchQuery)
+  );
+
+  const paginatedRows = filteredData.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error loading brand data.</div>;
 
   return (
     <>
       {openTab === 'Brand' &&
         <ThemeProvider theme={customTheme}>
-          <div className='w-auto p-4 h-full min-h-[600px] bg-white rounded-xl shadow-lg'>
+          <div key = {rows.id} className='w-auto h-full p-4 bg-white shadow-lg rounded-xl'>
 
-            {/* ---------------Title and Buttons --------------- */}
-            <div className='flex justify-end p-2 mb-3 w-100'>
-              <Autocomplete
-                id="free-solo-demo"
-                freeSolo
-                options={refBrandData.map((item) => item.BrandName)}
-                renderInput={(params) => 
-                  <TextField {...params} label="Search here" 
-                    sx={{
-                      '& .MuiInputLabel-root': {
-                        marginBottom: '2px',
-                        paddingLeft: '5px',
-                      },
-                      border: 1, 
-                      borderColor: 'grey.100', 
-                      borderRadius: 2,
-                    }}
-                  />}
-                sx={{ width: 300, height: 30, }}
-              />  
-            </div>
-            
-            <div className='flex items-center justify-between mt-6 mb-4'>
-              <h1 className='text-xl font-semibold text-gray-800'>Brand List</h1>
-                <div className="flex space-x-2">
-                  <IconButton
-                    aria-label={editMode ? "cancel" : "edit"}
-                    onClick={editMode ? handleCancelEdit : handleEditRow}
-                    color={editMode ? 'secondary' : 'default'}
-                    title={editMode ? 'Cancel Changes' : 'Enable Editing'}
-                    className='transition duration-150 hover:bg-gray-100'
-                    size="medium"
-                  >
-                    {editMode ? <CancelIcon fontSize="small" /> : <EditIcon fontSize="small" />}
-                  </IconButton>
-
-                    {editMode &&
-                      <IconButton
-                        color="primary"
-                        title="Save Changes"
-                        onClick={handleSave}
-                        className='transition duration-150 hover:bg-indigo-100'
-                      >
-                        <SaveIcon />
-                      </IconButton>
-                    }
-
-                    <IconButton
-                      title="Download Data"
-                      className='transition duration-150 hover:bg-gray-100'
-                    >
-                      <DownloadIcon />
-                    </IconButton>
-                </div>
-            </div>
-            {/* ----------------------------------------------------------- */}
-
-            <div
-              className='overflow-x-auto border border-gray-300 rounded-lg w-500'
-              style={{ height: 400 }}
+            {/* Snackbar */}
+            <Snackbar
+              open={snackbar.open}
+              autoHideDuration={4000}
+              onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             >
-              {/* ----------------------- TABLE STARTS HERE --------------------------- */}
-              <table
-                className="border-collapse w-100"
-                style={{ tableLayout: 'fixed' /* important so column widths are respected */, }}
+              <Alert
+                severity={snackbar.severity}
+                onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
               >
+                {snackbar.message}
+              </Alert>
+            </Snackbar>
 
-                {/* ----------------------- > TABLE HEADER */}
+            {/* Search */}
+            <div className='flex justify-end mb-3'>
+              <Autocomplete
+                freeSolo
+                options={rows.map(item => item.BrandName)}
+                value={searchQuery}
+                onInputChange={(e, v) => {
+                  setSearchQuery(v);
+                  setPage(0);
+                }}
+                renderInput={(params) =>
+                  <TextField {...params} label="Search here" />
+                }
+                sx={{ width: 300 }}
+              />
+            </div>
+
+            {/* Title + Buttons */}
+            <div className='flex items-center justify-between mb-4'>
+              <h1 className='text-lg font-semibold text-gray-800'>Brand List</h1>
+
+              <div className="flex space-x-1">
+
+                {/* Save */}
+                {editingRowId !== null && (
+                  <IconButton
+                    title='Save Changes'
+                    color="primary"
+                    onClick={handleSave}
+                    size="small"
+                    sx={{ border: 1 }}
+                  >
+                    <SaveIcon />
+                  </IconButton>
+                )}
+
+                {/* Cancel */}
+                {editingRowId !== null && (
+                  <IconButton
+                    title='Cancel Changes'
+                    color="secondary"
+                    onClick={handleCancelEdit}
+                    className='transition duration-150 hover:bg-indigo-100'
+                    size="small"
+                    sx={{ border: 1 }}
+                  >
+                    <CancelIcon />
+                  </IconButton>
+                )}
+
+                {/* Add Row */}
+                <IconButton
+                  onClick={handleAddRow}
+                  disabled={editingRowId !== null}
+                  size="small"
+                  sx={{ border: 1 }}
+                >
+                  <AddIcon />
+                </IconButton>
+
+                {/* Download */}
+                <IconButton size="small" sx={{ border: 1 }}>
+                  <DownloadIcon />
+                </IconButton>
+
+              </div>
+            </div>
+
+            {/* -------------------------- Table -------------------------------- */}
+            <div className='overflow-x-auto border rounded-lg'>
+              <table className="w-full border-collapse">
+
                 <thead>
-                  <tr className='bg-gray-100 border-b border-gray-300 select-none'>
-
-                    {/* ID */}
+                  <tr className='bg-gray-100 border-b'>
                     <th
                       className='relative p-2 text-sm font-semibold text-left text-gray-700 border-r border-gray-200'
-                      style={theaderStyle('id') }
-                      onClick={() => handleSort('id')}
-                    >
-                      ID
-                      <span className="ml-1 text-gray-500">
-                        {sortConfig.key === 'BrandName' ? (
-                          sortConfig.direction === 'asc' ? (
-                            <ArrowUpwardIcon fontSize="inherit" sx={{ fontSize: 16 }} />
-                          ) : (
-                            <ArrowDownwardIcon fontSize="inherit" sx={{ fontSize: 16 }} />
-                          )
-                        ) : (
-                          <UnfoldMoreIcon fontSize="inherit" sx={{ fontSize: 16, opacity: 0.4 }} />
-                        )}
-                      </span>
-                      <div
-                        onMouseDown={(e) => handleResizeMouseDown('id', e)}
-                        style={resizeColumn }
-                        title="Resize column"
-                      />
-                    </th>
-
-                    {/* BRAND CODE */}
-                    <th
-                      className='relative p-2 text-sm font-semibold text-left text-gray-700 border-r border-gray-200'
-                      style={theaderStyle('Code')}
                       onClick={() => handleSort('BrandID')}
+                      style={theaderStyle('Code')}
                     >
                       Branch Code
                       <span className="ml-8 text-gray-500">
@@ -224,13 +345,10 @@ export default function RefBrand({useProps, openTab,}) {
                         title="Resize column"
                       />
                     </th>
-
-                    {/* BRAND NAME */}
-
                     <th
-                      className='relative p-2 text-sm font-semibold text-left text-gray-700'
-                      style={theaderStyle('Name')}
+                      className='relative p-2 text-sm font-semibold text-left text-gray-700 border-r border-gray-200'
                       onClick={() => handleSort('BrandName')}
+                      style={theaderStyle('Name')}
                     >
                       Branch Name
                       <span className="ml-8 text-gray-500">
@@ -250,70 +368,90 @@ export default function RefBrand({useProps, openTab,}) {
                         title="Resize column"
                       />
                     </th>
+                    <th className='p-2 text-sm text-center'>Action</th>
                   </tr>
                 </thead>
-                {/* ------------------ Table Header Ends Here */}
 
                 <tbody>
-                  {(editMode ? temporaryData : (rows || []).slice(0, 5)).map((row) => (
+                  {paginatedRows.map(row => (
                     <tr
                       key={row.id}
-                      className={`border-b  border-gray-200 transition duration-100 ${editMode ? 'bg-inherit hover:bg-indigo-50' : 'hover:bg-gray-50'}`}
-                      >
-                      {/* ID column - not editable */}
-                      <td className="p-2 border-r border-gray-200 pl-2text-sm bg-gray-50" style={tbodyStyle('id')}>
-                        {row.id}
-                      </td>
-
-                      {/* Brand Code column */}
-                      <td className="p-2 border-r border-gray-200 pl-2text-sm bg-gray-50" style={tbodyStyle('BrandID')}>
-                        {editMode ? (
+                      className={`border-b ${editingRowId === row.id ? 'bg-blue-100' : 'hover:bg-gray-50'}`}
+                    >
+                      {/* BrandID */}
+                      <td className='p-1 pl-2' style={tbodyStyle('BrandID')}>
+                        {editingRowId === row.id ? (
                           <input
                             type="text"
                             value={row.BrandID ?? ''}
                             onChange={(e) => handleTempChange(row.id, 'BrandID', e.target.value)}
-                            className="w-full p-2 text-sm bg-white border-b border-gray-400 focus:border-indigo-600 focus:ring-0 focus:outline-none"
-                            style={{ padding: '2px 0' }}
-                            onFocus={(e) => e.target.select()}
+                            className="w-full p-1 border-b"
                           />
                         ) : (
-                          <span className="text-sm">{row.BrandID}</span>
+                          row.BrandID
                         )}
                       </td>
 
-                      {/* Brand Name column */}
-                      <td className="p-2 border-r border-gray-200 pl-2text-sm bg-gray-50" style={tbodyStyle('BrandName')}>
-                        {editMode ? (
+                      {/* BrandName */}
+                      <td className='p-1 pl-2'style={tbodyStyle('BrandName')} >
+                        {editingRowId === row.id ? (
                           <input
                             type="text"
                             value={row.BrandName ?? ''}
                             onChange={(e) => handleTempChange(row.id, 'BrandName', e.target.value)}
-                            className="w-full p-2 text-sm bg-white border-b border-gray-400 focus:border-indigo-600 focus:ring-0 focus:outline-none"
-                            style={{ padding: '2px 0' }}
-                            onFocus={(e) => e.target.select()}
+                            className="w-full p-1 border-b"
                           />
                         ) : (
-                          <span className="text-sm">{row.BrandName}</span>
+                          row.BrandName
+                        )}
+                      </td>
+
+                      {/* Edit Action */}
+                      <td className='p-1 pl-2 text-center'>
+                        {editingRowId === null && (
+                          <IconButton size="small" onClick={() => handleEditExistingRow(row.id)}>
+                            <EditIcon fontSize="small" />
+                          </IconButton>
                         )}
                       </td>
                     </tr>
                   ))}
                 </tbody>
-              </table>
-              {/* ------------------------ TABLE ENDS HERE ---------------------------- */}
 
-              <div className="flex justify-end p-2 text-sm text-gray-600 border-t border-gray-200 bg-gray-50">
-                Showing 1 - 5 of {rows.length} rows
-              </div>
+              </table>
+
+              <TablePagination
+                component="div"
+                count={rows.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={(e, p) => setPage(p)}
+                onRowsPerPageChange={(e) => {
+                  setRowsPerPage(parseInt(e.target.value, 10));
+                  setPage(0);
+                }}
+              />
             </div>
 
-            <p className="mt-4 text-sm text-gray-500">
-              {editMode
-                ? 'Editing enabled. Click the save icon to commit changes.'
-                : `Click the Edit icon ${String.fromCodePoint(0x270E)} to enable editing.`
+            <p className="mt-3 text-sm text-gray-500">
+              {editingRowId === null
+                ? 'Click Edit or Add Row to begin editing.'
+                : 'Editing one row. Save or Cancel to continue.'
               }
             </p>
           </div>
+          <Dialog open={confirmDeleteEmptyOpen} onClose={cancelDeleteEmpty}>
+            <DialogTitle>Confirm Empty Row</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                This row is empty. Saving will remove this row. Do you want to continue?
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={cancelDeleteEmpty}>Cancel</Button>
+              <Button color="error" onClick={confirmDeleteEmpty}>Yes, Remove</Button>
+            </DialogActions>
+        </Dialog>
         </ThemeProvider>
       }
     </>

@@ -65,8 +65,8 @@ router.get('/:id', (req, res) => {
 
 // POST create new category
 router.post('/', (req, res) => {
-  const { category, xCode } = req.body;
-  console.log('POST /api/refCat - Creating category:', {category, xCode});
+  const { xCode, category } = req.body;
+  console.log('POST /api/refCat - Creating category:', {xCode, category });
   
   if (!category) {
     return res.status(400).json({ error: 'Name is required' });
@@ -77,8 +77,8 @@ router.post('/', (req, res) => {
       return res.status(500).json({ error: 'Database connection failed' });
     }
 
-    const sql = 'INSERT INTO refcategory (category, xCode) VALUES (?, ?)';
-    const params = [category, xCode || ''];
+    const sql = 'INSERT INTO refcategory (xCode, category ) VALUES (?, ?)';
+    const params = [xCode, category || ''];
     
     connection.query(sql, params, (error, result) => {
       connection.release();
@@ -101,8 +101,8 @@ router.post('/', (req, res) => {
 // PUT update category
 router.put('/:id', (req, res) => {
   const { id } = req.params;
-  const { category, xCode } = req.body;
-  console.log(`PUT /api/refCat/${id} - Updating category to:`, {category, xCode});
+  const { xCode, category } = req.body;
+  console.log(`PUT /api/refCat/${id} - Updating category to:`, {xCode, category});
   
   if (!category) {
     return res.status(400).json({ error: 'Name is required' });
@@ -113,8 +113,8 @@ router.put('/:id', (req, res) => {
       return res.status(500).json({ error: 'Database connection failed' });
     }
 
-    const sql = 'UPDATE refcategory SET category = ?, xCode = ? WHERE id = ?';
-    const params = [category, xCode || '', id];    
+    const sql = 'UPDATE refcategory SET xCode = ?, category = ? WHERE id = ?';
+    const params = [xCode, category || '', id];    
     
     connection.query(sql, params, (error, result) => {
       connection.release();
@@ -128,7 +128,7 @@ router.put('/:id', (req, res) => {
         return res.status(404).json({ error: 'Category not found' });
       }
       
-      res.json({ message: 'Category updated successfully' });
+      res.json({ message: 'Category updates has been successfully' });
     });
   });
 });

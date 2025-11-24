@@ -1,5 +1,5 @@
 // React
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 // Material UI - Icons & Components
 import EditIcon from '@mui/icons-material/Edit';
@@ -20,6 +20,7 @@ import { IconButton, ThemeProvider, TextField, TablePagination, Snackbar, Alert,
 } from '@mui/material';
 
 // Custom hooks
+import { useRefItemClass } from '../../hooks/refClass';
 import { useRefCategory } from '../../hooks/refCategory';
 
 // Custom table utilities & theme
@@ -28,22 +29,23 @@ import useColumnWidths from '../../components/customTable';
 
 
 // ----------------------------------------------------------------------------
-//                       REF CATEGORY COMPONENT
+//                       REF ITEM CLASS COMPONENT
 // ----------------------------------------------------------------------------
-export default function RefCategory({useProps, openTab,}) {
+export default function RefItemClass({useProps, openTab,}) {
   const {
-    refCategoryData,
+    refItemClassData,
     loading,
     error,
-    createRefCategory,
-    updateRefCategory,
-    deleteRefCategory,
-    fetchRefCategories
-  } = useRefCategory(useProps); 
+    createRefItemClass,
+    updateRefItemClass,
+    deleteRefItemClass,
+    refreshItemClasses,
+  } = useRefItemClass(useProps); 
+  const {refCategoryData, fetchRefCategories} = useRefCategory(useProps)
 
   const {handleResizeMouseDown, theaderStyle, tbodyStyle} = useColumnWidths();
-  const [rows, setRows] = useState(refCategoryData || []); // To hold the Data
-  const [temporaryData, setTemporaryData] = useState(refCategoryData || []);
+  const [rows, setRows] = useState(refItemClassData || []); // To hold the Data
+  const [temporaryData, setTemporaryData] = useState(refItemClassData || []);
   const [editingRowId, setEditingRowId] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -52,16 +54,34 @@ export default function RefCategory({useProps, openTab,}) {
   const [searchQuery, setSearchQuery] = useState("");
   const [confirmDeleteEmptyOpen, setConfirmDeleteEmptyOpen] = useState(false);
   const [pendingSaveRow, setPendingSaveRow] = useState(null);
+  // const [addCategory, setAddCategory] = useState(refCategoryData || []);
 
-// In your component, add this useEffect for debugging:
+
   useEffect(() => {
-    setRows(refCategoryData);
-    setTemporaryData(refCategoryData);
-  }, [refCategoryData]);
+    if (openTab === 'Asset Class') {
+      refreshItemClasses();
+      fetchRefCategories();
+    }
+  }, [openTab]); // eslint-disable-next-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    setRows(refItemClassData);
+    setTemporaryData(refItemClassData);
+  }, [refItemClassData]);
 
   const showSnackbar = (message, severity = 'success') => {
     setSnackbar({ open: true, message, severity });
   };
+
+  const assetGrp = useMemo(() => {
+    return refCategoryData.map(item => item.category);
+  }, [refCategoryData]);
+  console.log( `asset group: ${assetGrp}`)
+
+  // const handleAddCategory = (item) => {
+  //   setAddCategory(item)
+  // }
+
 
   // ✅ Add Row (Only One Editable)
   const handleAddRow = () => {
@@ -72,8 +92,9 @@ export default function RefCategory({useProps, openTab,}) {
 
     const newRow = {
       id: newId,
-      xCode: '',
-      category: '',
+      classCode: '',
+      itemClass: '',
+      category:'',
       isNew: true
     };
 
@@ -101,7 +122,7 @@ export default function RefCategory({useProps, openTab,}) {
   const editedRow = temporaryData.find(r => r.id === editingRowId);
   if (!editedRow) return;
 
-  const empty = !editedRow.xCode.trim() && !editedRow.category.trim();
+  const empty = !editedRow.classCode.trim() && !editedRow.itemClass.trim();
   if (empty) {
     setPendingSaveRow(editedRow);
     setConfirmDeleteEmptyOpen(true);
@@ -111,26 +132,26 @@ export default function RefCategory({useProps, openTab,}) {
   // ❗ Duplicate validation
   const isDuplicate = rows.some(row =>
     row.id !== editedRow.id && (
-      row.xCode.trim().toLowerCase() === editedRow.xCode.trim().toLowerCase() ||
-      row.category.trim().toLowerCase() === editedRow.category.trim().toLowerCase()
+      row.classCode.trim().toLowerCase() === editedRow.classCode.trim().toLowerCase() ||
+      row.itemClass.trim().toLowerCase() === editedRow.itemClass.trim().toLowerCase()
     )
   );
 
   if (isDuplicate) {
-    showSnackbar("Asset Grp Code/Name already exists!", "error");
+    showSnackbar("Asset Class Code/Name already exists!", "error");
     return;
   }
 
   try {
     if (empty) {
-      if (!editedRow.isNew) await deleteRefCategory(editedRow.id);
+      if (!editedRow.isNew) await deleteRefItemClass(editedRow.id);
     } else if (editedRow.isNew) {
-      await createRefCategory(editedRow.xCode, editedRow.category);
+      await createRefItemClass(editedRow.classCode, editedRow.itemClass, editedRow.category);
     } else {
-      await updateRefCategory(editedRow.id, editedRow.xCode, editedRow.category);
+      await updateRefItemClass(editedRow.id, editedRow.classCode, editedRow.itemClass, editedRow.category);
     }
 
-    await fetchRefCategories();
+    await refreshItemClasses();
     setEditingRowId(null);
     showSnackbar('Changes has been saved');
   } catch (err) {
@@ -144,12 +165,12 @@ export default function RefCategory({useProps, openTab,}) {
     try {
       // If it's NOT new, emptying = delete row
       if (!pendingSaveRow.isNew) {
-        await deleteRefCategory(pendingSaveRow.id);
+        await deleteRefItemClass(pendingSaveRow.id);
       }
 
-      await fetchRefCategories();
+      await refreshItemClasses();
 
-      showSnackbar("Asset Group has been deleted successfully!");
+      showSnackbar("Asset Class has been deleted successfully!");
     } catch (err) {
       showSnackbar("Failed: " + err.message, "error");
     }
@@ -166,9 +187,10 @@ export default function RefCategory({useProps, openTab,}) {
 
   const removeEmptyRows = () => {
     const cleaned = rows.filter(row => {
-      const x = row.xCode?.trim() || "";
-      const c = row.category?.trim() || "";
-      return !(x === "" && c === "");
+      const x = row.classCode?.trim() || "";
+      const c = row.itemClass?.trim() || "";
+      const t = row.category?.trim() || "";
+      return !(x === "" && c === "" && t==="");
     });
   
     setRows(cleaned);
@@ -210,8 +232,8 @@ export default function RefCategory({useProps, openTab,}) {
 
   // ✅ Filter + Paginate
   const filteredData = temporaryData.filter(item =>
-    item.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.xCode?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.itemClass?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.classCode?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.id?.toString().includes(searchQuery)
   );
 
@@ -227,7 +249,7 @@ export default function RefCategory({useProps, openTab,}) {
 
   return (
     <>
-      {openTab === 'Asset Group' &&
+      {openTab === 'Asset Class' &&
         <ThemeProvider theme={customTheme}>
           <div key = {rows.id} className='w-auto h-full p-4 bg-white shadow-lg rounded-xl'>
             
@@ -250,7 +272,7 @@ export default function RefCategory({useProps, openTab,}) {
               <div className='flex justify-end mb-3'>
                 <Autocomplete
                   freeSolo
-                  options={rows.map(item => item.category)}
+                  options={rows.map(item => item.itemClass)}
                   value={searchQuery}
                   onInputChange={(e, v) => {
                     setSearchQuery(v);
@@ -321,15 +343,15 @@ export default function RefCategory({useProps, openTab,}) {
                 <thead>
                   <tr className='bg-gray-100 border-b'>
 
-                    {/* CATEGORY CODE */}
+                    {/* itemClass CODE */}
                     <th
                       className='relative p-2 text-sm font-semibold text-left text-gray-700 border-r border-gray-200'
                       style={theaderStyle('Code')}
-                      onClick={() => handleSort('xCode')}
+                      onClick={() => handleSort('classCode')}
                     >
-                      Asset Grp Code
+                      Asset Class Code
                       <span className="ml-8 text-gray-500">
-                        {sortConfig.key === 'xCode' ? (
+                        {sortConfig.key === 'classCode' ? (
                           sortConfig.direction === 'asc' ? (
                             <ArrowUpwardIcon fontSize="inherit" sx={{ fontSize: 16 }} />
                           ) : (
@@ -340,13 +362,39 @@ export default function RefCategory({useProps, openTab,}) {
                         )}
                       </span>
                       <div
-                        onMouseDown={(e) => handleResizeMouseDown('xCode', e)}
+                        onMouseDown={(e) => handleResizeMouseDown('classCode', e)}
                         style={resizeColumn }
                         title="Resize column"
                       />
                     </th>
 
-                    {/* CATEGORY NAME */}
+                    {/* itemClass NAME */}
+
+                    <th
+                      className='relative p-2 text-sm font-semibold text-left text-gray-700 border-r border-gray-200'
+                      style={theaderStyle('Name')}
+                      onClick={() => handleSort('itemClass')}
+                    >
+                      Asset Class
+                      <span className="ml-8 text-gray-500">
+                        {sortConfig.key === 'itemClass' ? (
+                          sortConfig.direction === 'asc' ? (
+                            <ArrowUpwardIcon fontSize="inherit" sx={{ fontSize: 16 }} />
+                          ) : (
+                            <ArrowDownwardIcon fontSize="inherit" sx={{ fontSize: 16 }} />
+                          )
+                        ) : (
+                          <UnfoldMoreIcon fontSize="inherit" sx={{ fontSize: 16, opacity: 0.4 }} />
+                        )}
+                      </span>
+                      <div
+                        onMouseDown={(e) => handleResizeMouseDown('itemClass', e)}
+                        style={resizeColumn }
+                        title="Resize column"
+                      />
+                    </th>
+
+                    {/* itemClass NAME */}
 
                     <th
                       className='relative p-2 text-sm font-semibold text-left text-gray-700 border-r border-gray-200'
@@ -355,7 +403,7 @@ export default function RefCategory({useProps, openTab,}) {
                     >
                       Asset Group
                       <span className="ml-8 text-gray-500">
-                        {sortConfig.key === 'category' ? (
+                        {sortConfig.key === 'itemClass' ? (
                           sortConfig.direction === 'asc' ? (
                             <ArrowUpwardIcon fontSize="inherit" sx={{ fontSize: 16 }} />
                           ) : (
@@ -366,7 +414,7 @@ export default function RefCategory({useProps, openTab,}) {
                         )}
                       </span>
                       <div
-                        onMouseDown={(e) => handleResizeMouseDown('category', e)}
+                        onMouseDown={(e) => handleResizeMouseDown('itemClass', e)}
                         style={resizeColumn }
                         title="Resize column"
                       />
@@ -385,28 +433,47 @@ export default function RefCategory({useProps, openTab,}) {
                       className={`border-b ${editingRowId === row.id ? 'bg-blue-100' : 'hover:bg-gray-50'}`}
                     >
 
-                    {/* Category Code column */}
-                    <td className='p-1 pl-2' style={tbodyStyle('xCode')}>
+                    {/* itemClass Code column */}
+                    <td className='p-1 pl-2' style={tbodyStyle('classCode')}>
                       {editingRowId  === row.id?  (
                         <input
                           type="text"
-                          value={row.xCode ?? ''}
-                          onChange={(e) => handleTempChange(row.id, 'xCode', e.target.value)}
+                          value={row.classCode ?? ''}
+                          onChange={(e) => handleTempChange(row.id, 'classCode', e.target.value)}
                           className="w-full p-1 border-b"
                         />
                       ) : (
-                        row.xCode
+                        row.classCode
                       )}
                     </td>
 
-                    {/* Category Name column */}
-                    <td className='p-1 pl-2'style={tbodyStyle('category')} >
+                    {/* itemClass Name column */}
+                    <td className='p-1 pl-2'style={tbodyStyle('itemClass')} >
                     {editingRowId === row.id? (
                         <input
                           type="text"
-                          value={row.category ?? ''}
-                          onChange={(e) => handleTempChange(row.id, 'category', e.target.value)}
+                          value={row.itemClass ?? ''}
+                          onChange={(e) => handleTempChange(row.id, 'itemClass', e.target.value)}
                           className="w-full p-1 border-b"
+                        />
+                      ) : (
+                        row.itemClass
+                      )}
+                    </td>
+                    {/* itemClass Name column */}
+                    <td className='p-1 pl-2'style={tbodyStyle('category')} >
+                    {editingRowId === row.id? (
+                        <Autocomplete
+                          value={row.category || ''}
+                          options={assetGrp}
+                          onChange={(e, newValue) => {
+                            console.log("Selected category:", newValue);
+                            handleTempChange(row.id, 'category', newValue || "")
+                          }}
+                          className="w-full p-1 border-b"
+                          renderInput={(params) => (
+                                        <TextField {...params} size="small" />
+                                      )}
                         />
                       ) : (
                         row.category

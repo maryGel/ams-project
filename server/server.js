@@ -7,7 +7,10 @@ import cors from 'cors';
 import userRouter from './routes/users.js';
 import useItemlist from './routes/asstMasterlist.js';
 import referentialsRoute from './routes/referentials.js';
-import refCategoryRoute from './routes/refCat.js';
+import refCategoryRoute from './routes/refCatRoute.js';
+import refBrandRoute from './routes/refBrandRoute.js';
+import refUnitRoute from './routes/refUnitRoute.js';
+import refItemClassRoute from './routes/refClassRoute.js';
 
 
 // Express Pool
@@ -37,7 +40,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/login', userRouter);
 app.use('/itemlist', useItemlist);
 app.use('/referentials', referentialsRoute);
-app.use('/api/refCat', refCategoryRoute )
+app.use('/api/refCat', refCategoryRoute );
+app.use('/api/refBrand', refBrandRoute);
+app.use('/api/refUnit', refUnitRoute);
+app.use('/refItemClass', refItemClassRoute)
 
 app.listen(3000, () => {
     console.log('Server is running on 3000');

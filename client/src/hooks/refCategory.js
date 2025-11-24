@@ -4,7 +4,7 @@ import axios from 'axios';
 
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: '/api',
   timeout: 10000,
 });
 
@@ -68,12 +68,12 @@ export const useRefCategory = () => {
   }, []);
 
   // Create category - UPDATED TO SEND CORRECT FIELDS
-  const createRefCategory = async (category, xCode = '') => {
+  const createRefCategory = async (xCode = '', category) => {
     try {
       setActionLoading(true);
-      console.log('Creating category:', { category, xCode });
+      console.log('Creating category:', { xCode, category });
       
-      const response = await api.post('/api/refCat', { category, xCode });
+      const response = await api.post('/api/refCat', { xCode, category});
       console.log('Create response:', response.data);
       
       // Refresh the list
@@ -91,18 +91,18 @@ export const useRefCategory = () => {
   };
 
   // Update category - UPDATED TO SEND CORRECT FIELDS
-  const updateRefCategory = async (id, category, xCode = '') => {
+  const updateRefCategory = async (id, xCode = '', category) => {
     try {
       setActionLoading(true);
-      console.log(`Updating category ${id} to:`, { category, xCode });
+      console.log(`Updating category ${id} to:`, { xCode, category });
       
-      const response = await api.put(`/api/refCat/${id}`, { category, xCode });
+      const response = await api.put(`/api/refCat/${id}`, { xCode, category });
       console.log('Update response:', response.data);
       
       // Update local state
       setRefCategoryData(prev => 
         prev.map(item => 
-          item.id == id ? { ...item, category, xCode} : item
+          item.id == id ? { ...item, xCode, category} : item
         )
       );
       

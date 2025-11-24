@@ -3,6 +3,7 @@ import RefTabs from '../referentials/refTabs';
 import RefUom from '../referentials/refUom';
 import RefBrand from '../referentials/refBrand';
 import RefCategory from '../referentials/refCategory';
+import RefItemClass from '../referentials/refItemClass';
 
 function ReferentialPage() {
 
@@ -26,6 +27,9 @@ function ReferentialPage() {
         />
         <RefCategory
           openTab = {openTab}
+        />
+        <RefItemClass
+          openTab = {openTab}      
         />
       </div>
    </div>
