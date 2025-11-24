@@ -41,7 +41,7 @@ export default function RefItemClass({useProps, openTab,}) {
     deleteRefItemClass,
     refreshItemClasses,
   } = useRefItemClass(useProps); 
-  const {refCategoryData, fetchRefCategories} = useRefCategory(useProps)
+  const {refCategoryData} = useRefCategory(useProps, [openTab])
 
   const {handleResizeMouseDown, theaderStyle, tbodyStyle} = useColumnWidths();
   const [rows, setRows] = useState(refItemClassData || []); // To hold the Data
@@ -57,12 +57,6 @@ export default function RefItemClass({useProps, openTab,}) {
   // const [addCategory, setAddCategory] = useState(refCategoryData || []);
 
 
-  useEffect(() => {
-    if (openTab === 'Asset Class') {
-      refreshItemClasses();
-      fetchRefCategories();
-    }
-  }, [openTab]); // eslint-disable-next-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     setRows(refItemClassData);
