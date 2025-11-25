@@ -12,9 +12,6 @@ import Practice from './components/practice.jsx';
 import ReferentialPage from './assetMaster/pages/ReferentialPage.jsx';
 
 
-// Use environment variable for backend API
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
 
 function App() {
 
