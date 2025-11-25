@@ -26,7 +26,7 @@ export const useRefItemClass = () => {
     }
   };
 
-  // GET all categories
+  // GET all AssetClasses
   useEffect(() => {
     const getRefItemClass = async () => {
       try {
@@ -36,10 +36,10 @@ export const useRefItemClass = () => {
         // Test API first
         await testAPI();
         
-        // Then fetch categories
-        console.log('Fetching categories...');
+        // Then fetch AssetClasses
+        console.log('Fetching AssetClasses...');
         const response = await api.get('/refItemClass');
-        console.log('Item Class response:', response.data);
+        // console.log('Item Class response:', response.data);
         
         const data = response.data;
         
@@ -59,7 +59,7 @@ export const useRefItemClass = () => {
         
       } catch (error) {
         console.error('Error in getRefItemClass:', error);
-        setError(error.response?.data?.error || error.message || 'Failed to fetch categories');
+        setError(error.response?.data?.error || error.message || 'Failed to fetch AssetClasses');
       } finally {
         setLoading(false);
       }
@@ -141,7 +141,7 @@ export const useRefItemClass = () => {
     }
   };
 
-  // Refresh categories
+  // Refresh AssetClasses
   const refreshItemClasses = async () => {
     try {
       setLoading(true);
@@ -159,8 +159,8 @@ export const useRefItemClass = () => {
       setRefItemClassData(dataWithID);
       setError(null);
     } catch (error) {
-      console.error('Error fetching categories:', error);
-      setError(error.response?.data?.error || error.message || 'Failed to fetch categories');
+      console.error('Error fetching AssetClasses:', error);
+      setError(error.response?.data?.error || error.message || 'Failed to fetch AssetClasses');
       throw error;
     } finally {
       setLoading(false);

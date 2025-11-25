@@ -113,7 +113,7 @@ export default function RefBrand({ useProps, openTab }) {
     }
 
      // If xCoode has value, then BrandName is required
-     if (editedRow.BrandID?.trim()) {
+    if (editedRow.BrandID?.trim()) {
       
       if (!editedRow.BrandName?.trim()) {
         showSnackbar(`Please fill in required fields: Brand Name`, "error");

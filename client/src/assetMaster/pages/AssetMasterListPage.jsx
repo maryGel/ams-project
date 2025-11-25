@@ -11,12 +11,13 @@ import ClearAllIcon from '@mui/icons-material/ClearAll';
 import { createFilterOptions } from '@mui/material/Autocomplete';
 
 //Component/pages import
-import {top100Films} from '../hooks/assetlist';
 import AssetMasterTable from '../assetMaster/assetMasterTable'
 import { NavLink } from 'react-router-dom';
 import { useAssetMasterData } from '../../hooks/assetMasterHooks';
 import { useRefCategory } from '../../hooks/refCategory';
 import { useRefItemClass } from '../../hooks/refClass';
+import { useRefLocation } from '../../hooks/refLocation';
+import { useRefDepartment } from '../../hooks/refDepartment';
 
 
 
@@ -25,18 +26,24 @@ function AssetMasterListPage({useProps, setHeaderTitle}) {
   const {itemList, loading, error} = useAssetMasterData(useProps);
   const {refCategoryData} = useRefCategory(useProps)
   const {refItemClassData} = useRefItemClass(useProps)
+  const {refLocData} = useRefLocation(useProps)
+  const {refDeptData} = useRefDepartment(useProps)
 
   // 1. INPUT STATE (What the user is typing/selecting now)
   const [draftSearchQuery, setDraftSearchQuery] = useState("");
   const [draftSelectedAssets, setDraftSelectedAssets] = useState([]); 
   const [draftSelectedAssetGroups, setDraftSelectedAssetGroups] = useState([]);
   const [draftSelectedAssetClass, setDraftSelectedAssetClass] = useState([]);
+  const [draftSelectedLocation, setDraftSelectedLocation] = useState([]);
+  const [draftSelectedDepartment, setDraftSelectedDepartment] = useState([]);
 
   // 2. COMMITTED FILTER STATE (What is used to filter data)
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAssets, setSelectedAssets] = useState([]); 
   const [selectedAssetGroups, setSelectedAssetGroups] = useState([]);
   const [selectedAssetClass, setSelectedAssetClass] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState([]);
+  const [selectedDepartment, setSelectedDepartment] = useState([]);
   const [filterKey, setFilterKey] = useState(0);
 
   // Table state
@@ -45,8 +52,10 @@ function AssetMasterListPage({useProps, setHeaderTitle}) {
 
   const assetGrp = refCategoryData.map(item => item.category)
   const assetClass = refItemClassData.map(item => item.itemClass)
+  const location = refLocData.map(item => item.LocationName)
+  const department = refDeptData.map(item => item.Department)
 
-  const isTableActive = searchQuery.trim() !== "" || selectedAssets.length > 0 || selectedAssetGroups.length > 0 || selectedAssetClass.length > 0; // Flag to control when data is displayed
+  const isTableActive = searchQuery.trim() !== "" || selectedAssets.length > 0 || selectedAssetGroups.length > 0 || selectedAssetClass.length > 0 || selectedLocation.length > 0 || selectedDepartment.length > 0; // Flag to control when data is displayed
  
  
   const filterOptions = createFilterOptions({
@@ -67,17 +76,29 @@ function AssetMasterListPage({useProps, setHeaderTitle}) {
       selectedAssets.length === 0 ||
       selectedAssets.some(sel => sel.FacNO === item.FacNO);
 
-    // 3. ➡️ NEW: Filter by Asset Group
+    // 3. Filter by Asset Group
     const matchesAssetGroup = 
       selectedAssetGroups.length === 0 ||
       selectedAssetGroups.includes(item.CATEGORY); // Assuming item.CATEGORY holds the Asset Group value
 
-    // 4. ➡️ NEW: Filter by Asset Class
+    // 4. Filter by Asset Class
     const matchesAssetClass = 
       selectedAssetClass.length === 0 ||
       selectedAssetClass.includes(item.ItemClass); // Assuming item.CATEGORY holds the Asset Group value
-      console.log(`selectedClass: ${item.ItemClass} `)
-    return matchesText && matchesSelected && matchesAssetGroup && matchesAssetClass;
+
+    // 5. Filter by Location
+    const matchesLocation = 
+    selectedLocation.length === 0 ||
+    selectedLocation.includes(item.ItemLocation); // Assuming item.CATEGORY holds the Asset Group value
+
+
+    // 5. Filter by Department
+    const matchesDepartment = 
+    selectedDepartment.length === 0 ||
+    selectedDepartment.includes(item.Department); // Assuming item.CATEGORY holds the Asset Group value
+
+
+    return matchesText && matchesSelected && matchesAssetGroup && matchesAssetClass && matchesLocation && matchesDepartment;
   });
   
 
@@ -89,6 +110,8 @@ function AssetMasterListPage({useProps, setHeaderTitle}) {
     setSelectedAssets(draftSelectedAssets);
     setSelectedAssetGroups(draftSelectedAssetGroups);
     setSelectedAssetClass(draftSelectedAssetClass);
+    setSelectedLocation(draftSelectedLocation);
+    setSelectedDepartment(draftSelectedDepartment);
     setPage(0); //Reset Pagination
   }
   
@@ -98,15 +121,18 @@ function AssetMasterListPage({useProps, setHeaderTitle}) {
     setDraftSelectedAssets([]);
     setDraftSelectedAssetGroups([]);
     setDraftSelectedAssetClass([]);
+    setDraftSelectedLocation([]);
+    setDraftSelectedDepartment([]);
 
     // 2. Clear all committed filter states
     setSearchQuery("");
     setSelectedAssets([]);
     setSelectedAssetGroups([]);
     setSelectedAssetClass([]);
+    setSelectedLocation([]);
+    setSelectedDepartment([]);
 
     setFilterKey(prevKey => prevKey);
-    console.log( `Class filter: ${filterKey} `)
 
     setPage(0); // Reset pagination
   }
@@ -149,7 +175,7 @@ function AssetMasterListPage({useProps, setHeaderTitle}) {
             )}
             sx={{ width: 500, marginRight: '1rem' }}
           />
-       
+
           {/* Asset Group Search */}
           <Autocomplete
             key = {`assetgrp-search-${filterKey}`}
@@ -190,27 +216,39 @@ function AssetMasterListPage({useProps, setHeaderTitle}) {
             sx={{ width: '15rem', marginRight: '1rem' }}
           />
 
+          {/* Location Search  */}
           <Autocomplete
+            key = {`location-search-${filterKey}`}
             multiple
             limitTags={1}
             id="size-small-filled-multi"
-            size="small" 
-            options={top100Films}
-            getOptionLabel={(option) => option.title}
-            defaultValue={[]}
+            size="small"              
+            options={location}  
+            // Use draft state for asset group
+            value={draftSelectedLocation}
+            onChange={(event, newValue) => setDraftSelectedLocation(newValue)}
+
+            getOptionLabel={(option) => option}
+            // defaultValue={[]}
             renderInput={(params) => (
               <TextField {...params}  placeholder="Location" />
             )}
             sx={{ width: '15rem', marginRight: '1rem' }}
           />
+          {/* Department Search */}
           <Autocomplete
+            key = {`department-search-${filterKey}`}
             multiple
             limitTags={1}
             id="size-small-filled-multi"
-            size="small" 
-            options={top100Films}
-            getOptionLabel={(option) => option.title}
-            defaultValue={[]}
+            size="small"              
+            options={department}  
+            // Use draft state for asset group
+            value={draftSelectedDepartment}
+            onChange={(event, newValue) => setDraftSelectedDepartment(newValue)}
+
+            getOptionLabel={(option) => option}
+            // defaultValue={[]}
             renderInput={(params) => (
               <TextField {...params}  placeholder="Department" />
             )}

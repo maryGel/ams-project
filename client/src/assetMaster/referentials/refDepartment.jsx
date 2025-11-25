@@ -18,29 +18,29 @@ import { IconButton, ThemeProvider, TextField, TablePagination, Snackbar, Alert,
 } from '@mui/material';
 
 // Custom hooks
-import { useRefUom } from '../../hooks/refUom'; // import the refUnit data
+import { useRefDepartment } from '../../hooks/refDepartment'; // import the refDepartment data
 
 // Custom table utilities & theme
 import { customTheme, resizeColumn } from '../../components/customTable';
 import useColumnWidths from '../../components/customTable';
 
 // ----------------------------------------------------------------------------
-//                       REF UOM COMPONENT
+//                       REF Department COMPONENT
 // ----------------------------------------------------------------------------
-export default function RefUom({useProps, openTab,}) {
+export default function RefDepartment({useProps, openTab,}) {
   const {
-    uomData, 
+    refDeptData, 
     loading, 
     error,
-    createRefUnit,
-    updateRefUnit,
-    deleteRefUnit,
-    refreshRefUnit,
-  } = useRefUom(useProps)
+    createRefDepartment,
+    updateRefDepartment,
+    deleteRefDepartment,
+    refreshRefDepartment,
+  } = useRefDepartment(useProps)
 
   const {handleResizeMouseDown, theaderStyle, tbodyStyle} = useColumnWidths();
-  const [rows, setRows] = useState(uomData || []); // To hold the refUnit Data
-  const [temporaryData, setTemporaryData] = useState(uomData|| []);
+  const [rows, setRows] = useState(refDeptData || []); // To hold the refDepartment Data
+  const [temporaryData, setTemporaryData] = useState(refDeptData|| []);
   const [editingRowId, setEditingRowId] = useState(null);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -53,9 +53,9 @@ export default function RefUom({useProps, openTab,}) {
 
 
   useEffect(() => {
-    setRows(uomData || []);
-    setTemporaryData(uomData || []);
-  }, [uomData]);
+    setRows(refDeptData || []);
+    setTemporaryData(refDeptData || []);
+  }, [refDeptData]);
 
   const showSnackbar = (message, severity = 'success') => {
     setSnackbar({ open: true, message, severity });
@@ -70,8 +70,7 @@ const handleAddRow = () => {
 
   const newRow = {
     id: newId,
-    BrandID: '',
-    Unit: '',
+    Department: '',
     isNew: true
   };
 
@@ -99,7 +98,7 @@ const handleTempChange = (id, field, value) => {
   const editedRow = temporaryData.find(r => r.id === editingRowId);
   if (!editedRow) return;
 
-  const empty = !editedRow.Unit.trim();
+  const empty = !editedRow.Department.trim();
 
   // If row is empty → ask user for confirmation
   if (empty) {
@@ -111,25 +110,25 @@ const handleTempChange = (id, field, value) => {
   // ❗ Duplicate validation
   const isDuplicate = rows.some(row =>
     row.id !== editedRow.id && (
-      row.Unit.trim().toLowerCase() === editedRow.Unit.trim().toLowerCase()
+      row.Department.trim().toLowerCase() === editedRow.Department.trim().toLowerCase()
     )
     );
 
     if (isDuplicate) {
-      showSnackbar("UOM already exists!", "error");
+      showSnackbar("Department already exists!", "error");
       return;
     }
 
     try {
       if (empty) {
-        if (!editedRow.isNew) await deleteRefUnit(editedRow.id);
+        if (!editedRow.isNew) await deleteRefDepartment(editedRow.id);
       } else if (editedRow.isNew) {
-        await createRefUnit(editedRow.Unit);
+        await createRefDepartment(editedRow.Department);
       } else {
-        await updateRefUnit(editedRow.id, editedRow.Unit);
+        await updateRefDepartment(editedRow.id, editedRow.Department);
       }
 
-      await refreshRefUnit();
+      await refreshRefDepartment();
       setEditingRowId(null);
       showSnackbar('Changes has been saved!');
     } catch (err) {
@@ -143,12 +142,12 @@ const handleTempChange = (id, field, value) => {
     try {
       // If it's NOT new, emptying = delete row
       if (!pendingSaveRow.isNew) {
-        await deleteRefUnit(pendingSaveRow.id);
+        await deleteRefDepartment(pendingSaveRow.id);
       }
 
-      await refreshRefUnit();
+      await refreshRefDepartment();
 
-      showSnackbar("Unit has been deleted successfully!");
+      showSnackbar("Department has been deleted successfully!");
     } catch (err) {
       showSnackbar("Failed: " + err.message, "error");
     }
@@ -167,7 +166,7 @@ const handleTempChange = (id, field, value) => {
   const removeEmptyRows = () => {
     const cleaned = rows.filter(row => {
       const x = row.BrandID?.trim() || "";
-      const c = row.Unit?.trim() || "";
+      const c = row.Department?.trim() || "";
       return !(x === "" && c === "");
     });
   
@@ -211,7 +210,7 @@ const handleTempChange = (id, field, value) => {
     // Always include the currently edited row in results
     item.id === editingRowId ||
     // Normal search filter for other rows
-    item.Unit?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.Department?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.id?.toString().includes(searchQuery)
   );
 
@@ -226,7 +225,7 @@ const handleTempChange = (id, field, value) => {
 
   return (
     <>
-    {openTab === 'Unit of Measure' &&
+    {openTab === 'Department' &&
       <ThemeProvider theme={customTheme}>
         <div key = {rows.id} className='w-auto h-full p-4 bg-white shadow-lg rounded-xl'>
 
@@ -249,7 +248,7 @@ const handleTempChange = (id, field, value) => {
           <div className='flex justify-end mb-3'>
             <Autocomplete
               freeSolo
-              options={rows.map(item => item.Unit)}
+              options={rows.map(item => item.Department)}
               value={searchQuery}
               onInputChange={(e, v) => {
                 setSearchQuery(v);
@@ -264,7 +263,7 @@ const handleTempChange = (id, field, value) => {
 
           {/* Title + Buttons */}
           <div className='flex items-center justify-between mb-4'>
-            <h1 className='text-lg font-semibold text-gray-800'>Brand List</h1>
+            <h1 className='text-lg font-semibold text-gray-800'>Department List</h1>
 
             <div className="flex space-x-1">
 
@@ -321,12 +320,12 @@ const handleTempChange = (id, field, value) => {
                 <tr className='bg-gray-100 border-b'>
                   <th
                     className='relative p-2 text-sm font-semibold text-left text-gray-700 border-r border-gray-200'
-                    onClick={() => handleSort('Unit')}
+                    onClick={() => handleSort('Department')}
                     style={theaderStyle('Name')}
                   >
-                    Unit of Measure
+                    Department of Measure
                     <span className="ml-8 text-gray-500">
-                      {sortConfig.key === 'Unit' ? (
+                      {sortConfig.key === 'Department' ? (
                         sortConfig.direction === 'asc' ? (
                           <ArrowUpwardIcon fontSize="inherit" sx={{ fontSize: 16 }} />
                         ) : (
@@ -337,7 +336,7 @@ const handleTempChange = (id, field, value) => {
                       )}
                     </span>
                     <div
-                      onMouseDown={(e) => handleResizeMouseDown('Unit', e)}
+                      onMouseDown={(e) => handleResizeMouseDown('Department', e)}
                       style={resizeColumn }
                       title="Resize column"
                     />
@@ -352,17 +351,17 @@ const handleTempChange = (id, field, value) => {
                     key={row.id}
                     className={`border-b ${editingRowId === row.id ? 'bg-blue-100' : 'hover:bg-gray-50'}`}
                   >
-                      {/* Unit */}
-                    <td className='p-1 pl-2'style={tbodyStyle('Unit')} >
+                      {/* Department */}
+                    <td className='p-1 pl-2'style={tbodyStyle('Department')} >
                       {editingRowId === row.id ? (
                         <input
                           type="text"
-                          value={row.Unit ?? ''}
-                          onChange={(e) => handleTempChange(row.id, 'Unit', e.target.value)}
+                          value={row.Department ?? ''}
+                          onChange={(e) => handleTempChange(row.id, 'Department', e.target.value)}
                           className="w-full p-1 border-b"
                         />
                       ) : (
-                        row.Unit
+                        row.Department
                       )}
                     </td>
 

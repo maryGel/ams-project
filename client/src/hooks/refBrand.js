@@ -27,7 +27,7 @@ export const useRefBrand = () => {
     }
   };
 
-  // GET all categories
+  // GET all brands
   useEffect(() => {
     const getRefBrand = async () => {
       try {
@@ -37,10 +37,8 @@ export const useRefBrand = () => {
         // Test API first
         await testAPI();
         
-        // Then fetch categories
-        console.log('Fetching categories...');
         const response = await api.get('/refBrand');
-        console.log('Categories response:', response.data);
+        console.log('Brand response:', response.data);
         
         const data = response.data;
         
@@ -59,7 +57,7 @@ export const useRefBrand = () => {
         
       } catch (error) {
         console.error('Error in getRefBrand:', error);
-        setError(error.response?.data?.error || error.message || 'Failed to fetch categories');
+        setError(error.response?.data?.error || error.message || 'Failed to fetch brands');
       } finally {
         setLoading(false);
       }
@@ -141,7 +139,7 @@ export const useRefBrand = () => {
     }
   };
 
-  // Refresh categories
+  // Refresh brands
   const refreshRefBRand = async () => {
     try {
       setLoading(true);
@@ -158,8 +156,8 @@ export const useRefBrand = () => {
       setRefBrandData(dataWithID);
       setError(null);
     } catch (error) {
-      console.error('Error fetching categories:', error);
-      setError(error.response?.data?.error || error.message || 'Failed to fetch categories');
+      console.error('Error fetching brands:', error);
+      setError(error.response?.data?.error || error.message || 'Failed to fetch brands');
       throw error;
     } finally {
       setLoading(false);

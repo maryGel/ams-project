@@ -9,9 +9,9 @@ const api = axios.create({
 });
 
 
-export const useRefUom = () => {
+export const useRefLocation = () => {
   
-  const [uomData, setUomData] = useState([]);
+  const [refLocData, setRefLocData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -19,7 +19,7 @@ export const useRefUom = () => {
   //  Test API connection
     const testAPI = async () => {
       try {
-        const response = await api.get('/api/refUnit/test');
+        const response = await api.get('/refLocation/test');
         console.log('API Test Response:', response.data);
         return response.data;
       } catch (error) {
@@ -28,9 +28,9 @@ export const useRefUom = () => {
       }
     };
   
-    // GET all UOMS
+    // GET all locations
     useEffect(() => {
-      const getrefUnit = async () => {
+      const getrefLocation = async () => {
         try {
           setLoading(true);
           setError(null);
@@ -38,10 +38,10 @@ export const useRefUom = () => {
           // Test API first
           await testAPI();
           
-          // Then fetch categories
-          console.log('Fetching categories...');
-          const response = await api.get('/api/refUnit');
-          console.log('UOMS response:', response.data);
+          // Then fetch locations
+          console.log('Fetching location...');
+          const response = await api.get('/refLocation');
+          // console.log('Locations response:', response.data);
           
           const data = response.data;
           
@@ -52,38 +52,38 @@ export const useRefUom = () => {
           const dataWithID = data.map((item, index) => ({
             ...item,
             id: item.id || `temp-${index}`,
-            Unit: item.Unit || item.name || 'Unit'
+            LocationName: item.LocationName || item.name || 'LocationName'
           }));
           
-          setUomData(dataWithID);
+          setRefLocData(dataWithID);
           
         } catch (error) {
-          console.error('Error in getrefUnit:', error);
-          setError(error.response?.data?.error || error.message || 'Failed to fetch categories');
+          console.error('Error in getrefLocation:', error);
+          setError(error.response?.data?.error || error.message || 'Failed to fetch locations');
         } finally {
           setLoading(false);
         }
       };
       
-      getrefUnit();
+      getrefLocation();
     }, []);
   
-    // Create Unit - UPDATED TO SEND CORRECT FIELDS
-    const createRefUnit = async (Unit ='') => {
+    // Create LocationName - UPDATED TO SEND CORRECT FIELDS
+    const createRefLocation = async (LocationName ='') => {
       try {
         setActionLoading(true);
-        console.log('Creating UOM:', { Unit });
+        console.log('Creating Location:', { LocationName });
         
-        const response = await api.post('/api/refUnit', { Unit });
+        const response = await api.post('/refLocation', { LocationName });
         console.log('Create response:', response.data);
         
         // Refresh the list
-        await refreshRefUnit();
+        await refreshRefLocation();
         
         return response.data;
       } catch (error) {
-        console.error('Error creating UOM:', error);
-        const errorMsg = error.response?.data?.error || error.message || 'Failed to create UOM';
+        console.error('Error creating Location:', error);
+        const errorMsg = error.response?.data?.error || error.message || 'Failed to create Location';
         setError(errorMsg);
         throw new Error(errorMsg);
       } finally {
@@ -91,26 +91,26 @@ export const useRefUom = () => {
       }
     };
   
-    // Update Unit - UPDATED TO SEND CORRECT FIELDS
-    const updateRefUnit = async (id,  Unit = '') => {
+    // Update LocationName - UPDATED TO SEND CORRECT FIELDS
+    const updateRefLocation = async (id,  LocationName = '') => {
       try {
         setActionLoading(true);
-        console.log(`Updating Unit ${id} to:`, { Unit });
+        console.log(`Updating LocationName ${id} to:`, { LocationName });
         
-        const response = await api.put(`/api/refUnit/${id}`, { Unit });
+        const response = await api.put(`/refLocation/${id}`, { LocationName });
         console.log('Update response:', response.data);
         
         // Update local state
-        setUomData(prev => 
+        setRefLocData(prev => 
           prev.map(item => 
-            item.id == id ? { ...item, Unit} : item
+            item.id == id ? { ...item, LocationName} : item
           )
         );
         
         return response.data;
       } catch (error) {
-        console.error('Error updating Unit:', error);
-        const errorMsg = error.response?.data?.error || error.message || 'Failed to update Unit';
+        console.error('Error updating LocationName:', error);
+        const errorMsg = error.response?.data?.error || error.message || 'Failed to update LocationName';
         setError(errorMsg);
         throw new Error(errorMsg);
       } finally {
@@ -118,22 +118,22 @@ export const useRefUom = () => {
       }
     };
   
-    // Delete Unit
-    const deleteRefUnit = async (id) => {
+    // Delete LocationName
+    const deleteRefLocation = async (id) => {
       try {
         setActionLoading(true);
-        console.log('Deleting Unit:', id);
+        console.log('Deleting LocationName:', id);
         
-        const response = await api.delete(`/api/refUnit/${id}`);
+        const response = await api.delete(`/refLocation/${id}`);
         console.log('Delete response:', response.data);
         
         // Update local state
-        setUomData(prev => prev.filter(item => item.id != id));
+        setRefLocData(prev => prev.filter(item => item.id != id));
         
         return response.data;
       } catch (error) {
-        console.error('Error deleting Unit:', error);
-        const errorMsg = error.response?.data?.error || error.message || 'Failed to delete Unit';
+        console.error('Error deleting LocationName:', error);
+        const errorMsg = error.response?.data?.error || error.message || 'Failed to delete LocationName';
         setError(errorMsg);
         throw new Error(errorMsg);
       } finally {
@@ -141,24 +141,24 @@ export const useRefUom = () => {
       }
     };
   
-    // Refresh categories
-    const refreshRefUnit = async () => {
+    // Refresh locations
+    const refreshRefLocation = async () => {
       try {
         setLoading(true);
-        const response = await api.get('/api/refUnit');
+        const response = await api.get('/refLocation');
         const data = response.data;
         
         const dataWithID = data.map((item, index) => ({
           ...item,
           id: item.id || `temp-${index}`,
-          Unit: item.Unit || item.name || 'Unnamed Unit'
+          LocationName: item.LocationName || item.name || 'Unnamed LocationName'
         }));
         
-        setUomData(dataWithID);
+        setRefLocData(dataWithID);
         setError(null);
       } catch (error) {
-        console.error('Error fetching categories:', error);
-        setError(error.response?.data?.error || error.message || 'Failed to fetch categories');
+        console.error('Error fetching locations:', error);
+        setError(error.response?.data?.error || error.message || 'Failed to fetch locations');
         throw error;
       } finally {
         setLoading(false);
@@ -167,14 +167,14 @@ export const useRefUom = () => {
   
 
   return {
-    uomData, 
+    refLocData, 
     loading, 
     error,
     actionLoading,
-    createRefUnit,
-    updateRefUnit,
-    deleteRefUnit,
-    refreshRefUnit,
+    createRefLocation,
+    updateRefLocation,
+    deleteRefLocation,
+    refreshRefLocation,
     testAPI
   }
 }

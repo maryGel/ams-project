@@ -9,9 +9,9 @@ const api = axios.create({
 });
 
 
-export const useRefUom = () => {
+export const useRefDepartment = () => {
   
-  const [uomData, setUomData] = useState([]);
+  const [refDeptData, setRefDeptData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
@@ -19,7 +19,7 @@ export const useRefUom = () => {
   //  Test API connection
     const testAPI = async () => {
       try {
-        const response = await api.get('/api/refUnit/test');
+        const response = await api.get('/refDepartment/test');
         console.log('API Test Response:', response.data);
         return response.data;
       } catch (error) {
@@ -28,9 +28,9 @@ export const useRefUom = () => {
       }
     };
   
-    // GET all UOMS
+    // GET all locations
     useEffect(() => {
-      const getrefUnit = async () => {
+      const getrefLocation = async () => {
         try {
           setLoading(true);
           setError(null);
@@ -38,10 +38,10 @@ export const useRefUom = () => {
           // Test API first
           await testAPI();
           
-          // Then fetch categories
-          console.log('Fetching categories...');
-          const response = await api.get('/api/refUnit');
-          console.log('UOMS response:', response.data);
+          // Then fetch Departments
+          console.log('Fetching Departments...');
+          const response = await api.get('/refDepartment');
+          // console.log('Deparment response:', response.data);
           
           const data = response.data;
           
@@ -52,38 +52,38 @@ export const useRefUom = () => {
           const dataWithID = data.map((item, index) => ({
             ...item,
             id: item.id || `temp-${index}`,
-            Unit: item.Unit || item.name || 'Unit'
+            Department: item.Department || item.name || 'Department'
           }));
           
-          setUomData(dataWithID);
+          setRefDeptData(dataWithID);
           
         } catch (error) {
-          console.error('Error in getrefUnit:', error);
-          setError(error.response?.data?.error || error.message || 'Failed to fetch categories');
+          console.error('Error in getrefLocation:', error);
+          setError(error.response?.data?.error || error.message || 'Failed to fetch Departments');
         } finally {
           setLoading(false);
         }
       };
       
-      getrefUnit();
+      getrefLocation();
     }, []);
   
-    // Create Unit - UPDATED TO SEND CORRECT FIELDS
-    const createRefUnit = async (Unit ='') => {
+    // Create Department - UPDATED TO SEND CORRECT FIELDS
+    const createRefDepartment = async (Department ='') => {
       try {
         setActionLoading(true);
-        console.log('Creating UOM:', { Unit });
+        console.log('Creating Location:', { Department });
         
-        const response = await api.post('/api/refUnit', { Unit });
+        const response = await api.post('/refDepartment', { Department });
         console.log('Create response:', response.data);
         
         // Refresh the list
-        await refreshRefUnit();
+        await refreshRefDepartment();
         
         return response.data;
       } catch (error) {
-        console.error('Error creating UOM:', error);
-        const errorMsg = error.response?.data?.error || error.message || 'Failed to create UOM';
+        console.error('Error creating Location:', error);
+        const errorMsg = error.response?.data?.error || error.message || 'Failed to create Location';
         setError(errorMsg);
         throw new Error(errorMsg);
       } finally {
@@ -91,26 +91,26 @@ export const useRefUom = () => {
       }
     };
   
-    // Update Unit - UPDATED TO SEND CORRECT FIELDS
-    const updateRefUnit = async (id,  Unit = '') => {
+    // Update Department - UPDATED TO SEND CORRECT FIELDS
+    const updateRefDepartment = async (id,  Department = '') => {
       try {
         setActionLoading(true);
-        console.log(`Updating Unit ${id} to:`, { Unit });
+        console.log(`Updating Department ${id} to:`, { Department });
         
-        const response = await api.put(`/api/refUnit/${id}`, { Unit });
+        const response = await api.put(`/refDepartment/${id}`, { Department });
         console.log('Update response:', response.data);
         
         // Update local state
-        setUomData(prev => 
+        setRefDeptData(prev => 
           prev.map(item => 
-            item.id == id ? { ...item, Unit} : item
+            item.id == id ? { ...item, Department} : item
           )
         );
         
         return response.data;
       } catch (error) {
-        console.error('Error updating Unit:', error);
-        const errorMsg = error.response?.data?.error || error.message || 'Failed to update Unit';
+        console.error('Error updating Department:', error);
+        const errorMsg = error.response?.data?.error || error.message || 'Failed to update Department';
         setError(errorMsg);
         throw new Error(errorMsg);
       } finally {
@@ -118,22 +118,22 @@ export const useRefUom = () => {
       }
     };
   
-    // Delete Unit
-    const deleteRefUnit = async (id) => {
+    // Delete Department
+    const deleteRefDepartment = async (id) => {
       try {
         setActionLoading(true);
-        console.log('Deleting Unit:', id);
+        console.log('Deleting Department:', id);
         
-        const response = await api.delete(`/api/refUnit/${id}`);
+        const response = await api.delete(`/refDepartment/${id}`);
         console.log('Delete response:', response.data);
         
         // Update local state
-        setUomData(prev => prev.filter(item => item.id != id));
+        setRefDeptData(prev => prev.filter(item => item.id != id));
         
         return response.data;
       } catch (error) {
-        console.error('Error deleting Unit:', error);
-        const errorMsg = error.response?.data?.error || error.message || 'Failed to delete Unit';
+        console.error('Error deleting Department:', error);
+        const errorMsg = error.response?.data?.error || error.message || 'Failed to delete Department';
         setError(errorMsg);
         throw new Error(errorMsg);
       } finally {
@@ -141,24 +141,24 @@ export const useRefUom = () => {
       }
     };
   
-    // Refresh categories
-    const refreshRefUnit = async () => {
+    // Refresh Departments
+    const refreshRefDepartment = async () => {
       try {
         setLoading(true);
-        const response = await api.get('/api/refUnit');
+        const response = await api.get('/refDepartment');
         const data = response.data;
         
         const dataWithID = data.map((item, index) => ({
           ...item,
           id: item.id || `temp-${index}`,
-          Unit: item.Unit || item.name || 'Unnamed Unit'
+          Department: item.Department || item.name || 'Unnamed Department'
         }));
         
-        setUomData(dataWithID);
+        setRefDeptData(dataWithID);
         setError(null);
       } catch (error) {
-        console.error('Error fetching categories:', error);
-        setError(error.response?.data?.error || error.message || 'Failed to fetch categories');
+        console.error('Error fetching Departments:', error);
+        setError(error.response?.data?.error || error.message || 'Failed to fetch Departments');
         throw error;
       } finally {
         setLoading(false);
@@ -167,14 +167,14 @@ export const useRefUom = () => {
   
 
   return {
-    uomData, 
+    refDeptData, 
     loading, 
     error,
     actionLoading,
-    createRefUnit,
-    updateRefUnit,
-    deleteRefUnit,
-    refreshRefUnit,
+    createRefDepartment,
+    updateRefDepartment,
+    deleteRefDepartment,
+    refreshRefDepartment,
     testAPI
   }
 }

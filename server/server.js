@@ -11,6 +11,8 @@ import refCategoryRoute from './routes/refCatRoute.js';
 import refBrandRoute from './routes/refBrandRoute.js';
 import refUnitRoute from './routes/refUnitRoute.js';
 import refItemClassRoute from './routes/refClassRoute.js';
+import refLocationRoute from './routes/refLocationRoute.js'
+import RefDeptRoute from './routes/refDeptRoute.js';
 
 
 // Express Pool
@@ -29,7 +31,7 @@ const app = express();
 // to hande localhost:3000
 app.get('/', (req, res) => {
     res.send('Server is up and running!');
-  });
+});
 
 //   Middleware
 app.use(cors());
@@ -43,7 +45,9 @@ app.use('/referentials', referentialsRoute);
 app.use('/api/refCat', refCategoryRoute );
 app.use('/refBrand', refBrandRoute);
 app.use('/api/refUnit', refUnitRoute);
-app.use('/refItemClass', refItemClassRoute)
+app.use('/refItemClass', refItemClassRoute);
+app.use('/refLocation', refLocationRoute);
+app.use('/refDepartment', RefDeptRoute);
 
 app.listen(3000, () => {
     console.log('Server is running on 3000');

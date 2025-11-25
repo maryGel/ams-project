@@ -372,7 +372,6 @@ export default function AssetMasterTable({
                 const uniqueId = row.FacNO || row.id;
                 const isItemSelected = selected.includes(uniqueId);
                 const labelId = `enhanced-table-checkbox-${index}`;
-                // const isPlaceholder = row.FacNO === "";
 
                 return (
                   <TableRow
