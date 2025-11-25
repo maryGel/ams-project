@@ -248,20 +248,6 @@ export default function AssetMasterTable({
   //Data fetching for API Data 
   const navigate = useNavigate();
 
-  // const placeholderRows = Array.from({ length: rowsPerPage }).map(() => ({
-  //   id: Math.random(),
-  //   FacNO: "",
-  //   FacName: "",
-  //   ItemClass: "",
-  //   CATEGORY: "",
-  //   balance_unit: "",
-  //   Unit: "",
-  //   ItemLocation: "",
-  //   Department: "",
-  //   status: ""
-  // }));  
-  
-
   const rows = displayedAsset;
 
 

@@ -143,7 +143,7 @@ router.delete('/:id', (req, res) => {
       return res.status(500).json({ error: 'Database connection failed' });
     }
     
-    connection.query('DELETE FROM refItemclassClass WHERE id = ?', [id], (error, result) => {
+    connection.query('DELETE FROM refItemclass WHERE id = ?', [id], (error, result) => {
       connection.release();
       
       if (error) {

@@ -63,8 +63,7 @@ export default function RefTabs({handleOpenTab}){
                   >
                     <ListItemText primary={item} />
                   </ListItemButton>
-               )                
-              )}
+              ))}
             </List>
           </Collapse>
 

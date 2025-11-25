@@ -41,7 +41,7 @@ app.use('/login', userRouter);
 app.use('/itemlist', useItemlist);
 app.use('/referentials', referentialsRoute);
 app.use('/api/refCat', refCategoryRoute );
-app.use('/api/refBrand', refBrandRoute);
+app.use('/refBrand', refBrandRoute);
 app.use('/api/refUnit', refUnitRoute);
 app.use('/refItemClass', refItemClassRoute)
 

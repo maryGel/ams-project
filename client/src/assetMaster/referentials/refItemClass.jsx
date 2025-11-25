@@ -11,8 +11,7 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import AddIcon from '@mui/icons-material/Add';
-
-
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 import { IconButton, ThemeProvider, TextField, TablePagination, Snackbar, Alert,
   Dialog, DialogActions, DialogContent,
@@ -52,10 +51,9 @@ export default function RefItemClass({useProps, openTab,}) {
   const [page, setPage] = useState(0);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [searchQuery, setSearchQuery] = useState("");
+  const [inputQuery, setInputQuery] = useState("");
   const [confirmDeleteEmptyOpen, setConfirmDeleteEmptyOpen] = useState(false);
   const [pendingSaveRow, setPendingSaveRow] = useState(null);
-  // const [addCategory, setAddCategory] = useState(refCategoryData || []);
-
 
 
   useEffect(() => {
@@ -70,12 +68,6 @@ export default function RefItemClass({useProps, openTab,}) {
   const assetGrp = useMemo(() => {
     return refCategoryData.map(item => item.category);
   }, [refCategoryData]);
-  console.log( `asset group: ${assetGrp}`)
-
-  // const handleAddCategory = (item) => {
-  //   setAddCategory(item)
-  // }
-
 
   // ✅ Add Row (Only One Editable)
   const handleAddRow = () => {
@@ -113,44 +105,57 @@ export default function RefItemClass({useProps, openTab,}) {
 
   // ✅ Save One Row Only
   const handleSave = async () => {
-  const editedRow = temporaryData.find(r => r.id === editingRowId);
-  if (!editedRow) return;
+    const editedRow = temporaryData.find(r => r.id === editingRowId);
+    if (!editedRow) return;
 
-  const empty = !editedRow.classCode.trim() && !editedRow.itemClass.trim();
-  if (empty) {
-    setPendingSaveRow(editedRow);
-    setConfirmDeleteEmptyOpen(true);
-    return;
-  }
-
-  // ❗ Duplicate validation
-  const isDuplicate = rows.some(row =>
-    row.id !== editedRow.id && (
-      row.classCode.trim().toLowerCase() === editedRow.classCode.trim().toLowerCase() ||
-      row.itemClass.trim().toLowerCase() === editedRow.itemClass.trim().toLowerCase()
-    )
-  );
-
-  if (isDuplicate) {
-    showSnackbar("Asset Class Code/Name already exists!", "error");
-    return;
-  }
-
-  try {
-    if (empty) {
-      if (!editedRow.isNew) await deleteRefItemClass(editedRow.id);
-    } else if (editedRow.isNew) {
-      await createRefItemClass(editedRow.classCode, editedRow.itemClass, editedRow.category);
-    } else {
-      await updateRefItemClass(editedRow.id, editedRow.classCode, editedRow.itemClass, editedRow.category);
+    const allEmpty = !editedRow.classCode?.trim() && !editedRow.itemClass?.trim() && !editedRow.category?.trim();
+    if (allEmpty) {
+      setPendingSaveRow(editedRow);
+      setConfirmDeleteEmptyOpen(true);
+      return;
     }
 
-    await refreshItemClasses();
-    setEditingRowId(null);
-    showSnackbar('Changes has been saved');
-  } catch (err) {
-    showSnackbar('Save failed: ' + err.message, 'error');
-  }
+     // If classCode has value, then itemClass and category are required
+    if (editedRow.classCode?.trim()) {
+      const emptyRequiredFields = [];
+      if (!editedRow.itemClass?.trim()) emptyRequiredFields.push('Asset Class');
+      if (!editedRow.category?.trim()) emptyRequiredFields.push('Asset Group');
+
+      // If any required fields are empty, show error
+      if (emptyRequiredFields.length > 0) {
+        showSnackbar(`Please fill in required fields: ${emptyRequiredFields.join(', ')}`, "error");
+        return;
+      }
+    }
+
+    // ❗ Duplicate validation
+    const isDuplicate = rows.some(row =>
+      row.id !== editedRow.id && (
+      row.classCode.trim().toLowerCase() === editedRow.classCode.trim().toLowerCase() ||
+      row.itemClass.trim().toLowerCase() === editedRow.itemClass.trim().toLowerCase()
+      )
+    );
+
+    if (isDuplicate) {
+      showSnackbar("Asset Class Code/Name already exists!", "error");
+      return;
+    }
+
+    try {
+      if (allEmpty) {
+        if (!editedRow.isNew) await deleteRefItemClass(editedRow.id);
+      } else if (editedRow.isNew) {
+        await createRefItemClass(editedRow.classCode, editedRow.itemClass, editedRow.category);
+      } else {
+        await updateRefItemClass(editedRow.id, editedRow.classCode, editedRow.itemClass, editedRow.category);
+      }
+
+      await refreshItemClasses();
+      setEditingRowId(null);
+      showSnackbar('Changes has been saved');
+    } catch (err) {
+      showSnackbar('Save failed: ' + err.message, 'error');
+    }
   };
 
   const confirmDeleteEmpty = async () => {
@@ -179,22 +184,18 @@ export default function RefItemClass({useProps, openTab,}) {
     setPendingSaveRow(null);
   };
 
-  const removeEmptyRows = () => {
-    const cleaned = rows.filter(row => {
-      const x = row.classCode?.trim() || "";
-      const c = row.itemClass?.trim() || "";
-      const t = row.category?.trim() || "";
-      return !(x === "" && c === "" && t==="");
-    });
-  
-    setRows(cleaned);
-    setTemporaryData(cleaned);
-  };
-  
 
   // ✅ Cancel Editing
   const handleCancelEdit = () => {
-    removeEmptyRows()
+     // Only remove empty rows that are NOT currently being edited
+    const cleaned = rows.filter(row => {
+      const hasContent = row.classCode?.trim() || row.itemClass?.trim() || row.category?.trim();
+      // Keep the row if it has content OR if it's currently being edited
+      return hasContent || row.id === editingRowId;
+    });
+
+    setRows(cleaned);
+    setTemporaryData(cleaned);
     setEditingRowId(null);
   };
 
@@ -226,6 +227,9 @@ export default function RefItemClass({useProps, openTab,}) {
 
   // ✅ Filter + Paginate
   const filteredData = temporaryData.filter(item =>
+   // Always include the currently edited row in results
+    item.id === editingRowId ||
+    // Normal search filter for other rows
     item.itemClass?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.classCode?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.id?.toString().includes(searchQuery)
@@ -262,55 +266,77 @@ export default function RefItemClass({useProps, openTab,}) {
             </Snackbar>
 
             {/* ---------------Title and Buttons --------------- */}
-            {/* Search button */}
+            {/* Search input */}
               <div className='flex justify-end mb-3'>
-                <Autocomplete
-                  freeSolo
-                  options={rows.map(item => item.itemClass)}
-                  value={searchQuery}
-                  onInputChange={(e, v) => {
-                    setSearchQuery(v);
+              <Autocomplete
+                freeSolo
+                options={rows.map(item => item.itemClass)}
+                value={inputQuery}
+                inputValue={inputQuery}
+                // Update inputQuery as the user types (real-time typing)
+                onInputChange={(_, newInputValue) => { 
+                  setInputQuery(newInputValue);
+                }}
+                // ON CHANGE: Fired when an item is explicitly selected from the dropdown
+                onChange={(event, newValue) => {
+                  // When selected from dropdown, update both states and trigger filter
+                  setInputQuery(newValue || "");
+                  setSearchQuery(newValue || "");
+                  setPage(0);
+                }}
+                // ON KEY DOWN: The critical 'Enter' listener for filtering
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    // Only update searchQuery and trigger filtering when Enter is pressed
+                    setSearchQuery(inputQuery); 
                     setPage(0);
-                  }}
-                  renderInput={(params) =>
-                    <TextField {...params} label="Search here" />
+                    e.preventDefault(); // Good practice to prevent form submission
                   }
-                  sx={{ width: 300 }}
-                />
+                }}
+                renderInput={(params) =>
+                  <TextField 
+                    {...params} 
+                    label="Search here" 
+                    // Optional: Add a helper text to indicate Enter is needed
+                    helperText="Press Enter to search"
+                  />
+                }
+                sx={{ width: 300 }}
+              />
               </div>
            
             {/* Edit, Add, and Download button */}
             <div className='flex items-center justify-between mt-6 mb-4'>
-              <h1 className='text-lg font-semibold text-gray-800'>Asset Group List</h1>
+              <h1 className='text-lg font-semibold text-gray-800'>Asset Class List</h1>
                 <div className="flex space-x-1">
-                   {/* Save */}
-                {editingRowId !== null && (
-                  <IconButton
-                    title='Save Changes'
-                    color="primary"
-                    onClick={handleSave}
-                    size="small"
-                    sx={{ border: 1 }}
-                  >
-                    <SaveIcon />
-                  </IconButton>
-                )}
+                  {/* Save */}
+                  {editingRowId !== null && (
+                    <IconButton
+                      title='Save Changes'
+                      color="primary"
+                      onClick={handleSave}
+                      size="small"
+                      sx={{ border: 1 }}
+                    >
+                      <SaveIcon />
+                    </IconButton>
+                  )}
 
-                {/* Cancel */}
-                {editingRowId !== null && (
-                  <IconButton
-                    title='Cancel Changes'
-                    color="secondary"
-                    onClick={handleCancelEdit}
-                    className='transition duration-150 hover:bg-indigo-100'
-                    size="small"
-                    sx={{ border: 1 }}
-                  >
-                    <CancelIcon />
-                  </IconButton>
-                )}
+                  {/* Cancel */}
+                  {editingRowId !== null && (
+                    <IconButton
+                      title='Cancel Changes'
+                      color="secondary"
+                      onClick={handleCancelEdit}
+                      className='transition duration-150 hover:bg-indigo-100'
+                      size="small"
+                      sx={{ border: 1 }}
+                    >
+                      <CancelIcon />
+                    </IconButton>
+                  )}
 
-                {/* Add Row */}
+                  {/* Add Row */}
                   <IconButton
                     onClick={handleAddRow}
                     disabled={editingRowId !== null}
@@ -318,6 +344,22 @@ export default function RefItemClass({useProps, openTab,}) {
                     sx={{ border: 1 }}
                   >
                     <AddIcon />
+                  </IconButton>
+
+                  {/* Refresh Button */}
+                  <IconButton
+                    title='Refresh Data'
+                    onClick={() => {
+                      refreshItemClasses();
+                      setInputQuery("");
+                      setSearchQuery( "");
+                      setPage(0);
+                    }}
+                    disabled={loading}
+                    size="small"
+                    sx={{ border: 1 }}
+                  >
+                    <RefreshIcon />
                   </IconButton>
 
                   {/* Download */}
@@ -502,7 +544,7 @@ export default function RefItemClass({useProps, openTab,}) {
             </div>
 
             <p className="mt-3 text-sm text-gray-500">
-              {editingRowId === null
+              {editingRowId !== null
                 ? 'Editing enabled. Click the save icon to commit changes.'
                 : `Click the Edit icon ${String.fromCodePoint(0x270E)} to enable editing.`
               }

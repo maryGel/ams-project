@@ -14,7 +14,7 @@ router.get('/test', (req, res) => {
 
 // GET all brands
 router.get('/', ( req, res ) => {
-  console.log('GET /api/refBrand - Fetching all brands');  
+  console.log('GET /refBrand - Fetching all brands');  
 
   db.getConnection((err, connection) => {
 
@@ -42,7 +42,7 @@ router.get('/', ( req, res ) => {
 
 router.get('/:id', (req, res) => {
   const { id } = req.params;
-  console.log( `GET/api/refBrand/${id} - Fetching brand`)
+  console.log( `GET/refBrand/${id} - Fetching brand`)
 
   db.getConnection((error, connection) => {
     if(err) {
@@ -70,7 +70,7 @@ router.get('/:id', (req, res) => {
 
 router.post('/',(req,res) => {
   const { BrandID, BrandName } = req.body;
-  console.log('POST/api/refBrand - Creating brand', {BrandID, BrandName})
+  console.log('POST/refBrand - Creating brand', {BrandID, BrandName})
 
   if(!BrandName){
     return res.status(400).json({error: 'Brand name is required'})

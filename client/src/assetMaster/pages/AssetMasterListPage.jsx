@@ -16,6 +16,7 @@ import AssetMasterTable from '../assetMaster/assetMasterTable'
 import { NavLink } from 'react-router-dom';
 import { useAssetMasterData } from '../../hooks/assetMasterHooks';
 import { useRefCategory } from '../../hooks/refCategory';
+import { useRefItemClass } from '../../hooks/refClass';
 
 
 
@@ -23,16 +24,19 @@ function AssetMasterListPage({useProps, setHeaderTitle}) {
 
   const {itemList, loading, error} = useAssetMasterData(useProps);
   const {refCategoryData} = useRefCategory(useProps)
+  const {refItemClassData} = useRefItemClass(useProps)
 
   // 1. INPUT STATE (What the user is typing/selecting now)
   const [draftSearchQuery, setDraftSearchQuery] = useState("");
   const [draftSelectedAssets, setDraftSelectedAssets] = useState([]); 
   const [draftSelectedAssetGroups, setDraftSelectedAssetGroups] = useState([]);
+  const [draftSelectedAssetClass, setDraftSelectedAssetClass] = useState([]);
 
   // 2. COMMITTED FILTER STATE (What is used to filter data)
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAssets, setSelectedAssets] = useState([]); 
   const [selectedAssetGroups, setSelectedAssetGroups] = useState([]);
+  const [selectedAssetClass, setSelectedAssetClass] = useState([]);
   const [filterKey, setFilterKey] = useState(0);
 
   // Table state
@@ -40,8 +44,9 @@ function AssetMasterListPage({useProps, setHeaderTitle}) {
   
 
   const assetGrp = refCategoryData.map(item => item.category)
+  const assetClass = refItemClassData.map(item => item.itemClass)
 
-  const isTableActive = searchQuery.trim() !== "" || selectedAssets.length > 0 || selectedAssetGroups.length > 0; // Flag to control when data is displayed
+  const isTableActive = searchQuery.trim() !== "" || selectedAssets.length > 0 || selectedAssetGroups.length > 0 || selectedAssetClass.length > 0; // Flag to control when data is displayed
  
  
   const filterOptions = createFilterOptions({
@@ -66,8 +71,13 @@ function AssetMasterListPage({useProps, setHeaderTitle}) {
     const matchesAssetGroup = 
       selectedAssetGroups.length === 0 ||
       selectedAssetGroups.includes(item.CATEGORY); // Assuming item.CATEGORY holds the Asset Group value
-  
-    return matchesText && matchesSelected && matchesAssetGroup;
+
+    // 4. ➡️ NEW: Filter by Asset Class
+    const matchesAssetClass = 
+      selectedAssetClass.length === 0 ||
+      selectedAssetClass.includes(item.ItemClass); // Assuming item.CATEGORY holds the Asset Group value
+      console.log(`selectedClass: ${item.ItemClass} `)
+    return matchesText && matchesSelected && matchesAssetGroup && matchesAssetClass;
   });
   
 
@@ -78,6 +88,7 @@ function AssetMasterListPage({useProps, setHeaderTitle}) {
     setSearchQuery(draftSearchQuery);
     setSelectedAssets(draftSelectedAssets);
     setSelectedAssetGroups(draftSelectedAssetGroups);
+    setSelectedAssetClass(draftSelectedAssetClass);
     setPage(0); //Reset Pagination
   }
   
@@ -86,13 +97,16 @@ function AssetMasterListPage({useProps, setHeaderTitle}) {
     setDraftSearchQuery("");
     setDraftSelectedAssets([]);
     setDraftSelectedAssetGroups([]);
+    setDraftSelectedAssetClass([]);
 
     // 2. Clear all committed filter states
     setSearchQuery("");
     setSelectedAssets([]);
     setSelectedAssetGroups([]);
+    setSelectedAssetClass([]);
 
     setFilterKey(prevKey => prevKey);
+    console.log( `Class filter: ${filterKey} `)
 
     setPage(0); // Reset pagination
   }
@@ -136,8 +150,9 @@ function AssetMasterListPage({useProps, setHeaderTitle}) {
             sx={{ width: 500, marginRight: '1rem' }}
           />
        
+          {/* Asset Group Search */}
           <Autocomplete
-            key = {`asset-search-${filterKey}`}
+            key = {`assetgrp-search-${filterKey}`}
             multiple
             limitTags={1}
             id="size-small-filled-multi"
@@ -151,6 +166,26 @@ function AssetMasterListPage({useProps, setHeaderTitle}) {
             // defaultValue={[]}
             renderInput={(params) => (
               <TextField {...params}  placeholder="Asset Group" />
+            )}
+            sx={{ width: '15rem', marginRight: '1rem' }}
+          />
+
+          {/* Asset Class Search  */}
+          <Autocomplete
+            key = {`assetclass-search-${filterKey}`}
+            multiple
+            limitTags={1}
+            id="size-small-filled-multi"
+            size="small"              
+            options={assetClass}  
+            // Use draft state for asset group
+            value={draftSelectedAssetClass}
+            onChange={(event, newValue) => setDraftSelectedAssetClass(newValue)}
+
+            getOptionLabel={(option) => option}
+            // defaultValue={[]}
+            renderInput={(params) => (
+              <TextField {...params}  placeholder="Asset Class" />
             )}
             sx={{ width: '15rem', marginRight: '1rem' }}
           />

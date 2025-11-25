@@ -111,6 +111,16 @@ export default function RefBrand({ useProps, openTab }) {
       setConfirmDeleteEmptyOpen(true);
       return;
     }
+
+     // If xCoode has value, then BrandName is required
+     if (editedRow.BrandID?.trim()) {
+      
+      if (!editedRow.BrandName?.trim()) {
+        showSnackbar(`Please fill in required fields: Brand Name`, "error");
+        return;
+      }
+    }
+
   
 
     // ❗ Duplicate validation
@@ -214,6 +224,9 @@ export default function RefBrand({ useProps, openTab }) {
 
   // ✅ Filter + Paginate
   const filteredData = temporaryData.filter(item =>
+    // Always include the currently edited row in results
+    item.id === editingRowId ||
+    // Normal search filter for other rows
     item.BrandName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.BrandID?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.id?.toString().includes(searchQuery)

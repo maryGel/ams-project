@@ -18,7 +18,7 @@ export const useRefBrand = () => {
   // Test API connection
   const testAPI = async () => {
     try {
-      const response = await api.get('/api/refBrand/test');
+      const response = await api.get('/refBrand/test');
       console.log('API Test Response:', response.data);
       return response.data;
     } catch (error) {
@@ -39,7 +39,7 @@ export const useRefBrand = () => {
         
         // Then fetch categories
         console.log('Fetching categories...');
-        const response = await api.get('/api/refBrand');
+        const response = await api.get('/refBrand');
         console.log('Categories response:', response.data);
         
         const data = response.data;
@@ -74,7 +74,7 @@ export const useRefBrand = () => {
       setActionLoading(true);
       console.log('Creating BrandName:', { BrandID, BrandName });
       
-      const response = await api.post('/api/refBrand', { BrandID, BrandName });
+      const response = await api.post('/refBrand', { BrandID, BrandName });
       console.log('Create response:', response.data);
       
       // Refresh the list
@@ -97,7 +97,7 @@ export const useRefBrand = () => {
       setActionLoading(true);
       console.log(`Updating BrandName ${id} to:`, { BrandID, BrandName });
       
-      const response = await api.put(`/api/refBrand/${id}`, { BrandID, BrandName });
+      const response = await api.put(`/refBrand/${id}`, { BrandID, BrandName });
       console.log('Update response:', response.data);
       
       // Update local state
@@ -124,7 +124,7 @@ export const useRefBrand = () => {
       setActionLoading(true);
       console.log('Deleting BrandName:', id);
       
-      const response = await api.delete(`/api/refBrand/${id}`);
+      const response = await api.delete(`/refBrand/${id}`);
       console.log('Delete response:', response.data);
       
       // Update local state
@@ -145,7 +145,7 @@ export const useRefBrand = () => {
   const refreshRefBRand = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/refBrand');
+      const response = await api.get('/refBrand');
       const data = response.data;
       
       const dataWithID = data.map((item, index) => ({

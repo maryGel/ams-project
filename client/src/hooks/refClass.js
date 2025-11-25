@@ -124,7 +124,7 @@ export const useRefItemClass = () => {
       setActionLoading(true);
       console.log('Deleting itemClass:', id);
       
-      const response = await api.delete(`/api/refItemClass/${id}`);
+      const response = await api.delete(`/refItemClass/${id}`);
       console.log('Delete response:', response.data);
       
       // Update local state

@@ -54,9 +54,8 @@ export const useRefCategory = (useProps, deps = []) => {
     }
   };
 
-  // 2. ONLY ONE INITIAL/DEPENDENCY EFFECT (The new one)
-  // This comment suppresses the necessary warning on 'deps'
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+/* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     const initialLoad = async () => {
         try {
@@ -72,7 +71,6 @@ export const useRefCategory = (useProps, deps = []) => {
     
   }, deps);
 
-  // 3. CUD OPERATIONS (Updated to call fetchRefCategories instead of manual state updates)
   
   // Create category
   const createRefCategory = async (xCode = '', category) => {

@@ -65,98 +65,106 @@ export default function RefCategory({useProps, openTab,}) {
 
   // ✅ Add Row (Only One Editable)
   const handleAddRow = () => {
-    if (editingRowId !== null) return; // Safety block
+      if (editingRowId !== null) return; // Safety block
 
-    const lastId = rows.length > 0 ? Math.max(...rows.map(row => Number(row.id))) : 0;
-    const newId = lastId + 1;
+      const lastId = rows.length > 0 ? Math.max(...rows.map(row => Number(row.id))) : 0;
+      const newId = lastId + 1;
 
-    const newRow = {
-      id: newId,
-      xCode: '',
-      category: '',
-      isNew: true
-    };
+      const newRow = {
+        id: newId,
+        xCode: '',
+        category: '',
+        isNew: true
+      };
 
-    setRows(prev => [...prev, newRow]);
-    setTemporaryData(prev => [...prev, newRow]);
+      setRows(prev => [...prev, newRow]);
+      setTemporaryData(prev => [...prev, newRow]);
 
-    setEditingRowId(newId);
+      setEditingRowId(newId);
 
-    const totalRows = rows.length + 1;
-    const newLastPage = Math.floor(totalRows / rowsPerPage);
-    setPage(newLastPage);
+      const totalRows = rows.length + 1;
+      const newLastPage = Math.floor(totalRows / rowsPerPage);
+      setPage(newLastPage);
   };
   
   // ✅ Update temp data for editable row
   const handleTempChange = (id, field, value) => {
-    setTemporaryData(prev =>
-      prev.map(row =>
-        row.id === id ? { ...row, [field]: value } : row
-      )
-    );
+      setTemporaryData(prev =>
+        prev.map(row =>
+          row.id === id ? { ...row, [field]: value } : row
+        )
+      );
   };
 
   // ✅ Save One Row Only
   const handleSave = async () => {
-  const editedRow = temporaryData.find(r => r.id === editingRowId);
-  if (!editedRow) return;
+      const editedRow = temporaryData.find(r => r.id === editingRowId);
+      if (!editedRow) return;
 
-  const empty = !editedRow.xCode.trim() && !editedRow.category.trim();
-  if (empty) {
-    setPendingSaveRow(editedRow);
-    setConfirmDeleteEmptyOpen(true);
-    return;
-  }
+      const empty = !editedRow.xCode.trim() && !editedRow.category.trim();
+      if (empty) {
+        setPendingSaveRow(editedRow);
+        setConfirmDeleteEmptyOpen(true);
+        return;
+      }
 
-  // ❗ Duplicate validation
-  const isDuplicate = rows.some(row =>
-    row.id !== editedRow.id && (
-      row.xCode.trim().toLowerCase() === editedRow.xCode.trim().toLowerCase() ||
-      row.category.trim().toLowerCase() === editedRow.category.trim().toLowerCase()
-    )
-  );
 
-  if (isDuplicate) {
-    showSnackbar("Asset Grp Code/Name already exists!", "error");
-    return;
-  }
-
-  try {
-    if (empty) {
-      if (!editedRow.isNew) await deleteRefCategory(editedRow.id);
-    } else if (editedRow.isNew) {
-      await createRefCategory(editedRow.xCode, editedRow.category);
-    } else {
-      await updateRefCategory(editedRow.id, editedRow.xCode, editedRow.category);
+     // If xCode has value, then category is required
+     if (editedRow.xCode?.trim()) {
+    
+      // If any required fields are empty, show error
+      if (!editedRow.category?.trim()) {
+        showSnackbar(`Please fill in required fields: Asset Group`, "error");
+        return;
+      }
     }
 
-    await fetchRefCategories();
-    setEditingRowId(null);
-    showSnackbar('Changes has been saved');
-  } catch (err) {
-    showSnackbar('Save failed: ' + err.message, 'error');
-  }
+      // ❗ Duplicate validation
+      const isDuplicate = rows.some(row =>
+          row.id !== editedRow.id && (
+            row.xCode.trim().toLowerCase() === editedRow.xCode.trim().toLowerCase() ||
+            row.category.trim().toLowerCase() === editedRow.category.trim().toLowerCase()
+          )
+      );
+
+      if (isDuplicate) {
+          showSnackbar("Asset Grp Code/Name already exists!", "error");
+          return;
+      }
+
+      try {
+          if (empty) {
+            if (!editedRow.isNew) await deleteRefCategory(editedRow.id);
+          } else if (editedRow.isNew) {
+            await createRefCategory(editedRow.xCode, editedRow.category);
+          } else {
+            await updateRefCategory(editedRow.id, editedRow.xCode, editedRow.category);
+          }
+
+          await fetchRefCategories();
+          setEditingRowId(null);
+          showSnackbar('Changes has been saved');
+        } catch (err) {
+          showSnackbar('Save failed: ' + err.message, 'error');
+        }
   };
 
   const confirmDeleteEmpty = async () => {
     if (!pendingSaveRow) return;
-
     try {
       // If it's NOT new, emptying = delete row
       if (!pendingSaveRow.isNew) {
         await deleteRefCategory(pendingSaveRow.id);
       }
-
       await fetchRefCategories();
-
-      showSnackbar("Asset Group has been deleted successfully!");
-    } catch (err) {
-      showSnackbar("Failed: " + err.message, "error");
+        showSnackbar("Asset Group has been deleted successfully!");
+      } catch (err) {
+        showSnackbar("Failed: " + err.message, "error");
     }
 
-    setEditingRowId(null);
-    setPendingSaveRow(null);
-    setConfirmDeleteEmptyOpen(false);
+      setEditingRowId(null);
+      setPendingSaveRow(null);
+      setConfirmDeleteEmptyOpen(false);
   };
 
   const cancelDeleteEmpty = () => {
@@ -210,6 +218,9 @@ export default function RefCategory({useProps, openTab,}) {
 
   // ✅ Filter + Paginate
   const filteredData = temporaryData.filter(item =>
+    // Always include the currently edited row in results
+    item.id === editingRowId ||
+    // Normal search filter for other rows
     item.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.xCode?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.id?.toString().includes(searchQuery)
@@ -262,7 +273,7 @@ export default function RefCategory({useProps, openTab,}) {
                   sx={{ width: 300 }}
                 />
               </div>
-           
+
             {/* Edit, Add, and Download button */}
             <div className='flex items-center justify-between mt-6 mb-4'>
               <h1 className='text-lg font-semibold text-gray-800'>Asset Group List</h1>
@@ -441,7 +452,7 @@ export default function RefCategory({useProps, openTab,}) {
             </div>
 
             <p className="mt-3 text-sm text-gray-500">
-              {editingRowId === null
+              {editingRowId !== null
                 ? 'Editing enabled. Click the save icon to commit changes.'
                 : `Click the Edit icon ${String.fromCodePoint(0x270E)} to enable editing.`
               }
