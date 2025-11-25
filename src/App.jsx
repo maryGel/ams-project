@@ -34,7 +34,7 @@ function App() {
     {/* You can add a NavLink/Link component here for navigation */}
 
     {/* Hide header on login page */}
-      {location.pathname !== '/loginpage' && (
+      {location.pathname !== '/' && (
         <Header 
         headerTitle={headerTitle}
         setHeaderTitle={saveTitleUpdate}
@@ -42,15 +42,15 @@ function App() {
       )}
       
       <Routes> {/* This container now works because of BrowserRouter in main.jsx */}
-        <Route  path="/" 
+        <Route path="/" 
+                element={<LoginPage />} 
+        />
+        <Route  path="/Home" 
                 element={<HomePage
                           headerTitle ={headerTitle}
                           setHeaderTitle={saveTitleUpdate}
                         />} 
         /> 
-        <Route path="/loginpage" 
-                element={<LoginPage />} 
-        />
         
         <Route path="/assetFolder/pages/assetMasterList" 
                 element={<AssetMasterListPage 
@@ -72,7 +72,6 @@ function App() {
                           setHeaderTitle={saveTitleUpdate}
                         />} 
         />
-
 
         <Route path="/practiceJsx" 
                 element={<Practice

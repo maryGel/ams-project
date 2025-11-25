@@ -20,7 +20,7 @@ function LoginPage() {
       });
 
       if (res.data.success) {
-        navigate("/");
+        navigate("/Home");
       } else {
         setErrorMsg(res.data.message);
       }
