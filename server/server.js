@@ -41,32 +41,54 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
 
-// Database configuration - MySQL runs on port 3306
-export const db = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: 'adminGel',
-  database: 'ams1',
-  port: 3306, // This is the MySQL database port
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  connectTimeout: 30000,
-  // Remove SSL for local MySQL
-});
+// Database configuration factory function
+const createDbConnection = (origin) => {
+  let config = {
+    host: 'localhost',
+    user: 'root', 
+    password: 'adminGel',
+    database: 'ams1',
+    port: 3306,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    connectTimeout: 30000,
+  };
 
-// Test database connection
+  // If request is from Vercel, use Render backend database
+  if (origin && origin.includes('vercel.app')) {
+    config = {
+      host: process.env.RENDER_DB_HOST || 'your-render-db-host',
+      user: process.env.RENDER_DB_USER || 'your-render-db-user',
+      password: process.env.RENDER_DB_PASS || 'your-render-db-pass',
+      database: process.env.RENDER_DB_NAME || 'your-render-db-name',
+      port: process.env.RENDER_DB_PORT || 3306,
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0,
+      connectTimeout: 30000,
+      ssl: {
+        rejectUnauthorized: false
+      }
+    };
+    console.log('🌐 Using Render database for Vercel request');
+  } else {
+    console.log('💻 Using local MySQL database');
+  }
+
+  return mysql.createPool(config);
+};
+
+// Create initial database connection pool (default: local)
+export let db = createDbConnection();
+
+// Test initial database connection
 db.getConnection((err, connection) => {
   if (err) {
-    console.error('❌ Database connection failed:', err.message);
-    console.log('🔧 Current DB Configuration:');
-    console.log('- Database Host: localhost:3306');
-    console.log('- Database User: root');
-    console.log('- Database Name: ams1');
-    console.log('💡 Check if MySQL is running and database exists');
+    console.error('❌ Initial database connection failed:', err.message);
   } else {
-    console.log('✅ Successfully connected to local MySQL database');
-    console.log('📊 Connected to database: ams1 (on port 3306)');
+    console.log('✅ Successfully connected to database');
+    console.log('📊 Database: ams1 (local)');
     connection.release();
   }
 });
@@ -75,6 +97,24 @@ const app = express();
 
 // Apply CORS middleware FIRST
 app.use(cors(corsOptions));
+
+// Middleware to set database connection based on origin
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  
+  // Create or update database connection based on origin
+  if (origin && origin.includes('vercel.app')) {
+    // Use Render database for Vercel requests
+    req.db = createDbConnection(origin);
+    console.log(`📍 Vercel request from: ${origin} → Using Render database`);
+  } else {
+    // Use local database for all other requests
+    req.db = db;
+    console.log(`📍 Local request from: ${origin || 'unknown'} → Using local database`);
+  }
+  
+  next();
+});
 
 // Additional CORS headers as fallback
 app.use((req, res, next) => {
@@ -97,20 +137,17 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Middleware to attach database to request and log requests
-app.use((req, res, next) => {
-  req.db = db;
-  console.log(`📍 ${req.method} ${req.path} from: ${req.headers.origin || 'unknown origin'}`);
-  next();
-});
-
 // Root route
 app.get('/', (req, res) => {
+  const origin = req.headers.origin;
+  const isVercel = origin && origin.includes('vercel.app');
+  
   res.json({ 
     message: 'Server is up and running!',
     server: 'Local Development Server',
     application: 'Running on port 3000',
-    database: 'Connected to MySQL on port 3306',
+    database: isVercel ? 'Render Database' : 'Local MySQL Database',
+    client: isVercel ? 'Vercel Frontend' : 'Local Frontend',
     environment: 'development',
     timestamp: new Date().toISOString()
   });
@@ -118,7 +155,10 @@ app.get('/', (req, res) => {
 
 // Database health check endpoint
 app.get('/health', (req, res) => {
-  db.query("SELECT 1 as test", (err, results) => {
+  const origin = req.headers.origin;
+  const isVercel = origin && origin.includes('vercel.app');
+  
+  req.db.query("SELECT 1 as test", (err, results) => {
     if (err) {
       console.error('❌ Database health check failed:', err.message);
       return res.status(500).json({ 
@@ -126,14 +166,16 @@ app.get('/health', (req, res) => {
         message: 'Database connection failed',
         error: err.message,
         server: 'Local Development Server (port 3000)',
-        database: 'MySQL (port 3306)'
+        database: isVercel ? 'Render Database' : 'Local MySQL Database',
+        client: isVercel ? 'Vercel' : 'Local'
       });
     }
     res.json({ 
       status: 'ok', 
       message: 'Database connection successful',
       application: 'Express server running on port 3000',
-      database: 'MySQL database on port 3306',
+      database: isVercel ? 'Render Database' : 'Local MySQL Database',
+      client: isVercel ? 'Vercel Frontend' : 'Local Frontend',
       server: 'Local Development Server',
       environment: 'development',
       timestamp: new Date().toISOString()
@@ -141,8 +183,13 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API routes
-app.use('/login', authRoute);
+// API routes - Make sure they use req.db instead of the global db
+app.use('/login', (req, res, next) => {
+  // Ensure authRoute uses the request-specific database
+  req.authDb = req.db;
+  next();
+}, authRoute);
+
 app.use('/itemlist', useItemlist);
 app.use('/referentials', referentialsRoute);
 app.use('/api/refCat', refCategoryRoute);
@@ -185,11 +232,12 @@ const PORT = 3000;
 app.listen(PORT, () => {
   console.log('='.repeat(60));
   console.log(`🚀 Express Server is running on port ${PORT}`);
-  console.log(`🗄️  MySQL Database is on port 3306`);
   console.log(`🌐 Environment: development`);
-  console.log(`📊 Database: ams1`);
   console.log(`✅ CORS enabled for:`, allowedOrigins);
   console.log(`🔗 Application URL: http://localhost:${PORT}`);
-  console.log(`🔗 Database URL: localhost:3306`);
+  console.log('='.repeat(60));
+  console.log('📊 Database Routing:');
+  console.log('   → Local requests (localhost:5173) → Local MySQL Database');
+  console.log('   → Vercel requests (*.vercel.app) → Render Database');
   console.log('='.repeat(60));
 });
