@@ -22,7 +22,8 @@ import authRoute from './routes/authRoute.js';
 const allowedOrigins = [ 
   'https://ams-project-sandy.vercel.app', 
   'http://localhost:5173',
-  'http://127.0.0.1:5173'
+  'http://127.0.0.1:5173', 
+  'https://*.vercel.app' // Wildcard for all Vercel domains
 ];
 
 const corsOptions = {
@@ -33,9 +34,11 @@ const corsOptions = {
       callback(null, true);
     } else {
       console.log('🚫 CORS blocked for origin:', origin);
+      console.log('✅ Allowed origins:', allowedOrigins);
       callback(new Error('Not allowed by CORS'));
     }
   },
+  origin: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
