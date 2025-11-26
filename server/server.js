@@ -16,25 +16,21 @@ import refDeptRoute from './routes/refDeptRoute.js';
 import authRoute from './routes/authRoute.js'
 
 // Configure CORS
+// Your allowedOrigins array (updated with safety slash)
 const allowedOrigins = [
-  'https://ams-project-phi.vercel.app', // <-- Replace with your Vercel domain!
-  'https://ams-project-phi.vercel.app/',
-  'http://localhost:5173' // for local development if needed
+  'https://ams-project-phi.vercel.app',  
+  'https://ams-project-phi.vercel.app/', 
+  'http://localhost:5173' 
 ];
+
+// Use the array directly as the origin property
 const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  // You may need to specify methods and headers if you use custom ones
+  origin: allowedOrigins,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
 };
 
+// app.use(cors(corsOptions));
 
 // Use environment variables if available, fallback to local development
 export const db = mysql.createPool({
