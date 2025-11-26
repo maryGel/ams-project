@@ -22,10 +22,11 @@ function LoginPage() {
 
     setIsLoading(true);
     setErrorMsg("");
+    console.log(`username: ${username}, password: ${password}`)
 
     try {
       const res = await api.post("/login", {
-        username: username.trim(),
+        user: username.trim(),
         password: password.trim(),
       });
 
@@ -128,7 +129,7 @@ function LoginPage() {
               try {
                 const res = await api.get('/login/health');
                 console.log('Health check:', res.data);
-                alert(`Server health: ${res.data.status}\nMessage: ${res.data.message}`);
+                alert(`Server health: ${res.data.status} Message: ${res.data.message}`);
               } catch (err) {
                 console.error('Health check failed:', err);
                 alert('Cannot connect to server');

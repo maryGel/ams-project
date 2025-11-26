@@ -1,24 +1,40 @@
 import axios from 'axios';
 
-// Use Render backend for both development and production
-const API_URL = import.meta.env.VITE_API_URL || 'https://ams-project-m93c.onrender.com';
+// For local development - point to local backend
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-// Create and export the configured Axios instance
 export const api = axios.create({
   baseURL: API_URL,
-  timeout: 15000, 
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
-// Add better error handling for Render
-api.interceptors.response.use(
-  (response) => response,
+// Add request logging
+api.interceptors.request.use(
+  (config) => {
+    console.log(`🚀 Making ${config.method?.toUpperCase()} request to: ${config.baseURL}${config.url}`);
+    return config;
+  },
   (error) => {
-    if (error.code === 'ECONNABORTED') {
-      console.error('Request timeout - Render might be spinning up');
-    }
+    return Promise.reject(error);
+  }
+);
+
+// Add response logging
+api.interceptors.response.use(
+  (response) => {
+    console.log(`✅ Response from: ${response.config.url}`, response.data);
+    return response;
+  },
+  (error) => {
+    console.error('❌ API Error:', {
+      url: error.config?.baseURL + error.config?.url,
+      status: error.response?.status,
+      message: error.message
+    });
     return Promise.reject(error);
   }
 );
