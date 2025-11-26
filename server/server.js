@@ -19,8 +19,7 @@ import refDeptRoute from './routes/refDeptRoute.js';
 import authRoute from './routes/authRoute.js';
 
 // Configure CORS
-const allowedOrigins = [
-  'https://ams-project-phi.vercel.app',  
+const allowedOrigins = [ 
   'https://ams-project-sandy.vercel.app/', 
   'https://ams-project-sandy.vercel.app',
   'http://localhost:5173' 
