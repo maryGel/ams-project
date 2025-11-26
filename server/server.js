@@ -49,6 +49,8 @@ export const db = mysql.createPool({
 
 const app = express();
 
+app.options('*', cors(corsOptions));
+
 // to hande localhost:3000
 app.get('/', (req, res) => {
     res.send('Server is up and running!');
