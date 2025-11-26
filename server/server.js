@@ -43,8 +43,11 @@ export const db = mysql.createPool({
   database: process.env.DB_NAME || 'ams1',
   port: process.env.DB_PORT || 4000,
   waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+  // CRUCIAL: Enable SSL/TLS for TiDB Cloud
+  ssl: {
+    rejectUnauthorized: true, // or false, depending on driver setup
+    // You typically don't need a CA cert download for TiDB Starter
+  },
 });
 
 
