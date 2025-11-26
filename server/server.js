@@ -72,6 +72,8 @@ app.use('/refLocation', refLocationRoute);
 app.use('/refDepartment', refDeptRoute);
 
 
-app.listen(3000, () => {
-    console.log('Server is running on 3000');
+// In your server.js (at the very end)
+const PORT = process.env.PORT || 3000; 
+app.listen(PORT, () => {
+    console.log(`Server is running on ${PORT}`);
 });

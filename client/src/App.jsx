@@ -1,5 +1,5 @@
 import React, {useState }from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { HeaderTitle } from './Utils/header.js';
 import Header from './components/header.jsx';
 import HomePage from './pages/HomePage.jsx'; 
@@ -11,7 +11,11 @@ import AssetMasterDisplay from './assetMaster/pages/AssetDisplayPage.jsx';
 import Practice from './components/practice.jsx';
 import ReferentialPage from './assetMaster/pages/ReferentialPage.jsx';
 
+
+
 function App() {
+
+  const location = useLocation();
 
 // To initialize the header title based on the current page
   const getInitialTitle = () => {
@@ -31,21 +35,24 @@ function App() {
   <div className="App">
     {/* You can add a NavLink/Link component here for navigation */}
 
-      <Header 
+    {/* Hide header on login page */}
+      {location.pathname !== '/' && (
+        <Header 
         headerTitle={headerTitle}
         setHeaderTitle={saveTitleUpdate}
       />
+      )}
       
       <Routes> {/* This container now works because of BrowserRouter in main.jsx */}
-        <Route  path="/" 
+        <Route path="/" 
+                element={<LoginPage />} 
+        />
+        <Route  path="/Home" 
                 element={<HomePage
                           headerTitle ={headerTitle}
                           setHeaderTitle={saveTitleUpdate}
                         />} 
         /> 
-        <Route path="/loginpage" 
-                element={<LoginPage />} 
-        />
         
         <Route path="/assetFolder/pages/assetMasterList" 
                 element={<AssetMasterListPage 
@@ -67,7 +74,6 @@ function App() {
                           setHeaderTitle={saveTitleUpdate}
                         />} 
         />
-
 
         <Route path="/practiceJsx" 
                 element={<Practice

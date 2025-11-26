@@ -1,4 +1,35 @@
+import React, { useState } from "react";
+import { api } from '../api/axios'
+import { useNavigate } from "react-router-dom";
+
+
+
 function LoginPage() {
+
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const navigate = useNavigate();
+
+  const handleLogin = async () => {
+    try {
+      const res = await api.post("login", {
+        username,
+        password,
+      });
+
+      if (res.data.success) {
+        navigate("/Home");
+      } else {
+        setErrorMsg(res.data.message);
+      }
+    } catch (err) {
+      setErrorMsg("Server error. Please try again.");
+      console.log(`User denied`, err)
+    }
+  };
+
   return (
    <div>
          {/* Logo */}
@@ -11,15 +42,24 @@ function LoginPage() {
           <section className="grid w-full h-screen place-content-center bg-slate-800">
           <h2 className="p-4 text-2xl tracking-wider text-center text-white">Asset Management System</h2>
           <div className="grid w-auto p-8 bg-white rounded shadow-md">
+
+            {errorMsg && (
+              <p className="mb-2 text-sm text-red-600">{errorMsg}</p>
+            )}
+
             <input 
                 type="text" placeholder="Username" 
                 className="p-2 m-2 mb-4 border w-72"
+                onChange={(e) => setUsername(e.target.value)}
             /> 
             <input 
                 type="password" placeholder="Password" 
                 className="p-2 m-2 mb-4 border w-72"
+                onChange={(e) => setPassword(e.target.value)}
             /> 
-            <button className="p-2 m-2 text-white bg-black rounded hover:bg-blue-700"
+            <button 
+              className="p-2 m-2 text-white bg-black rounded hover:bg-blue-700"
+              onClick={handleLogin}
             >Login
             </button>    
             

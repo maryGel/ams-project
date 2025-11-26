@@ -1,13 +1,6 @@
 import {useState, useEffect} from 'react';
-import axios from 'axios';
+import { api } from '../api/axios'
 
-
-
-// Create axios instance with base URL
-const api = axios.create({
-  baseURL: '/api',
-  timeout: 10000,
-});
 
 export const useRefBrand = () => {
   const [refBrandData, setRefBrandData] = useState([]);
