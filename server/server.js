@@ -2,6 +2,10 @@ import express from 'express';
 import mysql from 'mysql2';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
 
 // Your routes imports...
 import useItemlist from './routes/asstMasterlist.js';
@@ -29,44 +33,66 @@ const corsOptions = {
 
 // Database configuration with better error handling
 export const db = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASS || 'adminGel',
-  database: process.env.DB_NAME || 'ams1',
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
   port: process.env.DB_PORT || 4000,
   waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
   connectTimeout: 30000,
-  acquireTimeout: 30000,
-  timeout: 30000,
-  reconnect: true,
   
   // SSL configuration for TiDB Cloud
-  ssl: process.env.NODE_ENV === 'production' ? {
+  ssl: {
     rejectUnauthorized: false
-  } : false
-});
-
-// Test database connection
-db.getConnection((err, connection) => {
-  if (err) {
-    console.error('❌ Database connection failed:', err.message);
-    console.error('Error details:', err);
-  } else {
-    console.log('✅ Successfully connected to TiDB Cloud database');
-    connection.release();
   }
 });
 
-// Handle pool errors
-db.on('error', (err) => {
-  console.error('❌ Database pool error:', err);
+// Test database connection with better logging
+db.getConnection((err, connection) => {
+  if (err) {
+    console.error('❌ Database connection failed:', err.message);
+    console.log('🔧 Current DB Configuration:');
+    console.log('- Host:', process.env.DB_HOST || 'not set');
+    console.log('- User:', process.env.DB_USER || 'not set');
+    console.log('- Database:', process.env.DB_NAME || 'not set');
+    console.log('- Port:', process.env.DB_PORT || 'not set');
+  } else {
+    console.log('✅ Successfully connected to TiDB Cloud database');
+    console.log('📊 Connected to database:', process.env.DB_NAME);
+    connection.release();
+  }
 });
 
 const app = express();
 
 // Root route
 app.get('/', (req, res) => {
-  res.send('Server is up and running!');
+  res.json({ 
+    message: 'Server is up and running!',
+    database: process.env.DB_NAME ? 'Configured' : 'Not configured'
+  });
+});
+
+// Database health check endpoint
+app.get('/health', (req, res) => {
+  db.query("SELECT 1 as test", (err, results) => {
+    if (err) {
+      console.error('❌ Database health check failed:', err.message);
+      return res.status(500).json({ 
+        status: 'error', 
+        message: 'Database connection failed',
+        error: err.message 
+      });
+    }
+    res.json({ 
+      status: 'ok', 
+      message: 'Database connection successful',
+      database: process.env.DB_NAME,
+      timestamp: new Date().toISOString()
+    });
+  });
 });
 
 // Middleware
@@ -94,4 +120,5 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
+  console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
