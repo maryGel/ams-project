@@ -41,9 +41,11 @@ export const db = mysql.createPool({
   port: process.env.DB_PORT || 4000,
   waitForConnections: true,
   connectTimeout: 30000, // 30 seconds connection timeout
-  ssl: {
-    rejectUnauthorized: false, 
-  },
+   //  SSL CONFIGURATION FOR TiDB CLOUD
+   ssl: {
+    rejectUnauthorized: true,
+    minVersion: 'TLSv1.2'
+  }
 });
 
 
