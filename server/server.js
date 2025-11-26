@@ -41,7 +41,7 @@ export const db = mysql.createPool({
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASS || 'adminGel',
   database: process.env.DB_NAME || 'ams1',
-  port: process.env.DB_PORT || 3306,
+  port: process.env.DB_PORT || 4000,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
