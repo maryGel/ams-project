@@ -45,7 +45,7 @@ export const db = mysql.createPool({
   waitForConnections: true,
   // CRUCIAL: Enable SSL/TLS for TiDB Cloud
   ssl: {
-    rejectUnauthorized: true, // or false, depending on driver setup
+    rejectUnauthorized: false, // or false, depending on driver setup
     // You typically don't need a CA cert download for TiDB Starter
   },
 });
