@@ -18,6 +18,7 @@ import authRoute from './routes/authRoute.js'
 // Configure CORS
 const allowedOrigins = [
   'https://ams-project-phi.vercel.app', // <-- Replace with your Vercel domain!
+  'https://ams-project-phi.vercel.app/',
   'http://localhost:5173' // for local development if needed
 ];
 const corsOptions = {
