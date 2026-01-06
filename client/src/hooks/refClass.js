@@ -1,12 +1,7 @@
 // hooks/refItemClassegory.js
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { api } from '../api/axios'
 
-// Create axios instance with base URL
-const api = axios.create({
-  baseURL: '/api',
-  timeout: 10000,
-});
 
 export const useRefItemClass = () => {
   const [refItemClassData, setRefItemClassData] = useState([]);
@@ -18,7 +13,7 @@ export const useRefItemClass = () => {
   const testAPI = async () => {
     try {
       const response = await api.get('/refItemClass/test');
-      console.log('API Test Response:', response.data);
+      // console.log('API Test Response:', response.data);
       return response.data;
     } catch (error) {
       console.error('API Test Failed:', error);
@@ -37,7 +32,7 @@ export const useRefItemClass = () => {
         await testAPI();
         
         // Then fetch AssetClasses
-        console.log('Fetching AssetClasses...');
+        // console.log('Fetching AssetClasses...');
         const response = await api.get('/refItemClass');
         // console.log('Item Class response:', response.data);
         

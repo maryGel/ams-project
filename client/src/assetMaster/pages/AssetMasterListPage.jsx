@@ -1,4 +1,3 @@
-import Header from '../../components/header';
 import * as React from 'react';
 import { useState } from 'react';
 
@@ -21,7 +20,7 @@ import { useRefDepartment } from '../../hooks/refDepartment';
 
 
 
-function AssetMasterListPage({useProps, setHeaderTitle}) {
+function AssetMasterListPage({useProps, setHeaderTitle, setNavLink }) {
 
   const {itemList, loading, error} = useAssetMasterData(useProps);
   const {refCategoryData} = useRefCategory(useProps)
@@ -47,8 +46,7 @@ function AssetMasterListPage({useProps, setHeaderTitle}) {
   const [filterKey, setFilterKey] = useState(0);
 
   // Table state
-  const [page, setPage] = useState(0);
-  
+  const [page, setPage] = useState(0); 
 
   const assetGrp = refCategoryData.map(item => item.category)
   const assetClass = refItemClassData.map(item => item.itemClass)
@@ -56,14 +54,13 @@ function AssetMasterListPage({useProps, setHeaderTitle}) {
   const department = refDeptData.map(item => item.Department)
 
   const isTableActive = searchQuery.trim() !== "" || selectedAssets.length > 0 || selectedAssetGroups.length > 0 || selectedAssetClass.length > 0 || selectedLocation.length > 0 || selectedDepartment.length > 0; // Flag to control when data is displayed
- 
- 
+
   const filterOptions = createFilterOptions({
     stringify: (option) =>
       `${option.FacNO} ${option.FacName} ${option.Description}`, // searchable text
   });
 
-  const getFilteredAsset = itemList.filter(item => {
+  const filteredAsset = itemList.filter(item => {
 
     // 1. Filter by Search Text (free text search in Autocomplete or selected chips)
     const matchesText =
@@ -91,18 +88,16 @@ function AssetMasterListPage({useProps, setHeaderTitle}) {
     selectedLocation.length === 0 ||
     selectedLocation.includes(item.ItemLocation); // Assuming item.CATEGORY holds the Asset Group value
 
-
     // 5. Filter by Department
     const matchesDepartment = 
     selectedDepartment.length === 0 ||
     selectedDepartment.includes(item.Department); // Assuming item.CATEGORY holds the Asset Group value
 
-
     return matchesText && matchesSelected && matchesAssetGroup && matchesAssetClass && matchesLocation && matchesDepartment;
   });
-  
 
-  const displayedAsset = isTableActive ? getFilteredAsset : [];
+  const displayedAsset = isTableActive ? filteredAsset : [];
+
 
   const handleGoClick = () => {
     // Commit all draft states to the filter states
@@ -283,15 +278,18 @@ function AssetMasterListPage({useProps, setHeaderTitle}) {
           Go  
         </button>
         
-        <NavLink to="/assetFolder/createAsset">
-          <button 
-            className='pt-1 pb-1 pl-2 pr-3 mr-4 text-gray-600 border rounded-full shadow-md border-slate-300'
-            onClick={() => setHeaderTitle('Create Asset')}
-          >
-            <AddIcon />
-            Create
-          </button>
-        </NavLink>
+
+        <button 
+          className='pt-1 pb-1 pl-2 pr-3 mr-4 text-gray-600 border rounded-full shadow-md border-slate-300'
+          onClick={() => {
+            const path = '/assetFolder/createAsset';
+            window.open(path ,'_blank')
+          }}
+        >
+          <AddIcon />
+          Create
+        </button>
+
       </div>
 
        {/* Filter table */}
@@ -305,6 +303,8 @@ function AssetMasterListPage({useProps, setHeaderTitle}) {
           displayedAsset = {displayedAsset}
           searchQuery={searchQuery}  
           isTableActive={isTableActive}
+          setHeaderTitle={setHeaderTitle}
+          setNavLink={setNavLink}
         />
       </div>
     </div>

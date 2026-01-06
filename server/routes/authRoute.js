@@ -5,10 +5,10 @@ const router = express.Router();
 console.log(`authroute`)
 router.post("/", (req, res) => {
   
-  const { username, password } = req.body;
+  const { user, password } = req.body;
 
   // Input validation
-  if (!username || !password) {
+  if (!user || !password) {
  
     return res.status(400).json({ 
       success: false, 
@@ -16,11 +16,11 @@ router.post("/", (req, res) => {
     });
   }
 
-  const sql = "SELECT * FROM user0000inv WHERE username = ? AND password = ?";
+  const sql = "SELECT * FROM user0000inv WHERE user = ? AND password = ?";
   
-  console.log(`🔐 Login attempt for username: ${username}`);
+  console.log(`🔐 Login attempt for username: ${user}`);
   
-  db.query(sql, [username, password], (err, results) => {
+  db.query(sql, [user, password], (err, results) => {
     if (err) {
       console.error('❌ Database query error:', err);
       return res.status(500).json({ 
@@ -31,14 +31,14 @@ router.post("/", (req, res) => {
     }
 
     if (results.length > 0) {
-      console.log(`✅ Login successful for username: ${username}`);
+      console.log(`✅ Login successful for username: ${user}`);
       res.json({ 
         success: true, 
         message: "Login successful",
-        username: { username: results[0].username } // Don't send password back
+        username: { username: results[0].user } // Don't send password back
       });
     } else {
-      console.log(`❌ Login failed for username: ${username}`);
+      console.log(`❌ Login failed for username: ${user}`);
       res.status(401).json({ 
         success: false, 
         message: "Invalid username or password" 

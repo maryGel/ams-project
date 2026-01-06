@@ -5,8 +5,6 @@ import { assetTileList } from '../hooks/assetTilelist';
 
 function AssetMasterTile({setHeaderTitle}) {
 
-
-
   return (
     <div className='grid items-start w-full h-full grid-cols-10 gap-1'>
       {assetTileList.map((asset) => (

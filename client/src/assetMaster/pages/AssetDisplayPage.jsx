@@ -1,71 +1,42 @@
 import React, {useState, useEffect} from 'react'
 import AssetDisplayTabs from '../assetDisplay/assetDisplayTabs'
-import GroupBtns from '../../components/groupbtns'
+import GroupBtns from '../../Utils/groupbtns'
 import { useParams } from 'react-router-dom';
+import { useAssetMasterData } from '../../hooks/assetMasterHooks';
 
 
 export default function AssetMasterDisplay(){
 
   // State to hold API Asset data
+  const { itemList, loading, error } = useAssetMasterData(); 
   const [asset, setAsset] = useState({});
   const { facno } = useParams();
+  console.log( `facno: ${facno}`)
 
   // Fetch Asset data from API on component mount
   useEffect(() => {
-    const fetchAssetData = async () => {
-      try {
-        const response = await fetch(('/api/itemlist/assetMasterlist')); 
-          if (!response.ok){
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json()
+    if (!itemList || itemList.length === 0) return;
 
-        
-          // Set your clean target value
-        const targetFacNo = facno;
-        console.log(facno)
+    // Clean the route facno
+    const targetFacNoClean = facno?.replace(/\s/g, '').toUpperCase();
 
-        const matchingAssets = data.filter(item => {            
-            // Ensure FacNo exists and is a string before attempting to clean
-            if (typeof item.FacNO !== 'string') {
-                return false;
-            }
-        
-                // 1. Replace the Non-Breaking Space (U+00A0) and all other whitespace (\s) globally.
-                // 2. Convert to uppercase for case-insensitive matching (optional but recommended).
-                const itemFacNoClean = item.FacNO
-                    .replace(/\u00A0/g, '') // Explicitly remove Non-Breaking Space (U+00A0)
-                    .replace(/\s/g, '')    // Remove all standard whitespace
-                    .toUpperCase();
-                    
-                // Clean the target value just in case
-                const targetFacNoClean = targetFacNo.replace(/\s/g, '').toUpperCase();
-                
-                const isMatch = itemFacNoClean === targetFacNoClean;
+    const matchingAsset = itemList.find(item => {
+      if (!item.FacNO || typeof item.FacNO !== 'string') return false;
 
-                return isMatch;
-                });
-        
+      const itemFacNoClean = item.FacNO
+        .replace(/\u00A0/g, '')   // Remove NBSP
+        .replace(/\s/g, '')       // Remove normal whitespace
+        .toUpperCase();
 
-            const targetAsset = matchingAssets.length > 0 ? matchingAssets[0] : undefined;
-            if (targetAsset) {
-                // 💡 The linter often flags targetAsset here because its value 
-                // is only used within this conditional block.
-                // However, it is used here:
-                setAsset(targetAsset); 
-            } else {
-                // ...
-            }
-          
-      } catch (error) {
-        console.error('Error fetching asset data:', error);
-      } finally {
-        console.log('Fetch attempt finished.');
-      }
-    };
-    fetchAssetData();
-  },[facno]);
+      return itemFacNoClean === targetFacNoClean;
+    });
 
+    setAsset(matchingAsset || {});
+
+  }, [itemList, facno]);
+
+  if (loading) return <p className="p-5">Loading asset...</p>;
+  if (error) return <p className="p-5 text-red-600">Error loading asset data.</p>;
 
   return(
     <>
@@ -78,7 +49,7 @@ export default function AssetMasterDisplay(){
 
       {/* Asset Display Detials */}
       <div className='grid p-5 border rounded-lg border-spacing-x-3 bg-gray-50'>
-       
+      
             <div  className='mb-1'>
               <p className='p-3 pl-16 font-medium tracking-wide bg-white border rounded-md shadow-md text-normal shadow-slate-300 border-slate-300 text-slate-800'
               >Asset Number: {asset.FacNO}</p>

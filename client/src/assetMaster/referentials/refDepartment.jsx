@@ -21,8 +21,8 @@ import { IconButton, ThemeProvider, TextField, TablePagination, Snackbar, Alert,
 import { useRefDepartment } from '../../hooks/refDepartment'; // import the refDepartment data
 
 // Custom table utilities & theme
-import { customTheme, resizeColumn } from '../../components/customTable';
-import useColumnWidths from '../../components/customTable';
+import { customTheme, resizeColumn } from '../../Utils/customTable';
+import useColumnWidths from '../../Utils/customTable';
 
 // ----------------------------------------------------------------------------
 //                       REF Department COMPONENT

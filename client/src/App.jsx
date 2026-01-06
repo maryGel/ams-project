@@ -1,14 +1,14 @@
-import React, {useState }from 'react';
+import React, { useState } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
-import { HeaderTitle } from './Utils/header.js';
-import Header from './components/header.jsx';
+// import { HeaderTitle } from './Utils/headerTitleList';
+import Header from './Utils/header.jsx';
 import HomePage from './pages/HomePage.jsx'; 
 import LoginPage from './pages/LoginPage.jsx';
 
 import AssetMasterListPage from './assetMaster/pages/AssetMasterListPage.jsx';
 import CreateAssetPage from './assetMaster/pages/CreateAssetPage.jsx';
 import AssetMasterDisplay from './assetMaster/pages/AssetDisplayPage.jsx';
-import Practice from './components/practice.jsx';
+import Practice from './Utils/practice.jsx';
 import ReferentialPage from './assetMaster/pages/ReferentialPage.jsx';
 
 
@@ -20,7 +20,7 @@ function App() {
 // To initialize the header title based on the current page
   const getInitialTitle = () => {
     const savedTitle = localStorage.getItem('currentHeaderTitle');
-    return savedTitle ? savedTitle : HeaderTitle.DEFAULT;
+    return savedTitle ? savedTitle : 'Asset Management System';
   }
 
   const [ headerTitle, setHeaderTitle] = useState(getInitialTitle);
@@ -31,6 +31,21 @@ function App() {
     setHeaderTitle(newTitle);
   }
 
+  // To initialize the nav link based on the current page
+
+  const getInitialNavLink = () => {
+    const savedLink = localStorage.getItem('navLink');
+    return savedLink 
+  }
+
+  const [navLink, setNavLink] = useState(getInitialNavLink);
+
+  // To save the nav link to localStorage whenever it changes
+  const saveNavLinkUpdate = (newLink) => {
+    localStorage.setItem('navLink', newLink);
+    setNavLink(newLink);
+  }
+
   return (
   <div className="App">
     {/* You can add a NavLink/Link component here for navigation */}
@@ -38,14 +53,19 @@ function App() {
     {/* Hide header on login page */}
       {location.pathname !== '/' && (
         <Header 
-        headerTitle={headerTitle}
-        setHeaderTitle={saveTitleUpdate}
-      />
+          headerTitle={headerTitle}
+          setHeaderTitle={saveTitleUpdate}
+          navLink={navLink}
+          setNavLink={saveNavLinkUpdate}
+        />
       )}
       
       <Routes> {/* This container now works because of BrowserRouter in main.jsx */}
         <Route path="/" 
-                element={<LoginPage />} 
+                element={<LoginPage 
+                  headerTitle ={headerTitle}
+                  setHeaderTitle={saveTitleUpdate}
+                />} 
         />
         <Route  path="/Home" 
                 element={<HomePage
@@ -57,6 +77,7 @@ function App() {
         <Route path="/assetFolder/pages/assetMasterList" 
                 element={<AssetMasterListPage 
                           setHeaderTitle={saveTitleUpdate}
+                          setNavLink={setNavLink}
                         />} 
         />
         <Route path="/assetFolder/createAsset" 

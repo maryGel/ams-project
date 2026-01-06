@@ -23,8 +23,8 @@ import { IconButton, ThemeProvider, TextField, TablePagination, Snackbar, Alert,
 import { useRefCategory } from '../../hooks/refCategory';
 
 // Custom table utilities & theme
-import { customTheme, resizeColumn } from '../../components/customTable';
-import useColumnWidths from '../../components/customTable';
+import { customTheme, resizeColumn } from '../../Utils/customTable';
+import useColumnWidths from '../../Utils/customTable';
 
 
 // ----------------------------------------------------------------------------

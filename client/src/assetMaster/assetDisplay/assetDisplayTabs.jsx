@@ -67,9 +67,9 @@ export default function AssetDisplayTabs({asset}){
           textColor="inherit"
           aria-label="full width tabs example"
         >
-          <Tab label="General Info" {...a11yProps(0)} />
-          <Tab label="Asset Value" {...a11yProps(1)} />
-          <Tab label="Transaction" {...a11yProps(2)} />
+          <Tab label="General Info" {...a11yProps(0)} sx={{ letterSpacing: '0.10em' }}/>
+          <Tab label="Asset Value" {...a11yProps(1)} sx={{ letterSpacing: '0.10em' }}/>
+          <Tab label="Transaction" {...a11yProps(2)} sx={{ letterSpacing: '0.10em' }}/>
         </Tabs>
       </AppBar>
       <TabPanel value={value} index={0} dir={theme.direction} sx={{ width: '100%' }}>

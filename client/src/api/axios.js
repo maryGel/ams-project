@@ -15,7 +15,7 @@ export const api = axios.create({
 // Add request logging
 api.interceptors.request.use(
   (config) => {
-    console.log(`🚀 Making ${config.method?.toUpperCase()} request to: ${config.baseURL}${config.url}`);
+    // console.log(`🚀 Making ${config.method?.toUpperCase()} request to: ${config.baseURL}${config.url}`);
     return config;
   },
   (error) => {
@@ -26,7 +26,7 @@ api.interceptors.request.use(
 // Add response logging
 api.interceptors.response.use(
   (response) => {
-    console.log(`✅ Response from: ${response.config.url}`, response.data);
+    // console.log(`✅ Response from: ${response.config.url}`, response.data);
     return response;
   },
   (error) => {

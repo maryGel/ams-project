@@ -1,13 +1,5 @@
 import {useState, useEffect} from 'react';
-import axios from 'axios';
-
-
-// Create axios instance with base URL
-const api = axios.create({
-  baseURL: '/api',
-  timeout: 10000,
-});
-
+import { api } from '../api/axios'
 
 export const useRefLocation = () => {
   
@@ -20,7 +12,7 @@ export const useRefLocation = () => {
     const testAPI = async () => {
       try {
         const response = await api.get('/refLocation/test');
-        console.log('API Test Response:', response.data);
+        // console.log('API Test Response:', response.data);
         return response.data;
       } catch (error) {
         console.error('API Test Failed:', error);
@@ -39,7 +31,7 @@ export const useRefLocation = () => {
           await testAPI();
           
           // Then fetch locations
-          console.log('Fetching location...');
+          // console.log('Fetching location...');
           const response = await api.get('/refLocation');
           // console.log('Locations response:', response.data);
           

@@ -23,8 +23,8 @@ import {
 import { useRefBrand } from '../../hooks/refBrand';
 
 // Custom table utilities & theme
-import { customTheme, resizeColumn} from '../../components/customTable';
-import useColumnWidths from '../../components/customTable';
+import { customTheme, resizeColumn} from '../../Utils/customTable';
+import useColumnWidths from '../../Utils/customTable';
 
 
 // ----------------------------------------------------------------------------

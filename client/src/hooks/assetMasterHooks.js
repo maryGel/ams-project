@@ -1,5 +1,5 @@
 import {useState, useEffect } from 'react';
-import axios from 'axios';
+import { api } from '../api/axios'
 
 
 export const useAssetMasterData = () => {
@@ -10,7 +10,7 @@ export const useAssetMasterData = () => {
   useEffect(()=> {
     const pullItems = async () => {
       try{
-        const response = await axios.get('/api/itemlist/assetMasterlist');
+        const response = await api.get('/itemlist/assetMasterlist');
 
         const data = response.data;
 

@@ -21,8 +21,8 @@ import { IconButton, ThemeProvider, TextField, TablePagination, Snackbar, Alert,
 import { useRefUom } from '../../hooks/refUom'; // import the refUnit data
 
 // Custom table utilities & theme
-import { customTheme, resizeColumn } from '../../components/customTable';
-import useColumnWidths from '../../components/customTable';
+import { customTheme, resizeColumn } from '../../Utils/customTable';
+import useColumnWidths from '../../Utils/customTable';
 
 // ----------------------------------------------------------------------------
 //                       REF UOM COMPONENT
@@ -264,7 +264,7 @@ const handleTempChange = (id, field, value) => {
 
           {/* Title + Buttons */}
           <div className='flex items-center justify-between mb-4'>
-            <h1 className='text-lg font-semibold text-gray-800'>Brand List</h1>
+            <h1 className='text-lg font-semibold text-gray-800'>UOM List</h1>
 
             <div className="flex space-x-1">
 

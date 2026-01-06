@@ -1,12 +1,8 @@
 // hooks/refCategory.js
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { api } from '../api/axios'
 
-// Create axios instance with base URL
-const api = axios.create({
-  baseURL: '/api',
-  timeout: 10000,
-});
+
 
 // 1. UPDATED HOOK SIGNATURE
 export const useRefCategory = (useProps, deps = []) => {
@@ -19,7 +15,7 @@ export const useRefCategory = (useProps, deps = []) => {
   const testAPI = async () => {
     try {
       const response = await api.get('/api/refCat/test');
-      console.log('API Test Response:', response.data);
+      // console.log('API Test Response:', response.data);
       return response.data;
     } catch (error) {
       console.error('API Test Failed:', error);

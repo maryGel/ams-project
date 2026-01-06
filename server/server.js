@@ -66,8 +66,8 @@ const getDbConfig = () => {
     // Local development - use local MySQL
     return {
       host: 'localhost',
-      user: 'root',
-      password: 'adminGel',
+      user: 'myuser101',
+      password: 'MmFjbV69',
       database: 'ams1',
       port: 3306,
       waitForConnections: true,

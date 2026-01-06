@@ -24,7 +24,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 
 // useEffect (fetch API using axios)
 // import {useAssetMasterData} from '../../hooks/assetMasterHooks'
@@ -231,8 +231,9 @@ export default function AssetMasterTable({
     displayedAsset,
     page,
     setPage,
-    // searchQuery,
-    isTableActive
+    isTableActive,
+    setHeaderTitle,
+    // setNavLink
   }) {
   // MUI States
   const [order, setOrder] = useState('asc');
@@ -246,10 +247,9 @@ export default function AssetMasterTable({
 
 
   //Data fetching for API Data 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const rows = displayedAsset;
-
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -302,7 +302,11 @@ export default function AssetMasterTable({
     const facNo = row.FacNO || row.FacNo;
 
     // Navigate to display page
-    navigate(`/assetFolder/assetMasterDisplay/${facNo}`);
+    const path = `/assetFolder/assetMasterDisplay/${facNo}`;
+    setHeaderTitle(`Asset Master Display`);
+    // setNavLink('/assetFolder/pages/assetMasterList');
+    window.open(path, '_blank');
+
   }; 
 
 

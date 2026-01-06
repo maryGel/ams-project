@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+
 import { api } from '../api/axios';
 import { useNavigate } from "react-router-dom";
 
-function LoginPage() {
+
+function LoginPage({setHeaderTitle}) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -11,6 +13,8 @@ function LoginPage() {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
+    setHeaderTitle("Asset Management System");
+
     // Prevent default form submission if inside a form
     if (e) e.preventDefault();
     
@@ -34,7 +38,7 @@ function LoginPage() {
         console.log("✅ Login successful, navigating to home");
         // Store user data in localStorage if needed
         localStorage.setItem('user', JSON.stringify(res.data.user));
-        navigate("/Home");
+        navigate('/Home');
       } else {
         setErrorMsg(res.data.message || "Login failed");
       }
@@ -55,7 +59,10 @@ function LoginPage() {
     } finally {
       setIsLoading(false);
     }
+
   };
+
+  // console.log('header', headerTitle)
 
   // Handle form submission on Enter key
   const handleKeyPress = (e) => {
