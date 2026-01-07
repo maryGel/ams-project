@@ -2,7 +2,7 @@ import AssetDisplayDepTabs from './assetDisplayDepTabs'
 
 export default function AssetDisplayValue(){
   return(
-    <div className='p-5'>
+    <div className='px-10'>
       <div className='pt-5 pb-5 text-base shadow-sm shadow-slate-200 bg-gray-50'>
         {/* General Information Fields */}
         <p className='pl-5 mb-2 text-blue-800'>Costing Information</p>

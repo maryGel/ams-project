@@ -23,7 +23,7 @@ const rows = [
 
 export default function AssetDisplayTrans(){  
   return(
-    <div className='p-5'>
+    <div className='px-10'>
       <div className='pt-5 pb-5 text-base shadow-sm shadow-slate-200'>
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 300, width: '40rem' }} aria-label="simple table">

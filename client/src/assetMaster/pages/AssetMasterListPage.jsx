@@ -134,7 +134,11 @@ function AssetMasterListPage({useProps, setHeaderTitle, setNavLink }) {
 
   return (
     <div >
-      {/* Filter Options */}
+
+      {/* ------------------------
+      ------- Filter Options -----
+      ---------------------------*/}
+
       <form className="flex w-full h-auto p-5">
           <Autocomplete
             key = {`asset-search-${filterKey}`}
@@ -151,7 +155,6 @@ function AssetMasterListPage({useProps, setHeaderTitle, setNavLink }) {
             //  free text search
             inputValue= {draftSearchQuery}
             onInputChange = {(event, newInputValue) => setDraftSearchQuery(newInputValue)}
-
 
             getOptionLabel={(option) =>
               `${option.FacNO} - ${option.FacName}`
@@ -256,8 +259,14 @@ function AssetMasterListPage({useProps, setHeaderTitle, setNavLink }) {
             size="small"
           />     
         </form>
+        
       
-      {/* Filter buttons */}
+      
+      {/* ------------------------
+      ----  Search Buttons -------
+      ---------------------------*/}
+      
+
       <div className='flex w-full h-auto p-2 pr-5 ml-auto bg-gray-100 place-content-end'>
         {/* Asset Group List Table to be implemented here */}
         <button 

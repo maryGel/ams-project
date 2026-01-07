@@ -47,7 +47,7 @@ function a11yProps(index) {
   };
 }
 
-export default function AssetDisplayTabs({asset}){
+export default function AssetDisplayTabs({asset, isEditing, setIsEditing, onFieldChange}){
 
   const theme = useTheme();
   const [value, setValue] = React.useState(0);
@@ -75,6 +75,9 @@ export default function AssetDisplayTabs({asset}){
       <TabPanel value={value} index={0} dir={theme.direction} sx={{ width: '100%' }}>
         <AssetDisplayGenInfo
           asset={asset}
+          isEditing={isEditing}
+          setIsEditing={setIsEditing}
+          onFieldChange={onFieldChange}
         />
       </TabPanel>
       <TabPanel value={value} index={1} dir={theme.direction}>

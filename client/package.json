@@ -17,12 +17,14 @@
     "@mui/material": "^5.14.20",
     "@mui/utils": "^5.14.16",
     "@mui/x-data-grid": "^6.17.1",
+    "@mui/x-date-pickers": "^8.23.0",
+    "@vitejs/plugin-react": "^4.1.1",
     "axios": "^1.5.1",
+    "dayjs": "^1.11.19",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.1",
-    "vite": "^4.5.0",
-    "@vitejs/plugin-react": "^4.1.1"
+    "vite": "^4.5.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",
