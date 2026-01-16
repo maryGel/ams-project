@@ -65,7 +65,7 @@ const getDbConfig = () => {
   } else {
     // Local development - use local MySQL
     return {
-      host: 'localhost',
+      host: '192.168.64.5',
       user: 'myuser101',
       password: 'MmFjbV69',
       database: 'ams1',

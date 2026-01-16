@@ -22,9 +22,7 @@ export default function AssetDisplayGenInfo({asset, isEditing, onFieldChange }){
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={asset.writeOff}
-                  onChange={(e) => onFieldChange("writeOff",e.target.checked ? 1: 0)}
-                  sx={{ color: 'Green'}}
+                  checked={asset.writeOff} sx={{ color: 'Blue'}} onChange={(e) => onFieldChange("writeOff",e.target.checked ? 1: 0)}        
                 />
               }
               disabled={!isEditing}

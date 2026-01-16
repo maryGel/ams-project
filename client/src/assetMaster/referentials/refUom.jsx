@@ -28,6 +28,7 @@ import useColumnWidths from '../../Utils/customTable';
 //                       REF UOM COMPONENT
 // ----------------------------------------------------------------------------
 export default function RefUom({useProps, openTab,}) {
+  
   const {
     uomData, 
     loading, 
@@ -37,7 +38,6 @@ export default function RefUom({useProps, openTab,}) {
     deleteRefUnit,
     refreshRefUnit,
   } = useRefUom(useProps)
-
   const {handleResizeMouseDown, theaderStyle, tbodyStyle} = useColumnWidths();
   const [rows, setRows] = useState(uomData || []); // To hold the refUnit Data
   const [temporaryData, setTemporaryData] = useState(uomData|| []);
@@ -224,11 +224,14 @@ const handleTempChange = (id, field, value) => {
   if (loading) return <div className="p-4 text-gray-600">Loading data...</div>;
   if (error) return <div className="p-4 text-red-600">Error loading data.. {error.message}</div>;
 
+
+
   return (
     <>
     {openTab === 'Unit of Measure' &&
       <ThemeProvider theme={customTheme}>
         <div key = {rows.id} className='w-auto h-full p-4 bg-white shadow-lg rounded-xl'>
+          
 
           {/* Snackbar */}
           <Snackbar
@@ -249,7 +252,7 @@ const handleTempChange = (id, field, value) => {
           <div className='flex justify-end mb-3'>
             <Autocomplete
               freeSolo
-              options={rows.map(item => item.Unit)}
+              options={rows.map(item => item.Unit) }             
               value={searchQuery}
               onInputChange={(e, v) => {
                 setSearchQuery(v);
@@ -261,6 +264,7 @@ const handleTempChange = (id, field, value) => {
               sx={{ width: 300 }}
             />
           </div>
+        
 
           {/* Title + Buttons */}
           <div className='flex items-center justify-between mb-4'>
@@ -297,6 +301,7 @@ const handleTempChange = (id, field, value) => {
 
               {/* Add Row */}
               <IconButton
+                title='Create UOM'
                 onClick={handleAddRow}
                 disabled={editingRowId !== null}
                 size="small"

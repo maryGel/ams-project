@@ -297,16 +297,14 @@ export default function RefItemClass({useProps, openTab,}) {
                   <TextField 
                     {...params} 
                     label="Search here" 
-                    // Optional: Add a helper text to indicate Enter is needed
-                    helperText="Press Enter to search"
                   />
                 }
                 sx={{ width: 300 }}
               />
               </div>
-           
+              
             {/* Edit, Add, and Download button */}
-            <div className='flex items-center justify-between mt-6 mb-4'>
+            <div className='flex items-center justify-between mb-4'>
               <h1 className='text-lg font-semibold text-gray-800'>Asset Class List</h1>
                 <div className="flex space-x-1">
                   {/* Save */}
@@ -370,12 +368,14 @@ export default function RefItemClass({useProps, openTab,}) {
                 </div>
             </div>
             
-            {/* ----------------------- TABLE STARTS HERE --------------------------- */}
+            {/* ------------------------------------------------- 
+            -               TABLE STARTS HERE 
+            --------------------------------------------------- */}
 
             <div className='overflow-x-auto border rounded-lg '>
               <table className="w-full border-collapse">
 
-                {/* ----------------------- > TABLE HEADER */}
+                {/* ----------------------- > TABLE HEADER  <------------------------*/}
                 <thead>
                   <tr className='bg-gray-100 border-b'>
 
@@ -430,11 +430,11 @@ export default function RefItemClass({useProps, openTab,}) {
                       />
                     </th>
 
-                    {/* itemClass NAME */}
+                    {/* itemClass CATEGORY */}
 
                     <th
                       className='relative p-2 text-sm font-semibold text-left text-gray-700 border-r border-gray-200'
-                      style={theaderStyle('Name')}
+                      style={{width: 500}}
                       onClick={() => handleSort('category')}
                     >
                       Asset Group
@@ -460,7 +460,7 @@ export default function RefItemClass({useProps, openTab,}) {
                 </thead>
 
 
-                {/* ------------------ Table Body Starts Here */}
+                {/* ------------------ Table Body Starts Here -----------------------*/}
 
                 <tbody>
                   {paginatedRows.map((row) => (
@@ -496,7 +496,7 @@ export default function RefItemClass({useProps, openTab,}) {
                         row.itemClass
                       )}
                     </td>
-                    {/* itemClass Name column */}
+                    {/* itemClass Asset Group column */}
                     <td className='p-1 pl-2'style={tbodyStyle('category')} >
                     {editingRowId === row.id? (
                         <Autocomplete
@@ -507,9 +507,7 @@ export default function RefItemClass({useProps, openTab,}) {
                             handleTempChange(row.id, 'category', newValue || "")
                           }}
                           className="w-full p-1 border-b"
-                          renderInput={(params) => (
-                                        <TextField {...params} size="small" />
-                                      )}
+                          renderInput={(params) => (<TextField {...params} size="small" />)}
                         />
                       ) : (
                         row.category
@@ -546,7 +544,7 @@ export default function RefItemClass({useProps, openTab,}) {
             <p className="mt-3 text-sm text-gray-500">
               {editingRowId !== null
                 ? 'Editing enabled. Click the save icon to commit changes.'
-                : `Click the Edit icon ${String.fromCodePoint(0x270E)} to enable editing.`
+                : `Click Edit or Add Row to begin editing.`
               }
             </p>
           </div>

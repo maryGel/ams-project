@@ -63,7 +63,7 @@ export default function RefCategory({useProps, openTab,}) {
     setSnackbar({ open: true, message, severity });
   };
 
-  // ✅ Add Row (Only One Editable)
+  // Add Row (Only One Editable)
   const handleAddRow = () => {
       if (editingRowId !== null) return; // Safety block
 
@@ -87,7 +87,7 @@ export default function RefCategory({useProps, openTab,}) {
       setPage(newLastPage);
   };
   
-  // ✅ Update temp data for editable row
+  // Update temp data for editable row
   const handleTempChange = (id, field, value) => {
       setTemporaryData(prev =>
         prev.map(row =>
@@ -96,7 +96,7 @@ export default function RefCategory({useProps, openTab,}) {
       );
   };
 
-  // ✅ Save One Row Only
+  // Save One Row Only
   const handleSave = async () => {
       const editedRow = temporaryData.find(r => r.id === editingRowId);
       if (!editedRow) return;
@@ -110,7 +110,7 @@ export default function RefCategory({useProps, openTab,}) {
 
 
      // If xCode has value, then category is required
-     if (editedRow.xCode?.trim()) {
+    if (editedRow.xCode?.trim()) {
     
       // If any required fields are empty, show error
       if (!editedRow.category?.trim()) {
@@ -119,7 +119,7 @@ export default function RefCategory({useProps, openTab,}) {
       }
     }
 
-      // ❗ Duplicate validation
+      // Duplicate validation
       const isDuplicate = rows.some(row =>
           row.id !== editedRow.id && (
             row.xCode.trim().toLowerCase() === editedRow.xCode.trim().toLowerCase() ||
@@ -275,7 +275,7 @@ export default function RefCategory({useProps, openTab,}) {
               </div>
 
             {/* Edit, Add, and Download button */}
-            <div className='flex items-center justify-between mt-6 mb-4'>
+            <div className='flex items-center justify-between mb-4'>
               <h1 className='text-lg font-semibold text-gray-800'>Asset Group List</h1>
                 <div className="flex space-x-1">
                    {/* Save */}
@@ -454,7 +454,7 @@ export default function RefCategory({useProps, openTab,}) {
             <p className="mt-3 text-sm text-gray-500">
               {editingRowId !== null
                 ? 'Editing enabled. Click the save icon to commit changes.'
-                : `Click the Edit icon ${String.fromCodePoint(0x270E)} to enable editing.`
+                : `Click Edit or Add Row to begin editing.`
               }
             </p>
           </div>

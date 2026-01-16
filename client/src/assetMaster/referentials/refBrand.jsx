@@ -64,7 +64,7 @@ export default function RefBrand({ useProps, openTab }) {
     setSnackbar({ open: true, message, severity });
   };
 
-  // ✅ Add Row (Only One Editable)
+  // Add Row (Only One Editable)
   const handleAddRow = () => {
     if (editingRowId !== null) return; // Safety block
 
@@ -88,7 +88,7 @@ export default function RefBrand({ useProps, openTab }) {
     setPage(newLastPage);
   };
 
-  // ✅ Update temp data for editable row
+  // Update temp data for editable row
   const handleTempChange = (id, field, value) => {
     setTemporaryData(prev =>
       prev.map(row =>
@@ -98,7 +98,7 @@ export default function RefBrand({ useProps, openTab }) {
   };
 
   
-  // ✅ Save One Row Only
+  // Save One Row Only
   const handleSave = async () => {
     const editedRow = temporaryData.find(r => r.id === editingRowId);
     if (!editedRow) return;
@@ -123,7 +123,7 @@ export default function RefBrand({ useProps, openTab }) {
 
   
 
-    // ❗ Duplicate validation
+    // Duplicate validation
     const isDuplicate = rows.some(row =>
       row.id !== editedRow.id && (
         row.BrandID.trim().toLowerCase() === editedRow.BrandID.trim().toLowerCase() ||
@@ -313,6 +313,7 @@ export default function RefBrand({ useProps, openTab }) {
 
                 {/* Add Row */}
                 <IconButton
+                  title='Create Brand'
                   onClick={handleAddRow}
                   disabled={editingRowId !== null}
                   size="small"

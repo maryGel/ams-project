@@ -25,7 +25,7 @@ import { customTheme, resizeColumn } from '../../Utils/customTable';
 import useColumnWidths from '../../Utils/customTable';
 
 // ----------------------------------------------------------------------------
-//                       REF Department COMPONENT
+//                       REF Department
 // ----------------------------------------------------------------------------
 export default function RefDepartment({useProps, openTab,}) {
   const {
@@ -93,7 +93,7 @@ const handleTempChange = (id, field, value) => {
   );
 };
 
- // ✅ Save One Row Only
+ // Save One Row Only
  const handleSave = async () => {
   const editedRow = temporaryData.find(r => r.id === editingRowId);
   if (!editedRow) return;
@@ -107,7 +107,7 @@ const handleTempChange = (id, field, value) => {
     return;
   }
 
-  // ❗ Duplicate validation
+  // Duplicate validation
   const isDuplicate = rows.some(row =>
     row.id !== editedRow.id && (
       row.Department.trim().toLowerCase() === editedRow.Department.trim().toLowerCase()
@@ -174,19 +174,19 @@ const handleTempChange = (id, field, value) => {
     setTemporaryData(cleaned);
   };
   
-  // ✅ Cancel Editing
+  // Cancel Editing
   const handleCancelEdit = () => {
     removeEmptyRows()
     setEditingRowId(null);
   };
 
-  // ✅ Enable editing for existing rows
+  // Enable editing for existing rows
   const handleEditExistingRow = (id) => {
     if (editingRowId !== null) return;
     setEditingRowId(id);
   };
 
-  // ✅ Sort
+  // Sort
   const handleSort = (columnKey) => {
     let direction = 'asc';
     if (sortConfig.key === columnKey && sortConfig.direction === 'asc') {
@@ -205,7 +205,7 @@ const handleTempChange = (id, field, value) => {
     setSortConfig({ key: columnKey, direction });
   };
 
-  // ✅ Filter + Paginate
+  // Filter + Paginate
   const filteredData = temporaryData.filter(item =>
     // Always include the currently edited row in results
     item.id === editingRowId ||

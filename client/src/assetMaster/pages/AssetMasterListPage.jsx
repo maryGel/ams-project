@@ -4,14 +4,12 @@ import { useState } from 'react';
 // MUI import
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
-import AddIcon from '@mui/icons-material/Add';
-import CheckIcon from '@mui/icons-material/Check';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import { createFilterOptions } from '@mui/material/Autocomplete';
 
 //Component/pages import
 import AssetMasterTable from '../assetMaster/assetMasterTable'
-import { NavLink } from 'react-router-dom';
 import { useAssetMasterData } from '../../hooks/assetMasterHooks';
 import { useRefCategory } from '../../hooks/refCategory';
 import { useRefItemClass } from '../../hooks/refClass';
@@ -189,7 +187,7 @@ function AssetMasterListPage({useProps, setHeaderTitle, setNavLink }) {
             getOptionLabel={(option) => option}
             // defaultValue={[]}
             renderInput={(params) => (
-              <TextField {...params}  placeholder="Asset Group" />
+              <TextField {...params} label="Asset Group" placeholder="Asset Group" />
             )}
             sx={{ width: '15rem', marginRight: '1rem' }}
           />
@@ -209,7 +207,7 @@ function AssetMasterListPage({useProps, setHeaderTitle, setNavLink }) {
             getOptionLabel={(option) => option}
             // defaultValue={[]}
             renderInput={(params) => (
-              <TextField {...params}  placeholder="Asset Class" />
+              <TextField {...params} label="Asset Class"  placeholder="Asset Class" />
             )}
             sx={{ width: '15rem', marginRight: '1rem' }}
           />
@@ -229,7 +227,7 @@ function AssetMasterListPage({useProps, setHeaderTitle, setNavLink }) {
             getOptionLabel={(option) => option}
             // defaultValue={[]}
             renderInput={(params) => (
-              <TextField {...params}  placeholder="Location" />
+              <TextField {...params} label="Location"  placeholder="Location" />
             )}
             sx={{ width: '15rem', marginRight: '1rem' }}
           />
@@ -248,7 +246,7 @@ function AssetMasterListPage({useProps, setHeaderTitle, setNavLink }) {
             getOptionLabel={(option) => option}
             // defaultValue={[]}
             renderInput={(params) => (
-              <TextField {...params}  placeholder="Department" />
+              <TextField {...params} label="Department"   placeholder="Department" />
             )}
             sx={{ width: '15rem', marginRight: '1rem' }}
           />   
@@ -263,42 +261,28 @@ function AssetMasterListPage({useProps, setHeaderTitle, setNavLink }) {
       
       
       {/* ------------------------
-      ----  Search Buttons -------
+      -     Search Buttons       -
       ---------------------------*/}
       
 
       <div className='flex w-full h-auto p-2 pr-5 ml-auto bg-gray-100 place-content-end'>
         {/* Asset Group List Table to be implemented here */}
         <button 
-          className='pt-1 pb-1 pl-2 pr-3 mr-2 text-gray-600 border rounded-full shadow-md border-slate-300'
+          className='pt-1 pb-1 pl-2 pr-3 mr-2 text-white transition-transform duration-200 ease-in-out bg-green-500 border rounded-full shadow-black border-spacing-1 active:scale-95 hover:text-gray-600'
+          onClick={handleGoClick} 
+          type="button"
+        >
+          <CheckCircleIcon sx={{marginX: .5}} />  
+          Go  
+        </button>
+        <button 
+          className='pt-1 pb-1 pl-2 pr-3 mr-2 text-gray-600 transition-transform duration-200 ease-in-out border rounded-full border-slate-300 active:scale-95 hover:bg-gray-600 hover:text-white '
           onClick={handleClearClick}
           type="button" // Use this to prevent form submission
         >
           <ClearAllIcon/>
           Clear   
         </button>
-        
-        <button 
-          className='pt-1 pb-1 pl-2 pr-3 mr-2 text-green-100 bg-green-500 border border-green-400 rounded-full shadow-lg'
-          onClick={handleGoClick} 
-          type="button"
-        >
-          <CheckIcon/>  
-          Go  
-        </button>
-        
-
-        <button 
-          className='pt-1 pb-1 pl-2 pr-3 mr-4 text-gray-600 border rounded-full shadow-md border-slate-300'
-          onClick={() => {
-            const path = '/assetFolder/createAsset';
-            window.open(path ,'_blank')
-          }}
-        >
-          <AddIcon />
-          Create
-        </button>
-
       </div>
 
        {/* Filter table */}

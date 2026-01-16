@@ -30,7 +30,7 @@ export default function RefTabs({handleOpenTab}){
 
     return(
       <List
-        sx={{ width: '100%', maxWidth: 300, bgcolor: 'background.paper' }}
+        sx={{ width: '100%', maxWidth: 300, bgcolor: 'background.paper', borderRadius: 4, boxShadow: '0px 1px 2px rgba(0,0,0,0.25)'}}
         component="nav"
         aria-labelledby="nested-list-subheader"
       >

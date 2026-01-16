@@ -21,8 +21,10 @@ import {
   FormControlLabel,
   Switch,
 } from '@mui/material';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import AddIcon from '@mui/icons-material/Add';
 import { visuallyHidden } from '@mui/utils';
 // import { useNavigate } from 'react-router-dom';
 
@@ -31,13 +33,19 @@ import { visuallyHidden } from '@mui/utils';
 
 
 function descendingComparator(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
+  const aValue = a[orderBy];
+  const bValue = b[orderBy];
+
+  if (aValue == null || bValue == null) return 0;
+
+  if (typeof aValue === 'number' && typeof bValue === 'number') {
+    return bValue - aValue;
   }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
+
+  return bValue.toString().localeCompare(aValue.toString(), undefined, {
+    numeric: true,
+    sensitivity: 'base',
+  });
 }
 
 function getComparator(order, orderBy) {
@@ -48,58 +56,31 @@ function getComparator(order, orderBy) {
 
 const headCells = [
   {
-    id: 1,
-    numeric: false,
-    disablePadding: true,
-    label: 'Asset Number',
+    id: 'FacNO', numeric: false, disablePadding: true, label: 'Asset Number',
   },
   {
-    id: 2,
-    numeric: true,
-    disablePadding: false,
-    label: 'Asset Name',
+    id: 'FacName', numeric: true, disablePadding: false, label: 'Asset Name',
   },
   {
-    id: 3,
-    numeric: true,
-    disablePadding: false,
-    label: 'Asset Class',
+    id: 'ItemClass', numeric: true, disablePadding: false, label: 'Asset Class',
   },
   {
-    id: 4,
-    numeric: true,
-    disablePadding: false,
-    label: 'Asset Group',
+    id: 'CATEGORY', numeric: true, disablePadding: false, label: 'Asset Group',
   },
   {
-    id: 5,
-    numeric: true,
-    disablePadding: false,
-    label: 'Quantity',
+    id: 'balance_unit', numeric: true, disablePadding: false, label: 'Quantity',
   },
   {
-    id: 6,
-    numeric: true,
-    disablePadding: false,
-    label: 'UOM',
+    id: 'Unit', numeric: true, disablePadding: false,label: 'UOM',
   },
   {
-    id: 7,
-    numeric: true,
-    disablePadding: false,
-    label: 'Location',
+    id: 'ItemLocation', numeric: true, disablePadding: false, label: 'Location',
   },
   {
-    id: 8,
-    numeric: true,
-    disablePadding: false,
-    label: 'Department',
+    id: 'Department', numeric: true, disablePadding: false, label: 'Department',
   },
   {
-    id: 9,
-    numeric: true,
-    disablePadding: false,
-    label: 'Status',
+    id: 'status', numeric: true, disablePadding: false, label: 'Status',
   },
 ];
 
@@ -116,14 +97,14 @@ function EnhancedTableHead(props) {
         <TableCell padding="checkbox">
           {props.rowCount > 0 && (
             <Checkbox
-            color="primary"
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={onSelectAllClick}
-            inputProps={{
-              'aria-label': 'select all desserts',
-            }}
-          />
+              color="primary"
+              indeterminate={numSelected > 0 && numSelected < rowCount}
+              checked={rowCount > 0 && numSelected === rowCount}
+              onChange={onSelectAllClick}
+              inputProps={{
+                'aria-label': 'select all desserts',
+              }}
+            />
           )}
         </TableCell>
         {headCells.map((headCell) => (
@@ -163,7 +144,7 @@ EnhancedTableHead.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
-  const { numSelected } = props;
+  const { numSelected, selected, onCopyToNew } = props;
 
   return (
     <Toolbar
@@ -197,25 +178,48 @@ function EnhancedTableToolbar(props) {
           Asset Master List
         </Typography>
       )}
-      {numSelected > 0 ? (
+
+      {numSelected > 1 ? 
         <Tooltip title="Delete">
           <IconButton>
             <DeleteIcon />
           </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip title="Filter list">
-          <IconButton>
-            <FilterListIcon />
+        </Tooltip>      
+      :         
+        <Tooltip title="Copy to New">
+          <IconButton
+            disabled={numSelected !== 1}
+            onClick={(e) => onCopyToNew(selected[0])}
+          >
+            <FileCopyIcon />
           </IconButton>
         </Tooltip>
-      )}
+      }
+
+      <Tooltip title="Create Asset">
+        <IconButton
+          onClick={() => {
+            const path = '/assetFolder/createAsset';
+            window.open(path ,'_blank')
+          }}
+        >
+          <AddIcon />
+        </IconButton>
+      </Tooltip>
+
+      <Tooltip title="Filter list">
+        <IconButton>
+          <FilterListIcon />
+        </IconButton>
+      </Tooltip>
     </Toolbar>
   );
 }
 
 EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
+  selected: PropTypes.array.isRequired,
+  onCopyToNew: PropTypes.func.isRequired,
 };
 
 
@@ -225,7 +229,6 @@ EnhancedTableToolbar.propTypes = {
 
 
 export default function AssetMasterTable({ 
-    // itemList, 
     loading, 
     error,
     displayedAsset,
@@ -233,21 +236,13 @@ export default function AssetMasterTable({
     setPage,
     isTableActive,
     setHeaderTitle,
-    // setNavLink
   }) {
   // MUI States
   const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState('');
+  const [orderBy, setOrderBy] = useState('FacNO');
   const [selected, setSelected] = useState([]);
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-
-  // // New State for API Data
-  // const {itemList, loading, error} = useAssetMasterData(assetProps)
-
-
-  //Data fetching for API Data 
-  // const navigate = useNavigate();
 
   const rows = displayedAsset;
 
@@ -309,6 +304,14 @@ export default function AssetMasterTable({
 
   }; 
 
+  const handleClickCopytoNew = (facNo) => {
+    if (!facNo) return;
+
+    // Navigate to Create Asset Page
+    const path = `/assetFolder/createAsset?copyFrom=${facNo}`
+    window.open(path, '_blank');
+  }
+
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
@@ -349,13 +352,15 @@ export default function AssetMasterTable({
       </Box>
     );
   }
-
- 
   
   return (
     <Box sx={{ width: '100%',  padding: 2}}>
       <Paper sx={{ width: '100%', mb: 2 }}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <EnhancedTableToolbar 
+          numSelected={selected.length} 
+          selected={selected}
+          onCopyToNew = {handleClickCopytoNew}
+        />
         <TableContainer>
           <Table
             sx={{ minWidth: 750  }}
@@ -371,6 +376,10 @@ export default function AssetMasterTable({
               rowCount={rows.length}  
               sx={{ cursor: 'pointer', fontWeight: 'bold' }}          
             />
+
+            {/* -----------------------------------------
+            -           T A B L E  B O D Y             -
+            -------------------------------------------*/}
             <TableBody>
               {visibleRows.map((row, index) => {
                 const uniqueId = row.FacNO || row.id;

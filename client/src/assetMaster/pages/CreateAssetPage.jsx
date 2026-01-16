@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Stepper,
   Step,
@@ -10,6 +10,10 @@ import {
 //import Asset Fields
 import CreateAssetGenInfo from '../createAsset/createAssetGenInfo';
 import CreateAssetAcctAsgmnt from '../createAsset/createAssetAcctAsgmnt';
+import { useSearchParams } from 'react-router-dom';
+
+// Custom hooks
+import { useAssetMasterData } from '../../hooks/assetMasterHooks'; // import the itemlist
 
   // Define your step labels
 const steps = ['General Info', 'Account Assignment', 'Upload Picture'];
@@ -20,8 +24,14 @@ const steps = ['General Info', 'Account Assignment', 'Upload Picture'];
 
   // Component for the entire multi-step form
 export default function CreateAsset() {
-  const [activeStep, setActiveStep] = useState(0);
-  // const [skipped, setSkipped] = React.useState(new Set());
+  const { itemList, loading, error } = useAssetMasterData();   
+  const [ asset, setAsset ] = useState({});
+  const [ activeStep, setActiveStep ] = useState(0);
+  const [ searchParams  ] = useSearchParams();
+  const facNo = searchParams.get('copyFrom');
+  
+  
+  console.log(`create assetpage: ${facNo}`)
 
   // State to hold all form data
   const [assetData, setAssetData] = useState({
@@ -29,6 +39,28 @@ export default function CreateAsset() {
     accountAssignment: { },
     uploadPicture: { file: null, preview: '' }
   });
+
+  // Fetch Asset data from API on component mount
+  useEffect(() => {
+
+    if (!itemList || itemList.length === 0) return;
+    //Clean the route facNo
+    const targetFacNoClean = facNo?.replace(/\s/g, '').toUpperCase();
+
+    const matchingAsset = itemList.find(item => {
+      if (!item.FacNO || typeof item.FacNO !== 'string') return false;
+      const itemFacNoClean = item.FacNO
+        .replace(/\u00A0/g, '') // Remove NBSP
+        .replace(/\s/g, '') // Remove normal whitespace
+        .toUpperCase();
+      console.log(`itemFacNoClean: ${itemFacNoClean}`)
+      return itemFacNoClean === targetFacNoClean;
+      
+      });
+      setAsset(matchingAsset || {});
+  }, [itemList, facNo]);
+
+  // Handle functions 
 
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
@@ -47,7 +79,7 @@ export default function CreateAsset() {
     });
   };
 
-  // 4. Function to render content for each step
+  // Function to render content for each step
   function getStepContent(step) {
     switch (step) {
       case 0:
@@ -55,13 +87,19 @@ export default function CreateAsset() {
           <CreateAssetGenInfo
             assetData = {assetData}
             setAssetData = {setAssetData}
+            asset = {asset}
+            loading = {loading}
+            error = {error}
           />
         );
       case 1:
         return (
           <CreateAssetAcctAsgmnt
             assetData = {assetData}
-            setAssetData = {setAssetData}            
+            setAssetData = {setAssetData}  
+            asset = {asset}
+            loading = {loading}
+            error = {error}          
           />
         );
       case 2:
@@ -103,7 +141,7 @@ export default function CreateAsset() {
     }
   }
 
-  // 5. Final Submission Logic
+  // Final Submission Logic
   const handleSubmit = () => {
     console.log('Final Asset Data:', assetData);
     // Here you would typically send `assetData` to your API

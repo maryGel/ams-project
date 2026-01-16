@@ -14,33 +14,34 @@ function ReferentialPage() {
   const handleOpenTab = (tab) => setOpenTab(tab);
 
   return (
-  <div className='flex'>
+
+      <div className='flex p-5 m-12 border rounded-lg bg-slate-50 border-spacing-1'>
     
-    <RefTabs
-      handleOpenTab = {handleOpenTab}
-    />
-    
-    <div className='flex p-5 '>
-      <RefUom 
-        openTab = {openTab}
-      />
-      <RefBrand 
-        openTab = {openTab}
-      />
-      <RefCategory
-        openTab = {openTab}
-      />
-      <RefItemClass
-        openTab = {openTab}      
-      />
-      <RefLocation
-        openTab = {openTab}      
-      />
-      <RefDepartment
-        openTab = {openTab}      
-      />
-    </div>
-  </div>
+        <RefTabs
+          handleOpenTab = {handleOpenTab}
+        />
+        
+        <div className='flex ml-5'>
+          <RefUom 
+            openTab = {openTab}
+          />
+          <RefBrand 
+            openTab = {openTab}
+          />
+          <RefCategory
+            openTab = {openTab}
+          />
+          <RefItemClass
+            openTab = {openTab}      
+          />
+          <RefLocation
+            openTab = {openTab}      
+          />
+          <RefDepartment
+            openTab = {openTab}      
+          />
+        </div>
+      </div>
   );
 }
 
