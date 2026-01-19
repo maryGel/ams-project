@@ -20,8 +20,8 @@ export default function AssetDisplayGenInfo({useProps, asset, isEditing, onField
   const { uomData } = useRefUom(useProps);
   const { refCategoryData } = useRefCategory(useProps);
   const { refItemClassData } = useRefItemClass(useProps);
-  const {refDeptData} = useRefDepartment(useProps);
-  const {refLocData} = useRefLocation(useProps);
+  const { refDeptData } = useRefDepartment(useProps);
+  const { refLocData } = useRefLocation(useProps);
 
 
 
@@ -68,6 +68,9 @@ export default function AssetDisplayGenInfo({useProps, asset, isEditing, onField
             <input type= 'text' className='p-2 text-base text-gray-500' value={asset.suppName} disabled={!isEditing} readOnly={!isEditing} onChange={(e) => onFieldChange('suppName', e.target.value)}/>
             <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Reference:</span>
             <input type= 'text' className='p-2 text-base text-gray-500' value={asset.ReferenceNo} disabled={!isEditing} readOnly={!isEditing} onChange={(e) => onFieldChange('ReferenceNo', e.target.value)}/>
+            <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Color:</span>
+            <input type= 'text' className='p-2 text-base text-gray-500' value={asset.Color} disabled={!isEditing} readOnly={!isEditing} onChange={(e) => onFieldChange('ReferenceNo', e.target.value)}/>
+
           </div>
 
           {/* Item Assignment Fields*/}
@@ -126,7 +129,14 @@ export default function AssetDisplayGenInfo({useProps, asset, isEditing, onField
               )} 
             />
             <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Assigned to:</span>
-            <input type= 'text' className='p-2 text-base text-gray-500' value='mcagulada' disabled={!isEditing} readOnly={!isEditing} onChange={(e) => onFieldChange('mcagulada', e.target.value)}/>
+            <input type= 'text' className='p-2 text-base text-gray-500' value={asset.Holder} disabled={!isEditing} readOnly={!isEditing} onChange={(e) => onFieldChange('mcagulada', e.target.value)}/>
+            <box className='flex justify-between gap-2 w-100'>
+              <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Warranty:</span>
+              <span className='p-2 pl-5 mr-4 text-base tracking-wider text-gray-500'>From</span>
+              <input type= 'date' className='p-2 text-base text-gray-500' value={asset.StartDate} disabled={!isEditing} readOnly={!isEditing} />
+              <span className='p-2 pl-5 mr-4 text-base tracking-wider text-gray-500'>to</span>
+              <input type= 'date' className='p-2 text-base text-gray-500' value={asset.EndDate} disabled={!isEditing} readOnly={!isEditing} />
+            </box>
           </div>
           
           {/* Physical Count Information*/}
@@ -135,7 +145,7 @@ export default function AssetDisplayGenInfo({useProps, asset, isEditing, onField
             <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Last physical count on:</span>
             <span className='p-2 text-base text-gray-500'>12/31/2024</span>
             <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Inventory count sheet:</span>
-            <span className='p-2 text-base text-gray-500'>INV-TOWER1Manila</span>
+            <input type= 'text' className='p-2 text-base text-gray-500' value={asset.PC_BATCH} disabled readOnly/>
             <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Inventory note:</span>
             <span className='p-2 text-base text-gray-500'>Needs to evaluate for repair</span>
             <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Counted by:</span>

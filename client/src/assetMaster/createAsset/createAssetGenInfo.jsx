@@ -50,7 +50,9 @@ export default function CreateAssetGenInfo({
             })
           }
         />
+        <label className='pt-4 pl-3 text-gray-500' htmlFor="asset-description">Asset Description:</label>
         <TextareaAutosize
+          id="asset-description"
           aria-label="minimum height"
           minRows={2}
           label={'Asset Description'}
@@ -61,7 +63,7 @@ export default function CreateAssetGenInfo({
             color: 'black',
             padding: '1rem',
             border: '1px solid #ccc',
-            marginTop: '1rem'
+            marginTop: '.5rem'
           }}    
           onChange={(e) =>
             setAsset({
@@ -154,6 +156,46 @@ export default function CreateAssetGenInfo({
           margin="normal" 
           value= {asset.ReferenceNo || ''}
         />
+
+        <Box className= 'flex gap-2'>
+          <TextField
+            label={'Color'}
+            value={asset.Color || ''}
+            sx={{ width: '10rem' }}
+            margin="normal" 
+          />
+          <TextField
+            label="Warranty Start date"
+            sx={{ 
+              width: '16rem',
+              color: 'gray',
+              "& .MuiInputBase-input": {
+              color: "gray",
+              }
+            }}
+            type="date"
+            margin="normal" 
+            // value={asset.StartDate || ''}
+            // onChange={(e) => setDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}          
+          />
+
+          <TextField
+            label="Warranty End date"
+            sx={{ 
+              width: '16rem',
+              color: 'gray',
+              "& .MuiInputBase-input": {
+              color: "gray",
+              }
+            }}
+            type="date"
+            margin="normal" 
+            // value={date}
+            // onChange={(e) => setDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}          
+          /> 
+        </Box>         
       </Box>
     </Box>
   );

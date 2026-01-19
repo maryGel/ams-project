@@ -68,7 +68,7 @@ export default function AssetDisplayTabs({asset, isEditing, setIsEditing, onFiel
           aria-label="full width tabs example"
         >
           <Tab label="General Info" {...a11yProps(0)} sx={{ letterSpacing: '0.10em' }}/>
-          <Tab label="Asset Value" {...a11yProps(1)} sx={{ letterSpacing: '0.10em' }}/>
+          <Tab label="Finance" {...a11yProps(1)} sx={{ letterSpacing: '0.10em' }}/>
           <Tab label="Transaction" {...a11yProps(2)} sx={{ letterSpacing: '0.10em' }}/>
         </Tabs>
       </AppBar>
@@ -81,7 +81,12 @@ export default function AssetDisplayTabs({asset, isEditing, setIsEditing, onFiel
         />
       </TabPanel>
       <TabPanel value={value} index={1} dir={theme.direction}>
-        <AssetDisplayValue/>
+        <AssetDisplayValue
+          asset={asset}
+          isEditing={isEditing}
+          setIsEditing={setIsEditing}
+          onFieldChange={onFieldChange}
+        />
       </TabPanel>
       <TabPanel value={value} index={2} dir={theme.direction}>
         <AssetDisplayTrans/>

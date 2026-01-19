@@ -77,7 +77,7 @@ export default function AssetMasterDisplay({}){
             
             {/* EDIT and CANCEL BUTTON */}
               <button
-                className= {`flex justify-center pt-1 pb-1 pl-2 pr-3 mr-2 text-white transition-transform duration-200 ease-in-out border rounded-full
+                className= {`flex justify-center pt-1 pb-1 pl-2 pr-3 text-white transition-transform duration-200 ease-in-out border rounded-full
                   ${isEditing? 'bg-gray-600  hover:bg-gray-400 hover:text-white' : 'bg-blue-800 text-white hover:bg-blue-600' }  
                   border-slate-300 active:scale-95`}
                 title={isEditing? 'Cancel Edit' : 'Edit Asset'}
@@ -114,7 +114,7 @@ export default function AssetMasterDisplay({}){
                 </div>  
                 <div className='grid grid-cols-[10rem_2fr] shadow-sm shadow-slate-200 mt-2 ml-16 py-2 text-base bg-gray-100'>
                   <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Status:</span>
-                  <input type="text" className='p-2 text-base font-semibold tracking-wider text-green-600' disabled value={asset.xStatus || 'Active'} readOnly />
+                  <input type="text" className='p-2 text-base font-semibold tracking-wider text-green-600' disabled value={asset.xxStats || 'Active'} readOnly />
                 </div>          
               </div>
     
