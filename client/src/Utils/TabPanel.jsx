@@ -14,6 +14,7 @@ import Depreciation from '../assetDep/assetDepRun';
 import AssetReports from '../assetReports/assetReport';
 import PhysicalCount from '../assetPhysical/assetPhysicalCount';
 import AssetUtilities from '../assetUtilities/assetUtilities';
+import DashboardPage from '../assetDash/dashBoardPage';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -71,33 +72,37 @@ export default function FullWidthTabs({
           variant="fullWidth"
           aria-label="full width tabs example"
         >
-          <Tab label="ASSET MASTER" {...a11yProps(0)} />
-          <Tab label="MOVEMENT" {...a11yProps(1)} />
-          <Tab label="DEPRECIATION" {...a11yProps(2)} />
-          <Tab label="REPORTS" {...a11yProps(3)} />
-          <Tab label="PHYSICAL COUNT" {...a11yProps(4)} />
-          <Tab label="UTILITIES" {...a11yProps(5)} />
+          <Tab label="DASHBOARD" {...a11yProps(0)} />
+          <Tab label="ASSET MASTER" {...a11yProps(1)} />
+          <Tab label="MOVEMENT" {...a11yProps(2)} />
+          <Tab label="DEPRECIATION" {...a11yProps(3)} />
+          <Tab label="REPORTS" {...a11yProps(4)} />
+          <Tab label="PHYSICAL COUNT" {...a11yProps(5)} />
+          <Tab label="UTILITIES" {...a11yProps(6)} />
         </Tabs>
       </AppBar>
       <TabPanel value={value} index={0} dir={theme.direction}>
+        <DashboardPage/>
+      </TabPanel>
+      <TabPanel value={value} index={1} dir={theme.direction}>
         <AssetMasterTile 
           headerTitle={headerTitle}
           setHeaderTitle={setHeaderTitle}          
         />
       </TabPanel>
-      <TabPanel value={value} index={1} dir={theme.direction}>
+      <TabPanel value={value} index={2} dir={theme.direction}>
         <AssetMovement/>
       </TabPanel>
-      <TabPanel value={value} index={2} dir={theme.direction}>
+      <TabPanel value={value} index={3} dir={theme.direction}>
         <Depreciation/>
       </TabPanel>
-      <TabPanel value={value} index={3} dir={theme.direction}>
+      <TabPanel value={value} index={4} dir={theme.direction}>
         <AssetReports/>
       </TabPanel>
-      <TabPanel value={value} index={4} dir={theme.direction}>
+      <TabPanel value={value} index={5} dir={theme.direction}>
         <PhysicalCount/>
       </TabPanel>
-      <TabPanel value={value} index={5} dir={theme.direction}>
+      <TabPanel value={value} index={6} dir={theme.direction}>
         <AssetUtilities/>
       </TabPanel>
     </Box>

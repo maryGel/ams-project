@@ -231,13 +231,15 @@ export default function AssetMasterTable({
     setPage,
     isTableActive,
     setHeaderTitle,
+    selected,
+    setSelected
   }) {
   // MUI States
   const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState('FacNO');
-  const [selected, setSelected] = useState([]);
+  const [orderBy, setOrderBy] = useState('FacNO');  
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+
 
   const rows = displayedAsset;
 

@@ -45,6 +45,7 @@ function AssetMasterListPage({useProps, setHeaderTitle, setNavLink }) {
 
   // Table state
   const [page, setPage] = useState(0); 
+  const [selected, setSelected] = useState([]);
 
   const assetGrp = refCategoryData.map(item => item.category)
   const assetClass = refItemClassData.map(item => item.itemClass)
@@ -128,6 +129,7 @@ function AssetMasterListPage({useProps, setHeaderTitle, setNavLink }) {
     setFilterKey(prevKey => prevKey);
 
     setPage(0); // Reset pagination
+    setSelected([]); //Clear the selected rows
   }
 
   return (
@@ -298,6 +300,8 @@ function AssetMasterListPage({useProps, setHeaderTitle, setNavLink }) {
           isTableActive={isTableActive}
           setHeaderTitle={setHeaderTitle}
           setNavLink={setNavLink}
+          selected = {selected}
+          setSelected = {setSelected}
         />
       </div>
     </div>
