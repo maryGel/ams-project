@@ -23,14 +23,9 @@ import {
 } from '@mui/material';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
-import FilterListIcon from '@mui/icons-material/FilterList';
+import DownloadIcon from '@mui/icons-material/Download';
 import AddIcon from '@mui/icons-material/Add';
 import { visuallyHidden } from '@mui/utils';
-// import { useNavigate } from 'react-router-dom';
-
-// useEffect (fetch API using axios)
-// import {useAssetMasterData} from '../../hooks/assetMasterHooks'
-
 
 function descendingComparator(a, b, orderBy) {
   const aValue = a[orderBy];
@@ -207,9 +202,9 @@ function EnhancedTableToolbar(props) {
         </IconButton>
       </Tooltip>
 
-      <Tooltip title="Filter list">
+      <Tooltip title="Download list">
         <IconButton>
-          <FilterListIcon />
+          <DownloadIcon />
         </IconButton>
       </Tooltip>
     </Toolbar>

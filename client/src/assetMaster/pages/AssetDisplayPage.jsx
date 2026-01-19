@@ -1,14 +1,15 @@
 import React, {useState, useEffect} from 'react'
 import AssetDisplayTabs from '../assetDisplay/assetDisplayTabs'
-import BorderColorIcon from '@mui/icons-material/BorderColor';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
-import IconButton from '@mui/material/IconButton';
+import EditIcon from '@mui/icons-material/Edit';
 import { useParams } from 'react-router-dom';
 import { useAssetMasterData } from '../../hooks/assetMasterHooks';
+// Custom Hooks
+import { useRefUom } from '../../hooks/refUom'; // import the refUnit data
 
 
-export default function AssetMasterDisplay(){
+export default function AssetMasterDisplay({}){
 
   // State to hold API Asset data
   const { itemList, loading, error } = useAssetMasterData(); 
@@ -48,8 +49,6 @@ export default function AssetMasterDisplay(){
     }));
   };
 
-  
-
   if (loading) return <p className="p-5">Loading asset...</p>;
   if (error) return <p className="p-5 text-red-600">Error loading asset data.</p>;
 
@@ -64,28 +63,32 @@ export default function AssetMasterDisplay(){
             
             {/* SAVE BUTTON */}
             {isEditing && (
-              <IconButton
+              <button
+                className='flex justify-center pt-1 pb-1 pl-2 pr-3 text-white transition-transform duration-200 ease-in-out bg-green-500 border rounded-full shadow-black border-spacing-1 active:scale-95 hover:text-gray-600'
                 title='Save Changes'
                 color="primary"
                 sx={{ border: 1 }}
                 // onClick={handleSave}
               >
                 <SaveIcon />
-              </IconButton>
+                Save
+              </button>
             )}
             
             {/* EDIT and CANCEL BUTTON */}
-              <IconButton
-                title='Edit Asset'
-                sx={{ border: 1 }}
+              <button
+                className= {`flex justify-center pt-1 pb-1 pl-2 pr-3 mr-2 text-white transition-transform duration-200 ease-in-out border rounded-full
+                  ${isEditing? 'bg-gray-600  hover:bg-gray-400 hover:text-white' : 'bg-blue-800 text-white hover:bg-blue-600' }  
+                  border-slate-300 active:scale-95`}
+                title={isEditing? 'Cancel Edit' : 'Edit Asset'}
                 type="button" // Use this to prevent from submission
                 onClick={handleEditButton}
               >
                 {isEditing ? 
-                  <CancelIcon  size ="small"/> :
-                  <BorderColorIcon  size ="small" />
+                  <><CancelIcon size ="small"/> <span>Cancel </span></>:
+                  <><EditIcon size ="small"/> <span>Edit</span></>
                 }
-              </IconButton>
+              </button>
           </div>
 
 
@@ -102,7 +105,8 @@ export default function AssetMasterDisplay(){
               <div className='mt-3'>
                 <div className='grid grid-cols-[10rem_2fr] shadow-sm shadow-slate-200 mt-2 ml-16 py-2 text-base bg-gray-100'>
                   <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Asset Name:</span>
-                  <input type="text" className='p-2 mr-5 text-base' disabled={!isEditing} value={asset.FacName || ''}  onChange={(e) => handleChange('FacName', e.target.value)}/>
+                <input type="text" className='p-2 mr-5 text-base'  disabled={!isEditing} value={asset.FacName|| ''} readOnly={!isEditing} onChange={(e) => handleChange('Description', e.target.value)}/>
+
                 </div>
                 <div className='grid grid-cols-[10rem_2fr] shadow-sm shadow-slate-200 mt-2 ml-16 py-2 text-base bg-gray-100'>
                   <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Description:</span>

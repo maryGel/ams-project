@@ -11,6 +11,8 @@ import Box from '@mui/material/Box';
 
 import AssetMasterTile from '../assetMaster/assetMaster/assetMasterTile'
 import AssetMovement from '../assetMovement/assetMove';
+import Depreciation from '../assetDep/assetDepRun';
+
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -86,7 +88,10 @@ export default function FullWidthTabs({
         <AssetMovement />
       </TabPanel>
       <TabPanel value={value} index={2} dir={theme.direction}>
-        Item Three
+        <Depreciation/>
+      </TabPanel>
+      <TabPanel>
+
       </TabPanel>
     </Box>
   );
