@@ -8,11 +8,12 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
 // TabPanel component to render the content of each tab
-
 import AssetMasterTile from '../assetMaster/assetMaster/assetMasterTile'
 import AssetMovement from '../assetMovement/assetMove';
 import Depreciation from '../assetDep/assetDepRun';
-
+import AssetReports from '../assetReports/assetReport';
+import PhysicalCount from '../assetPhysical/assetPhysicalCount';
+import AssetUtilities from '../assetUtilities/assetUtilities';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -85,13 +86,19 @@ export default function FullWidthTabs({
         />
       </TabPanel>
       <TabPanel value={value} index={1} dir={theme.direction}>
-        <AssetMovement />
+        <AssetMovement/>
       </TabPanel>
       <TabPanel value={value} index={2} dir={theme.direction}>
         <Depreciation/>
       </TabPanel>
-      <TabPanel>
-
+      <TabPanel value={value} index={3} dir={theme.direction}>
+        <AssetReports/>
+      </TabPanel>
+      <TabPanel value={value} index={4} dir={theme.direction}>
+        <PhysicalCount/>
+      </TabPanel>
+      <TabPanel value={value} index={5} dir={theme.direction}>
+        <AssetUtilities/>
       </TabPanel>
     </Box>
   );
