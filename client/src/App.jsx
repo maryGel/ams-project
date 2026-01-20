@@ -11,25 +11,12 @@ import AssetMasterDisplay from './assetMaster/pages/AssetDisplayPage.jsx';
 import Practice from './Utils/practice.jsx';
 import ReferentialPage from './assetMaster/pages/ReferentialPage.jsx';
 
-
-
-function App() {
-
-  const location = useLocation();
-
 // To initialize the header title based on the current page
   const getInitialTitle = () => {
     const savedTitle = localStorage.getItem('currentHeaderTitle');
     return savedTitle ? savedTitle : 'Asset Management System';
   }
 
-  const [ headerTitle, setHeaderTitle] = useState(getInitialTitle);
-
-// To save the header title to localStorage whenever it changes
-  const saveTitleUpdate = (newTitle) => {
-    localStorage.setItem('currentHeaderTitle', newTitle);
-    setHeaderTitle(newTitle);
-  }
 
   // To initialize the nav link based on the current page
 
@@ -38,13 +25,35 @@ function App() {
     return savedLink 
   }
 
-  const [navLink, setNavLink] = useState(getInitialNavLink);
+
+function App() {
+
+  const location = useLocation();
+  const [ headerTitle, setHeaderTitle] = useState(getInitialTitle);
+  const [ navLink, setNavLink ] = useState(getInitialNavLink);
+  
+
+  // To save the header title to localStorage whenever it changes
+  const saveTitleUpdate = (newTitle) => {
+    localStorage.setItem('currentHeaderTitle', newTitle);
+    setHeaderTitle(newTitle);
+  }
 
   // To save the nav link to localStorage whenever it changes
   const saveNavLinkUpdate = (newLink) => {
     localStorage.setItem('navLink', newLink);
     setNavLink(newLink);
   }
+
+  const tabPaths = [
+    '/Home',
+    '/Home/AssetMasterPage',
+    '/Home/Movement',
+    '/Home/Depreciation',
+    '/Home/Reports',
+    '/Home/PhysicalCount',
+    '/Home/Utilities'
+  ];
 
   return (
   <div className="App">
@@ -57,6 +66,7 @@ function App() {
           setHeaderTitle={saveTitleUpdate}
           navLink={navLink}
           setNavLink={saveNavLinkUpdate}
+          tabPaths = {tabPaths}
         />
       )}
       
@@ -67,10 +77,11 @@ function App() {
                   setHeaderTitle={saveTitleUpdate}
                 />} 
         />
-        <Route  path="/Home" 
+        <Route  path="/Home/*" 
                 element={<HomePage
                           headerTitle ={headerTitle}
                           setHeaderTitle={saveTitleUpdate}
+                          tabPaths = {tabPaths}
                         />} 
         /> 
         

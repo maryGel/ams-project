@@ -6,7 +6,8 @@ import TabPanel from '../Utils/TabPanel'
 
 function HomePage({
   headerTitle,
-  setHeaderTitle
+  setHeaderTitle,
+  tabPaths
 }) {
 
   return (
@@ -15,6 +16,7 @@ function HomePage({
       <TabPanel 
         headerTitle={headerTitle}
         setHeaderTitle={setHeaderTitle}
+        tabPaths = {tabPaths}
       />
 
     </div>

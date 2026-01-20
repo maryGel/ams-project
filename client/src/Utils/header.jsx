@@ -1,7 +1,8 @@
-import React, {useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import {headerTitleMap} from './headerTitleMap'
 import HomeIcon from '@mui/icons-material/Home';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import { Box, InputBase, IconButton } from '@mui/material';
 
 
 // MUI Icons
@@ -11,12 +12,18 @@ import HistoryIcon from '@mui/icons-material/History';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
-// import pages to send props to change header title accordingly
 
-function Header() {
+function Header({tabPaths = []}) {
 
   const pagePath = useLocation();
   const currentPath = pagePath.pathname;
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const isHomeTab = tabPaths.includes(currentPath); //Determine if we are on a "Home" tab
+
+  const toggleSearch = () => {
+    setIsExpanded(!isExpanded);
+  };
 
   // derive title from URL
   let headerTitle = headerTitleMap[currentPath];
@@ -29,17 +36,15 @@ function Header() {
   const getBackPath = () => {
     if (currentPath.startsWith("/assetFolder/assetMasterDisplay/")) {
       headerTitle = "Display Asset";
-      return null;
-    }
-
-    if (currentPath === '/assetFolder/createAsset') {
       return '/assetFolder/pages/assetMasterList';
     } 
-
-    if (currentPath === `/assetFolder/pages/referentialPage` || `/assetFolder/pages/assetMasterList`) {
-      return '/Home';
+    if (currentPath.startsWith('/assetFolder/createAsset')) {
+      headerTitle = "Create New Asset";
+      return '/assetFolder/pages/assetMasterList';
     } 
-
+    if (currentPath === `/assetFolder/pages/assetMasterList` || `/assetFolder/pages/referentialPage`) {
+      return '/Home/AssetMasterPage';
+    } 
     return null; // Default case if no match
   }
 
@@ -51,9 +56,9 @@ function Header() {
         className="flex items-center p-2 pl-6 tracking-wider text-black bg-blue-100"      
       >
 
-          <button> 
-            {currentPath === '/Home' ? (
-              <NavLink to="/Home">
+          <button className='transition-transform duration-150 active:translate-y-0.5 hover:scale-x-95'> 
+            {isHomeTab? (
+              <NavLink to= "/Home">
                 <HomeIcon 
                   sx ={{ fontSize: 30, marginRight: 2 }}
                 />
@@ -73,11 +78,44 @@ function Header() {
         <div
           className="flex ml-auto mr-6 space-x-6 place-items-center"
         >
-          <button>
-            <SearchIcon 
-              sx ={{ fontSize: 30, marginRight: 20 }}
+          <Box
+            // Triggers when mouse enters the area
+            onMouseEnter={() => setIsHovered(true)}
+            // Triggers when mouse leaves the area
+            onMouseLeave={() => setIsHovered(false)}
+            placeholder="Search"
+          
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              backgroundColor: 'white',
+              padding: '0.1rem 0.5rem',
+              borderRadius: '10rem',
+              // Expansion logic
+              width: isHovered ? '30rem' : '5rem', 
+              transition: 'width 0.4s ease-in-out',
+              overflow: 'hidden',
+              cursor: 'pointer',
+              border: '1px solid gray'
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <SearchIcon sx={{ fontSize: 28, color: 'black' }} />
+            </Box>
+            
+            <InputBase
+              placeholder="Search..."
+              sx={{
+                ml: 1,
+                flex: 1,
+                // Fade text in/out
+                opacity: isHovered ? 1 : 0,
+                transition: 'opacity 0.3s ease-in-out',
+                // Ensures the input doesn't take up space when hidden
+                visibility: isHovered ? 'visible' : 'hidden'
+              }}
             />
-          </button>
+          </Box>
           <button>
             <HistoryIcon
               sx ={{ fontSize: 30, marginRight: 1  }}

@@ -1,4 +1,5 @@
-import * as React from 'react';
+import React, {useState, useEffect} from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useTheme } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
@@ -49,15 +50,41 @@ function a11yProps(index) {
   };
 }
 
+/* --------------------------------------------
+-          H O M E  * P A G E *  M E N U
+-----------------------------------------------*/
+
 export default function FullWidthTabs({
   headerTitle,
-  setHeaderTitle
+  setHeaderTitle,
+  tabPaths
 }) {
   const theme = useTheme();
-  const [value, setValue] = React.useState(0);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Sync the tab highlight with the current URL on load/refresh
+  const currentTabIndex = tabPaths.indexOf(location.pathname);
+  const [value, setValue] = useState(currentTabIndex !== -1 ? currentTabIndex : 0);
+
+  // 3. EFFECT: Redirect to Dashboard if path is just '/Home'
+  useEffect(() => {
+    if (location.pathname === '/Home') {
+      // replace: true prevents the user from getting stuck when clicking "Back"
+      navigate(tabPaths[0], { replace: true });
+    }
+  }, [location.pathname, navigate, tabPaths]);
+
+  // 4. EFFECT: Keep the tab highlighted if the URL changes (e.g., via back button)
+  useEffect(() => {
+    if (currentTabIndex !== -1) {
+      setValue(currentTabIndex);
+    }
+  }, [currentTabIndex]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
+    navigate(tabPaths[newValue]);
   };
 
   return (
