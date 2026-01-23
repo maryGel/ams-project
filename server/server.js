@@ -27,14 +27,16 @@ const allowedOrigins = [
 ];
 
 const corsOptions = {
-  origin: function (origin, callback) {
+  origin: function (origin, callback) 
+  {
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.includes(origin)) {
+    if (allowedOrigins.includes(origin)) 
+      {
       callback(null, true);
     } else {
-      console.log('🚫 CORS blocked for origin:', origin);
-      console.log('✅ Allowed origins:', allowedOrigins);
+      console.log('CORS blocked for origin:', origin);
+      console.log('Allowed origins:', allowedOrigins);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -126,7 +128,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Middleware to attach database to request
 app.use((req, res, next) => {
   req.db = db;
-  console.log(`📍 ${req.method} ${req.path} from: ${req.headers.origin || 'unknown origin'}`);
   next();
 });
 

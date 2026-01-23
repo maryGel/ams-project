@@ -107,8 +107,6 @@ export default function RefCategory({useProps, openTab,}) {
         setConfirmDeleteEmptyOpen(true);
         return;
       }
-
-
      // If xCode has value, then category is required
     if (editedRow.xCode?.trim()) {
     
@@ -338,18 +336,21 @@ export default function RefCategory({useProps, openTab,}) {
                       style={theaderStyle('Code')}
                       onClick={() => handleSort('xCode')}
                     >
-                      Asset Grp Code
-                      <span className="ml-8 text-gray-500">
-                        {sortConfig.key === 'xCode' ? (
-                          sortConfig.direction === 'asc' ? (
-                            <ArrowUpwardIcon fontSize="inherit" sx={{ fontSize: 16 }} />
-                          ) : (
-                            <ArrowDownwardIcon fontSize="inherit" sx={{ fontSize: 16 }} />
-                          )
-                        ) : (
-                          <UnfoldMoreIcon fontSize="inherit" sx={{ fontSize: 16, opacity: 0.4 }} />
-                        )}
+                      <div className='flex justify-between'>
+                        <span> Asset Grp Code </span>
+                        <span className="text-gray-500 ">
+                          {sortConfig.key === 'xCode' ? ( 
+                            sortConfig.direction === 'asc' ? (
+                              <ArrowUpwardIcon fontSize="inherit" /> 
+                            )  :  ( 
+                              <ArrowDownwardIcon fontSize="inherit"  /> 
+                            ) 
+                            ) : ( <UnfoldMoreIcon fontSize="inherit" sx={{ fontSize: 16, opacity: 0.4 }} /> )
+                          }
                       </span>
+
+                      </div>
+                      
                       <div
                         onMouseDown={(e) => handleResizeMouseDown('xCode', e)}
                         style={resizeColumn }

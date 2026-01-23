@@ -12,10 +12,8 @@ export const useRefBrand = () => {
   const testAPI = async () => {
     try {
       const response = await api.get('/refBrand/test');
-      // console.log('API Test Response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('API Test Failed:', error);
       throw error;
     }
   };
@@ -27,12 +25,9 @@ export const useRefBrand = () => {
         setLoading(true);
         setError(null);
         
-        // Test API first
         await testAPI();
         
-        const response = await api.get('/refBrand');
-        console.log('Brand response:', response.data);
-        
+        const response = await api.get('/refBrand');       
         const data = response.data;
         
         if (!Array.isArray(data)) {
@@ -42,20 +37,19 @@ export const useRefBrand = () => {
         const dataWithID = data.map((item, index) => ({
           ...item,
           id: item.id || `temp-${index}`,
-          BrandID: item.BrandID || item.code || `CODE-${item.id || index}`,
-          BrandName: item.BrandName || item.name || 'BrandName'
+          BrandID: item.BrandID,
+          BrandName: item.BrandName
         }));
         
         setRefBrandData(dataWithID);
         
       } catch (error) {
-        console.error('Error in getRefBrand:', error);
         setError(error.response?.data?.error || error.message || 'Failed to fetch brands');
       } finally {
         setLoading(false);
       }
     };
-    
+
     getRefBrand();
   }, []);
 
@@ -63,20 +57,24 @@ export const useRefBrand = () => {
   const createrefBrand = async (BrandID ='', BrandName ) => {
     try {
       setActionLoading(true);
-      console.log('Creating BrandName:', { BrandID, BrandName });
+      setError(null);
       
       const response = await api.post('/refBrand', { BrandID, BrandName });
-      console.log('Create response:', response.data);
       
-      // Refresh the list
-      await refreshRefBRand();
-      
-      return response.data;
+      const created = {
+        id: response.data.id,
+        BrandID: response.data.BrandID,
+        BrandName: response.data.BrandName
+      }
+
+      setRefBrandData(prev => [...prev, created]);      
+      return created;
+
     } catch (error) {
-      console.error('Error creating BrandName:', error);
       const errorMsg = error.response?.data?.error || error.message || 'Failed to create BrandName';
       setError(errorMsg);
       throw new Error(errorMsg);
+
     } finally {
       setActionLoading(false);
     }
@@ -86,10 +84,8 @@ export const useRefBrand = () => {
   const updaterefBrand = async (id,  BrandID = '', BrandName) => {
     try {
       setActionLoading(true);
-      console.log(`Updating BrandName ${id} to:`, { BrandID, BrandName });
       
       const response = await api.put(`/refBrand/${id}`, { BrandID, BrandName });
-      console.log('Update response:', response.data);
       
       // Update local state
       setRefBrandData(prev => 
@@ -99,11 +95,11 @@ export const useRefBrand = () => {
       );
       
       return response.data;
+
     } catch (error) {
-      console.error('Error updating BrandName:', error);
       const errorMsg = error.response?.data?.error || error.message || 'Failed to update BrandName';
       setError(errorMsg);
-      throw new Error(errorMsg);
+      throw new Error(errorMsg);    
     } finally {
       setActionLoading(false);
     }
@@ -113,17 +109,15 @@ export const useRefBrand = () => {
   const deleterefBrand = async (id) => {
     try {
       setActionLoading(true);
-      console.log('Deleting BrandName:', id);
       
       const response = await api.delete(`/refBrand/${id}`);
-      console.log('Delete response:', response.data);
       
       // Update local state
       setRefBrandData(prev => prev.filter(item => item.id != id));
       
       return response.data;
+
     } catch (error) {
-      console.error('Error deleting BrandName:', error);
       const errorMsg = error.response?.data?.error || error.message || 'Failed to delete BrandName';
       setError(errorMsg);
       throw new Error(errorMsg);
@@ -133,23 +127,15 @@ export const useRefBrand = () => {
   };
 
   // Refresh brands
-  const refreshRefBRand = async () => {
+  const refreshRefBrand = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/refBrand');
-      const data = response.data;
-      
-      const dataWithID = data.map((item, index) => ({
-        ...item,
-        id: item.id || `temp-${index}`,
-        BrandID: item.BrandID || item.code || `CODE-${item.id || index}`,
-        BrandName: item.BrandName || item.name || 'Unnamed BrandName'
-      }));
-      
-      setRefBrandData(dataWithID);
       setError(null);
+      
+      const response = await api.get('/refBrand');    
+      setRefBrandData(response.data);
+
     } catch (error) {
-      console.error('Error fetching brands:', error);
       setError(error.response?.data?.error || error.message || 'Failed to fetch brands');
       throw error;
     } finally {
@@ -165,7 +151,7 @@ export const useRefBrand = () => {
     createrefBrand,
     updaterefBrand,
     deleterefBrand,
-    refreshRefBRand,
+    refreshRefBrand,
     testAPI
   };
 };

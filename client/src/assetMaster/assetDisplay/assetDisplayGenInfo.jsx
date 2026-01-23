@@ -12,6 +12,7 @@ import { useRefItemClass } from '../../hooks/refClass';
 import { useRefCategory } from '../../hooks/refCategory';
 import { useRefDepartment } from '../../hooks/refDepartment'; 
 import { useRefLocation } from '../../hooks/refLocation'; 
+import { useRefBrand } from '../../hooks/refBrand';
 
 
 

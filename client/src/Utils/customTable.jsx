@@ -1,8 +1,11 @@
 import { useState, useRef } from 'react';
 import { createTheme, styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
+import { DialogContent, DialogTitle, DialogContentText, DialogActions, Button  } from '@mui/material';
 
-
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 
 export const customTheme = createTheme({
   palette: {
@@ -44,6 +47,44 @@ export const resizeColumn = {
   zIndex: 10,
 };
 
+export const RenderSortIcon = ({columnKey, sortConfig}) => {
+  if (!sortConfig || !sortConfig.key) {
+    return <UnfoldMoreIcon sx={{ fontSize: 16, opacity: 0.4 }} />;
+  }
+
+  if (sortConfig.key !== columnKey){
+    return <UnfoldMoreIcon fontSize='inherit' sx={{ fontSize : 16, opacity: 0.4 }} /> ;
+  }
+
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+      {sortConfig.direction === 'asc'
+        ? <ArrowUpwardIcon fontSize='inherit' />
+        : <ArrowDownwardIcon fontSize='inherit' />
+      }
+    </span>
+  )
+};
+
+export const RenderDialog = ({cancel, confirm}) => {
+
+  return (
+    <>
+      <DialogTitle sx={{ fontSize : 16, opacity: 0.8 }}>Confirm Empty Row</DialogTitle>
+        <DialogContent>
+          <DialogContentText  >
+            This row is empty. Saving will remove this row. Do you want to continue?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={cancel}>Cancel</Button>
+          <Button color="error" onClick={confirm}>Yes, Remove</Button>
+        </DialogActions>
+    </>
+
+  )
+};
+
 export const bootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
     padding: theme.spacing(2),
@@ -54,7 +95,6 @@ export const bootstrapDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 export default function useColumnWidths() {
-
   
   const [columnWidths, setColumnWidths] = useState({
     id: 50,
@@ -117,7 +157,6 @@ export default function useColumnWidths() {
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
   };
-
 
   return {handleResizeMouseDown, theaderStyle, tbodyStyle}
 }

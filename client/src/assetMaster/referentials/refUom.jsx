@@ -61,81 +61,77 @@ export default function RefUom({useProps, openTab,}) {
     setSnackbar({ open: true, message, severity });
   };
 
-// ✅ Add Row (Only One Editable)
-const handleAddRow = () => {
-  if (editingRowId !== null) return; // Safety block
+// -- >>> Add Row (Only One Editable)
+  const handleAddRow = () => {
+    if (editingRowId !== null) return; // Safety block
 
-  const lastId = rows.length > 0 ? Math.max(...rows.map(row => Number(row.id))) : 0;
-  const newId = lastId + 1;
+    const newRow = {
+      id: `tmp-${crypto.randomUUID()}`,
+      Unit: '',
+      isNew: true
+    };
 
-  const newRow = {
-    id: newId,
-    BrandID: '',
-    Unit: '',
-    isNew: true
+    setRows(prev => [...prev, newRow]);
+    setTemporaryData(prev => [...prev, newRow]);
+
+    setEditingRowId(newRow.id);
+
+    const totalRows = rows.length + 1;
+    const newLastPage = Math.floor(totalRows / rowsPerPage);
+    setPage(newLastPage);
   };
 
-  setRows(prev => [...prev, newRow]);
-  setTemporaryData(prev => [...prev, newRow]);
-
-  setEditingRowId(newId);
-
-  const totalRows = rows.length + 1;
-  const newLastPage = Math.floor(totalRows / rowsPerPage);
-  setPage(newLastPage);
-};
-
-// ✅ Update temp data for editable row
-const handleTempChange = (id, field, value) => {
-  setTemporaryData(prev =>
-    prev.map(row =>
-      row.id === id ? { ...row, [field]: value } : row
-    )
-  );
-};
-
- // ✅ Save One Row Only
- const handleSave = async () => {
-  const editedRow = temporaryData.find(r => r.id === editingRowId);
-  if (!editedRow) return;
-
-  const empty = !editedRow.Unit.trim();
-
-  // If row is empty → ask user for confirmation
-  if (empty) {
-    setPendingSaveRow(editedRow);
-    setConfirmDeleteEmptyOpen(true);
-    return;
-  }
-
-  // ❗ Duplicate validation
-  const isDuplicate = rows.some(row =>
-    row.id !== editedRow.id && (
-      row.Unit.trim().toLowerCase() === editedRow.Unit.trim().toLowerCase()
-    )
+// -- >>> Update temp data for editable row
+  const handleTempChange = (id, field, value) => {
+    setTemporaryData(prev =>
+      prev.map(row =>
+        row.id === id ? { ...row, [field]: value } : row
+      )
     );
+  };
 
-    if (isDuplicate) {
-      showSnackbar("UOM already exists!", "error");
+ // -- >>> Save One Row Only
+  const handleSave = async () => {
+    const editedRow = temporaryData.find(r => r.id === editingRowId);
+    if (!editedRow) return;
+
+    const empty = !editedRow.Unit.trim();
+
+    // If row is empty → ask user for confirmation
+    if (empty) {
+      setPendingSaveRow(editedRow);
+      setConfirmDeleteEmptyOpen(true);
       return;
     }
 
-    try {
-      if (empty) {
-        if (!editedRow.isNew) await deleteRefUnit(editedRow.id);
-      } else if (editedRow.isNew) {
-        await createRefUnit(editedRow.Unit);
-      } else {
-        await updateRefUnit(editedRow.id, editedRow.Unit);
+    // Duplicate validation
+    const isDuplicate = rows.some(row =>
+      row.id !== editedRow.id && (
+        row.Unit.trim().toLowerCase() === editedRow.Unit.trim().toLowerCase()
+      )
+      );
+
+      if (isDuplicate) {
+        showSnackbar("UOM already exists!", "error");
+        return;
       }
 
-      await refreshRefUnit();
-      setEditingRowId(null);
-      showSnackbar('Changes has been saved!');
-    } catch (err) {
-      showSnackbar('Save failed: ' + err.message, 'error');
-    }
-  };
+      try {
+        if (empty) {
+          if (!editedRow.isNew) await deleteRefUnit(editedRow.id);
+        } else if (editedRow.isNew) {
+          await createRefUnit(editedRow.Unit);
+        } else {
+          await updateRefUnit(editedRow.id, editedRow.Unit);
+        }
+
+        await refreshRefUnit();
+        setEditingRowId(null);
+        showSnackbar('Changes has been saved!');
+      } catch (err) {
+        showSnackbar('Save failed: ' + err.message, 'error');
+      }
+    };
 
   const confirmDeleteEmpty = async () => {
     if (!pendingSaveRow) return;
@@ -175,19 +171,19 @@ const handleTempChange = (id, field, value) => {
     setTemporaryData(cleaned);
   };
   
-  // ✅ Cancel Editing
+  // -- >>> Cancel Editing
   const handleCancelEdit = () => {
     removeEmptyRows()
     setEditingRowId(null);
   };
 
-  // ✅ Enable editing for existing rows
+  // -- >>> Enable editing for existing rows
   const handleEditExistingRow = (id) => {
     if (editingRowId !== null) return;
     setEditingRowId(id);
   };
 
-  // ✅ Sort
+  // -- >>> Sort
   const handleSort = (columnKey) => {
     let direction = 'asc';
     if (sortConfig.key === columnKey && sortConfig.direction === 'asc') {
@@ -206,7 +202,7 @@ const handleTempChange = (id, field, value) => {
     setSortConfig({ key: columnKey, direction });
   };
 
-  // ✅ Filter + Paginate
+  // -- >>> Filter + Paginate
   const filteredData = temporaryData.filter(item =>
     // Always include the currently edited row in results
     item.id === editingRowId ||

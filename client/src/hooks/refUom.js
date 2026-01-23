@@ -27,14 +27,9 @@ export const useRefUom = () => {
           setLoading(true);
           setError(null);
           
-          // Test API first
           await testAPI();
           
-          // Then fetch categories
-          // console.log('Fetching Uom...');
-          const response = await api.get('/api/refUnit');
-          console.log('UOMS response:', response.data);
-          
+          const response = await api.get('/api/refUnit');         
           const data = response.data;
           
           if (!Array.isArray(data)) {
@@ -50,7 +45,6 @@ export const useRefUom = () => {
           setUomData(dataWithID);
           
         } catch (error) {
-          console.error('Error in getrefUnit:', error);
           setError(error.response?.data?.error || error.message || 'Failed to fetch categories');
         } finally {
           setLoading(false);
@@ -64,20 +58,22 @@ export const useRefUom = () => {
     const createRefUnit = async (Unit ='') => {
       try {
         setActionLoading(true);
-        console.log('Creating UOM:', { Unit });
+        setError(null);
         
         const response = await api.post('/api/refUnit', { Unit });
-        console.log('Create response:', response.data);
         
-        // Refresh the list
-        await refreshRefUnit();
+        const created = {
+          id: response.data.id,
+          Unit: response.data.Unit
+        };
         
-        return response.data;
+        return created;
+      
       } catch (error) {
-        console.error('Error creating UOM:', error);
         const errorMsg = error.response?.data?.error || error.message || 'Failed to create UOM';
         setError(errorMsg);
         throw new Error(errorMsg);
+      
       } finally {
         setActionLoading(false);
       }
@@ -87,10 +83,8 @@ export const useRefUom = () => {
     const updateRefUnit = async (id,  Unit = '') => {
       try {
         setActionLoading(true);
-        console.log(`Updating Unit ${id} to:`, { Unit });
         
         const response = await api.put(`/api/refUnit/${id}`, { Unit });
-        console.log('Update response:', response.data);
         
         // Update local state
         setUomData(prev => 
@@ -100,11 +94,12 @@ export const useRefUom = () => {
         );
         
         return response.data;
+
       } catch (error) {
-        console.error('Error updating Unit:', error);
         const errorMsg = error.response?.data?.error || error.message || 'Failed to update Unit';
         setError(errorMsg);
         throw new Error(errorMsg);
+
       } finally {
         setActionLoading(false);
       }
@@ -114,20 +109,19 @@ export const useRefUom = () => {
     const deleteRefUnit = async (id) => {
       try {
         setActionLoading(true);
-        console.log('Deleting Unit:', id);
         
         const response = await api.delete(`/api/refUnit/${id}`);
-        console.log('Delete response:', response.data);
         
         // Update local state
         setUomData(prev => prev.filter(item => item.id != id));
         
         return response.data;
+        
       } catch (error) {
-        console.error('Error deleting Unit:', error);
         const errorMsg = error.response?.data?.error || error.message || 'Failed to delete Unit';
         setError(errorMsg);
         throw new Error(errorMsg);
+
       } finally {
         setActionLoading(false);
       }
@@ -148,10 +142,11 @@ export const useRefUom = () => {
         
         setUomData(dataWithID);
         setError(null);
+
       } catch (error) {
-        console.error('Error fetching categories:', error);
         setError(error.response?.data?.error || error.message || 'Failed to fetch categories');
         throw error;
+        
       } finally {
         setLoading(false);
       }

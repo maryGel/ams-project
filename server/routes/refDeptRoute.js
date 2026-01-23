@@ -13,7 +13,7 @@ router.get('/test', (req, res) => {
 
 // Get all Locations
 router.get('/', (req, res) => {
-  console.log('Get api/refDepartment = Fetching all Locations')
+  // console.log('Get api/refDepartment = Fetching all Locations')
 
   db.getConnection((error, connection) => {
     if(error){
@@ -39,7 +39,7 @@ router.get('/', (req, res) => {
 // Get single Location id 
 router.get('/:id', (req, res) => {
   const { id } = req.params;
-  console.log(`GET/refDepartment/${id} - Fetching Location`)
+  // console.log(`GET/refDepartment/${id} - Fetching Location`)
 
   db.getConnection((error, connection) => {
     if(error){
@@ -66,7 +66,7 @@ router.get('/:id', (req, res) => {
 
 router.post('/', (req, res) => {
   const {Location} = req.body;
-  console.log('POST/refDepartment - Creating Location', {Location})
+  // console.log('POST/refDepartment - Creating Location', {Location})
 
   if(!Location){
     return res.status(400).json({error: 'Location is required'})
@@ -102,7 +102,7 @@ router.post('/', (req, res) => {
 router.put('/:id', (req, res) => {
   const { id } = req.params;
   const { Location } = req.body;
-  console.log(`PUT/api/refDepartment/${id} - Creating brand`, {Location})
+  // console.log(`PUT/api/refDepartment/${id} - Creating brand`, {Location})
 
   if(!Location){
     return res.status(400).json({error: 'Brand name is required'})
@@ -140,7 +140,7 @@ router.put('/:id', (req, res) => {
 
 router.delete('/:id', (req,res) => {
   const { id } = req.params;
-  console.log(`DELETE /api/refDepartment/${id} - Deleting Location`);
+  // console.log(`DELETE /api/refDepartment/${id} - Deleting Location`);
 
   db.getConnection((error, connection) => {
     if(error) {

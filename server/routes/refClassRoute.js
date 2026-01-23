@@ -14,7 +14,7 @@ router.get('/test', (req, res) => {
 
 // GET all categories
 router.get('/', (req, res) => {
-  console.log('GET /refItemClass - Fetching all categories');
+  // console.log('GET /refItemClass - Fetching all categories');
   
   db.getConnection((err, connection) => {
     if (err) {
@@ -39,7 +39,7 @@ router.get('/', (req, res) => {
 // GET single itemClass by ID
 router.get('/:id', (req, res) => {
   const { id } = req.params;
-  console.log(`GET /refItemClass/${id} - Fetching itemClass`);
+  // console.log(`GET /refItemClass/${id} - Fetching itemClass`);
   
   db.getConnection((err, connection) => {
     if (err) {
@@ -66,7 +66,7 @@ router.get('/:id', (req, res) => {
 // POST create new itemClass
 router.post('/', (req, res) => {
   const { classCode, itemClass, category } = req.body;
-  console.log('POST /refItemClass - Creating itemClass:', {classCode, itemClass, category  });
+  // console.log('POST /refItemClass - Creating itemClass:', {classCode, itemClass, category  });
   
   if (!itemClass) {
     return res.status(400).json({ error: 'Name is required' });
@@ -102,7 +102,7 @@ router.post('/', (req, res) => {
 router.put('/:id', (req, res) => {
   const { id } = req.params;
   const { classCode, itemClass, category  } = req.body;
-  console.log(`PUT /refItemClass/${id} - Updating itemClass to:`, {classCode, itemClass, category });
+  // console.log(`PUT /refItemClass/${id} - Updating itemClass to:`, {classCode, itemClass, category });
   
   if (!itemClass) {
     return res.status(400).json({ error: 'Name is required' });
@@ -136,7 +136,7 @@ router.put('/:id', (req, res) => {
 // DELETE itemClass
 router.delete('/:id', (req, res) => {
   const { id } = req.params;
-  console.log(`DELETE /refItemClass/${id} - Deleting itemClass`);
+  // console.log(`DELETE /refItemClass/${id} - Deleting itemClass`);
   
   db.getConnection((err, connection) => {
     if (err) {

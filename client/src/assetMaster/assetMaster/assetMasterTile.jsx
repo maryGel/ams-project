@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { assetTileList } from '../hooks/assetTilelist';
+import { assetTileList } from './assetTilelist';
 
 
 function AssetMasterTile({setHeaderTitle}) {

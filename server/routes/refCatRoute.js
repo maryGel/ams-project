@@ -14,7 +14,7 @@ router.get('/test', (req, res) => {
 
 // GET all categories
 router.get('/', (req, res) => {
-  console.log('GET /api/refCat - Fetching all categories');
+  // console.log('GET /api/refCat - Fetching all categories');
   
   db.getConnection((err, connection) => {
     if (err) {
@@ -39,7 +39,7 @@ router.get('/', (req, res) => {
 // GET single category by ID
 router.get('/:id', (req, res) => {
   const { id } = req.params;
-  console.log(`GET /api/refCat/${id} - Fetching category`);
+  // console.log(`GET /api/refCat/${id} - Fetching category`);
   
   db.getConnection((err, connection) => {
     if (err) {
@@ -66,7 +66,7 @@ router.get('/:id', (req, res) => {
 // POST create new category
 router.post('/', (req, res) => {
   const { xCode, category } = req.body;
-  console.log('POST /api/refCat - Creating category:', {xCode, category });
+  // console.log('POST /api/refCat - Creating category:', {xCode, category });
   
   if (!category) {
     return res.status(400).json({ error: 'Name is required' });
@@ -102,7 +102,7 @@ router.post('/', (req, res) => {
 router.put('/:id', (req, res) => {
   const { id } = req.params;
   const { xCode, category } = req.body;
-  console.log(`PUT /api/refCat/${id} - Updating category to:`, {xCode, category});
+  // console.log(`PUT /api/refCat/${id} - Updating category to:`, {xCode, category});
   
   if (!category) {
     return res.status(400).json({ error: 'Name is required' });
@@ -136,7 +136,7 @@ router.put('/:id', (req, res) => {
 // DELETE category
 router.delete('/:id', (req, res) => {
   const { id } = req.params;
-  console.log(`DELETE /api/refCat/${id} - Deleting category`);
+  // console.log(`DELETE /api/refCat/${id} - Deleting category`);
   
   db.getConnection((err, connection) => {
     if (err) {

@@ -18,7 +18,7 @@ router.post("/", (req, res) => {
 
   const sql = "SELECT * FROM user0000inv WHERE user = ? AND password = ?";
   
-  console.log(`🔐 Login attempt for username: ${user}`);
+  // console.log(`🔐 Login attempt for username: ${user}`);
   
   db.query(sql, [user, password], (err, results) => {
     if (err) {

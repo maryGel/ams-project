@@ -13,24 +13,20 @@ router.get('/test', (req, res) => {
 
 // Get all Units
 router.get('/', (req, res) => {
-  console.log('Get api/refUnit = Fetching all units')
 
   db.getConnection((error, connection) => {
     if(error){
-      console.log('Error getting units from pool:' + error.stack)
       return res.status(500).json({error: 'Database connection error'});
     }
 
     const sqlSelect = 'SELECT * FROM refUnit';
 
     connection.query(sqlSelect, (error, result) => {
-      connection.release(); //release connecition back to pool
+      connection.release(); 
 
       if(error){
-        console.error('Error executing query' + error.stack)
         return res.status(500).json({error: 'Error fetching the data'})
       }
-      console.log(`Found ${result.length} units`)
       res.json(result);
     }) 
   })
@@ -39,7 +35,6 @@ router.get('/', (req, res) => {
 // Get single unit id 
 router.get('/:id', (req, res) => {
   const { id } = req.params;
-  console.log(`GET/api/refUnit/${id} - Fetching Unit`)
 
   db.getConnection((error, connection) => {
     if(error){
@@ -50,7 +45,6 @@ router.get('/:id', (req, res) => {
       connection.release();
 
       if(error){
-        console.log('Database query error', error)
         return res.status(500).json({error: 'Database query failed'});
       }
       if(result.length === 0){
@@ -66,7 +60,6 @@ router.get('/:id', (req, res) => {
 
 router.post('/', (req, res) => {
   const {Unit} = req.body;
-  console.log('POST/api/refUnit - Creating Unit', {Unit})
 
   if(!Unit){
     return res.status(400).json({error: 'Unit is required'})
@@ -84,7 +77,6 @@ router.post('/', (req, res) => {
       connection.release();
 
       if(error){
-        console.error('Database query error:', error);
         return res.status(500).json({error: 'Database query failed', details: error.message, sql: sql});
       }
 
@@ -102,7 +94,6 @@ router.post('/', (req, res) => {
 router.put('/:id', (req, res) => {
   const { id } = req.params;
   const { Unit } = req.body;
-  console.log(`PUT/api/refBrand/${id} - Creating brand`, {Unit})
 
   if(!Unit){
     return res.status(400).json({error: 'Brand name is required'})
@@ -121,7 +112,6 @@ router.put('/:id', (req, res) => {
       connection.release();
 
       if(error) {
-        console.error('Database query error:' , error);
         return res.status(500).json({error: 'Database query failed'});
       }
   
@@ -140,7 +130,6 @@ router.put('/:id', (req, res) => {
 
 router.delete('/:id', (req,res) => {
   const { id } = req.params;
-  console.log(`DELETE /api/refUnit/${id} - Deleting unit`);
 
   db.getConnection((error, connection) => {
     if(error) {
@@ -151,7 +140,6 @@ router.delete('/:id', (req,res) => {
       connection.release();
 
       if(error){
-        console.error('Database query error:', error);
         return res.status(500).json({error: 'Database query failed'});
       }
 
