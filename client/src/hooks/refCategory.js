@@ -15,7 +15,6 @@ export const useRefCategory = (useProps, deps = []) => {
   const testAPI = async () => {
     try {
       const response = await api.get('/api/refCat/test');
-      // console.log('API Test Response:', response.data);
       return response.data;
     } catch (error) {
       console.error('API Test Failed:', error);
@@ -23,62 +22,64 @@ export const useRefCategory = (useProps, deps = []) => {
     }
   };
 
-  // Refresh categories (Centralized Fetching Logic)
-  const fetchRefCategories = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await api.get('/api/refCat');
-      const data = response.data;
-      
-      const dataWithID = data.map((item, index) => ({
-        ...item,
-        id: item.id || `temp-${index}`,
-        xCode: item.xCode || item.code || `CODE-${item.id || index}`,
-        category: item.category || item.name || 'Unnamed Category'
-      }));
-      
-      setRefCategoryData(dataWithID);
-      
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      setError(error.response?.data?.error || error.message || 'Failed to fetch categories');
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-/* eslint-disable react-hooks/exhaustive-deps */
+// Get all categories
   useEffect(() => {
-    const initialLoad = async () => {
+    const getRefCategory = async () => {
         try {
-            await testAPI(); 
-            await fetchRefCategories(); 
-        } catch (e) {
-          // Errors logged/set inside testAPI/fetchRefCategories
-          console.error("An error occurred during initial load sequence:", e);
+        setLoading(true);
+        setError(null);
+        
+        await testAPI();
+        
+        const response = await api.get('/api/refCat');       
+        const data = response.data;
+        
+        if (!Array.isArray(data)) {
+          throw new Error('Expected array but got: ' + typeof data);
         }
+        
+        const dataWithID = data.map((item, index) => ({
+          ...item,
+          id: item.id || `temp-${index}`,
+          xCode: item.xCode,
+          category: item.category
+        }));
+        
+        setRefCategoryData(dataWithID);
+        
+      } catch (error) {
+        setError(error.response?.data?.error || error.message || 'Failed to fetch brands');
+      } finally {
+        setLoading(false);
+      }
     };
     
-    initialLoad();
-    
-  }, deps);
+  getRefCategory();    
+  }, []);
 
   
   // Create category
   const createRefCategory = async (xCode = '', category) => {
     try {
       setActionLoading(true);
+      setError(null);
+
       const response = await api.post('/api/refCat', { xCode, category});
-      await fetchRefCategories(); // Refresh the list
-      return response.data;
+
+      const created = {
+        id: response.data.id,
+        xCode: response.data.xCode,
+        category: response.data.category
+      }
+
+      setRefCategoryData(prev => [...prev, created]);
+      return created
+    
     } catch (error) {
       const errorMsg = error.response?.data?.error || error.message || 'Failed to create category';
       setError(errorMsg);
       throw new Error(errorMsg);
+
     } finally {
       setActionLoading(false);
     }
@@ -88,13 +89,21 @@ export const useRefCategory = (useProps, deps = []) => {
   const updateRefCategory = async (id, xCode = '', category) => {
     try {
       setActionLoading(true);
+      setError(null);
+
       const response = await api.put(`/api/refCat/${id}`, { xCode, category });
-      await fetchRefCategories(); // Refresh the list (Safer than manual state update)
+      // Update the local state
+
+      setRefCategoryData(prev =>
+        prev.map(item => item.id ? {...item, xCode, category} : item))
+
       return response.data;
+
     } catch (error) {
       const errorMsg = error.response?.data?.error || error.message || 'Failed to update category';
       setError(errorMsg);
       throw new Error(errorMsg);
+
     } finally {
       setActionLoading(false);
     }
@@ -105,8 +114,11 @@ export const useRefCategory = (useProps, deps = []) => {
     try {
       setActionLoading(true);
       const response = await api.delete(`/api/refCat/${id}`);
-      await fetchRefCategories(); // Refresh the list
+
+      setRefCategoryData(prev => prev.filter(item => item.id != id));
+      
       return response.data;
+
     } catch (error) {
       const errorMsg = error.response?.data?.error || error.message || 'Failed to delete category';
       setError(errorMsg);
@@ -116,6 +128,23 @@ export const useRefCategory = (useProps, deps = []) => {
     }
   };
 
+    // Refresh categories (Centralized Fetching Logic)
+  const refreshRefCategories = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await api.get('/api/refCat');      
+      setRefCategoryData(response.data);
+      
+    } catch (error) {
+      setError(error.response?.data?.error || error.message || 'Failed to fetch categories');
+      throw error;
+
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return {
     refCategoryData,
@@ -125,7 +154,7 @@ export const useRefCategory = (useProps, deps = []) => {
     createRefCategory,
     updateRefCategory,
     deleteRefCategory,
-    fetchRefCategories,
+    refreshRefCategories,
     testAPI
   };
 };

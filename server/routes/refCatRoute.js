@@ -14,7 +14,6 @@ router.get('/test', (req, res) => {
 
 // GET all categories
 router.get('/', (req, res) => {
-  // console.log('GET /api/refCat - Fetching all categories');
   
   db.getConnection((err, connection) => {
     if (err) {
@@ -22,7 +21,9 @@ router.get('/', (req, res) => {
       return res.status(500).json({ error: 'Database connection failed' });
     }
     
-    connection.query('SELECT * FROM refcategory', (error, results) => {
+    const sqlSelect = 'SELECT * FROM refcategory';
+    
+    connection.query(sqlSelect, (error, results) => {
       connection.release();
       
       if (error) {
@@ -39,14 +40,15 @@ router.get('/', (req, res) => {
 // GET single category by ID
 router.get('/:id', (req, res) => {
   const { id } = req.params;
-  // console.log(`GET /api/refCat/${id} - Fetching category`);
   
   db.getConnection((err, connection) => {
     if (err) {
       return res.status(500).json({ error: 'Database connection failed' });
     }
+
+    const sql = 'SELECT * FROM refcategory WHERE id = ?';
     
-    connection.query('SELECT * FROM refcategory WHERE id = ?', [id], (error, results) => {
+    connection.query(sql, [id], (error, results) => {
       connection.release();
       
       if (error) {
@@ -120,7 +122,6 @@ router.put('/:id', (req, res) => {
       connection.release();
       
       if (error) {
-        console.error('Database query error:', error);
         return res.status(500).json({ error: 'Database query failed' });
       }
       
@@ -147,7 +148,6 @@ router.delete('/:id', (req, res) => {
       connection.release();
       
       if (error) {
-        console.error('Database query error:', error);
         return res.status(500).json({ error: 'Database query failed' });
       }
       

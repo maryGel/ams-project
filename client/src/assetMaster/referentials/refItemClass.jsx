@@ -7,29 +7,25 @@ import SaveIcon from '@mui/icons-material/Save';
 import DownloadIcon from '@mui/icons-material/Download';
 import CancelIcon from '@mui/icons-material/Cancel';
 import Autocomplete from '@mui/material/Autocomplete';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
-import { IconButton, ThemeProvider, TextField, TablePagination, Snackbar, Alert,
-  Dialog, DialogActions, DialogContent,
-  DialogContentText, DialogTitle, Button
-} from '@mui/material';
+import { IconButton, ThemeProvider, TextField, TablePagination, Snackbar, Alert, Dialog} from '@mui/material';
 
 // Custom hooks
 import { useRefItemClass } from '../../hooks/refClass';
 import { useRefCategory } from '../../hooks/refCategory';
+import { useEditableTable } from '../../Utils/useEditableTable';
 
 // Custom table utilities & theme
-import { customTheme, resizeColumn } from '../../Utils/customTable';
+import { customTheme, resizeColumn, RenderSortIcon, RenderDialog } from '../../Utils/customTable';
 import useColumnWidths from '../../Utils/customTable';
 
 
 // ----------------------------------------------------------------------------
-//                       REF ITEM CLASS COMPONENT
+//                A S S E T  C L A S S  C O M P O N E N T
 // ----------------------------------------------------------------------------
+
 export default function RefItemClass({useProps, openTab,}) {
   const {
     refItemClassData,
@@ -43,22 +39,28 @@ export default function RefItemClass({useProps, openTab,}) {
   const {refCategoryData} = useRefCategory(useProps, [openTab])
 
   const {handleResizeMouseDown, theaderStyle, tbodyStyle} = useColumnWidths();
-  const [rows, setRows] = useState(refItemClassData || []); // To hold the Data
-  const [temporaryData, setTemporaryData] = useState(refItemClassData || []);
-  const [editingRowId, setEditingRowId] = useState(null);
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [page, setPage] = useState(0);
+
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [searchQuery, setSearchQuery] = useState("");
-  const [inputQuery, setInputQuery] = useState("");
   const [confirmDeleteEmptyOpen, setConfirmDeleteEmptyOpen] = useState(false);
-  const [pendingSaveRow, setPendingSaveRow] = useState(null);
+
+
+  // ---- Editable Table Hook ----
+  const {
+    data,
+    setData,
+    editedRow,
+    editingRowId,
+    addRow,
+    startEdit,
+    updateCell,
+    cancelEdit,
+    syncData,
+  } = useEditableTable([]);
 
 
   useEffect(() => {
-    setRows(refItemClassData);
-    setTemporaryData(refItemClassData);
+    syncData(refItemClassData || [])
   }, [refItemClassData]);
 
   const showSnackbar = (message, severity = 'success') => {
@@ -69,67 +71,51 @@ export default function RefItemClass({useProps, openTab,}) {
     return refCategoryData.map(item => item.category);
   }, [refCategoryData]);
 
-  // ✅ Add Row (Only One Editable)
+  // ---- H a n d l e r s ----
+
+  // ... Adding new row  ...
   const handleAddRow = () => {
     if (editingRowId !== null) return; // Safety block
 
-    const lastId = rows.length > 0 ? Math.max(...rows.map(row => Number(row.id))) : 0;
-    const newId = lastId + 1;
-
     const newRow = {
-      id: newId,
+      id: `tmp-${crypto.randomUUID()}`,
       classCode: '',
       itemClass: '',
-      category:'',
+      category: '',
       isNew: true
     };
 
-    setRows(prev => [...prev, newRow]);
-    setTemporaryData(prev => [...prev, newRow]);
+    addRow(newRow);
 
-    setEditingRowId(newId);
-
-    const totalRows = rows.length + 1;
-    const newLastPage = Math.floor(totalRows / rowsPerPage);
+    const totalRows = data.length + 1;
+    const newLastPage = Math.floor((totalRows - 1) / rowsPerPage);
     setPage(newLastPage);
   };
-  
-  // ✅ Update temp data for editable row
-  const handleTempChange = (id, field, value) => {
-    setTemporaryData(prev =>
-      prev.map(row =>
-        row.id === id ? { ...row, [field]: value } : row
-      )
-    );
+
+  const handleEditExistingRow = (id) => {
+    if (editingRowId !== null) return;
+    startEdit(id);
   };
 
-  // ✅ Save One Row Only
+  
+  // ... Saving ...
   const handleSave = async () => {
-    const editedRow = temporaryData.find(r => r.id === editingRowId);
-    if (!editedRow) return;
+      if (!editedRow) return;
 
-    const allEmpty = !editedRow.classCode?.trim() && !editedRow.itemClass?.trim() && !editedRow.category?.trim();
-    if (allEmpty) {
-      setPendingSaveRow(editedRow);
-      setConfirmDeleteEmptyOpen(true);
-      return;
-    }
+      const isEmpty = !editedRow.classCode?.trim() && !editedRow.itemClass?.trim() && !editedRow.category?.trim();
 
-     // If classCode has value, then itemClass and category are required
-    if (editedRow.classCode?.trim()) {
-      const emptyRequiredFields = [];
-      if (!editedRow.itemClass?.trim()) emptyRequiredFields.push('Asset Class');
-      if (!editedRow.category?.trim()) emptyRequiredFields.push('Asset Group');
-
-      // If any required fields are empty, show error
-      if (emptyRequiredFields.length > 0) {
-        showSnackbar(`Please fill in required fields: ${emptyRequiredFields.join(', ')}`, "error");
+      if (isEmpty) {
+        setConfirmDeleteEmptyOpen(true);
         return;
       }
-    }
 
-    // ❗ Duplicate validation
-    const isDuplicate = rows.some(row =>
+      // If any required fields are empty, show error
+      if (!editedRow.classCode?.trim() || !editedRow.itemClass?.trim() || !editedRow.category?.trim()) {
+        showSnackbar(`Please complete all the fields`, "error");
+        return;
+      }
+    
+    const isDuplicate = data.some(row =>
       row.id !== editedRow.id && (
       row.classCode.trim().toLowerCase() === editedRow.classCode.trim().toLowerCase() ||
       row.itemClass.trim().toLowerCase() === editedRow.itemClass.trim().toLowerCase()
@@ -141,79 +127,65 @@ export default function RefItemClass({useProps, openTab,}) {
       return;
     }
 
+    //Execute saving
     try {
-      if (allEmpty) {
-        if (!editedRow.isNew) await deleteRefItemClass(editedRow.id);
-      } else if (editedRow.isNew) {
-        await createRefItemClass(editedRow.classCode, editedRow.itemClass, editedRow.category);
+      if (editedRow.isNew) {
+        await createRefItemClass(editedRow.classCode, editedRow.itemClass, editedRow.category)
+        showSnackbar('New asset class has been created!')
+        
       } else {
         await updateRefItemClass(editedRow.id, editedRow.classCode, editedRow.itemClass, editedRow.category);
+        showSnackbar('Changes has been saved!')
       }
 
-      await refreshItemClasses();
-      setEditingRowId(null);
-      showSnackbar('Changes has been saved');
+      cancelEdit();
+      
     } catch (err) {
       showSnackbar('Save failed: ' + err.message, 'error');
     }
   };
 
   const confirmDeleteEmpty = async () => {
-    if (!pendingSaveRow) return;
+    if (!editedRow) return;
 
     try {
       // If it's NOT new, emptying = delete row
-      if (!pendingSaveRow.isNew) {
-        await deleteRefItemClass(pendingSaveRow.id);
+      if (!editedRow.isNew) {
+        await deleteRefItemClass(editedRow.id);
       }
 
-      await refreshItemClasses();
-
-      showSnackbar("Asset Class has been deleted successfully!");
+      cancelEdit();
+      showSnackbar("Asset Class has been deleted!");
+      
     } catch (err) {
       showSnackbar("Failed: " + err.message, "error");
     }
-
-    setEditingRowId(null);
-    setPendingSaveRow(null);
+    
     setConfirmDeleteEmptyOpen(false);
   };
 
   const cancelDeleteEmpty = () => {
     setConfirmDeleteEmptyOpen(false);
-    setPendingSaveRow(null);
   };
 
+    
+  // ... Disabling Save button if new row is empty ...
+  const isNewRowEmpty = editedRow?.isNew && !editedRow.classCode.trim() && !editedRow.itemClass.trim() && !editedRow.category.trim();
 
-  // ✅ Cancel Editing
-  const handleCancelEdit = () => {
-     // Only remove empty rows that are NOT currently being edited
-    const cleaned = rows.filter(row => {
-      const hasContent = row.classCode?.trim() || row.itemClass?.trim() || row.category?.trim();
-      // Keep the row if it has content OR if it's currently being edited
-      return hasContent || row.id === editingRowId;
-    });
+  // ---- F i l t e r  &   P a g i n a t i o n ----
 
-    setRows(cleaned);
-    setTemporaryData(cleaned);
-    setEditingRowId(null);
-  };
-
-  // ✅ Enable editing for existing rows
-  const handleEditExistingRow = (id) => {
-    if (editingRowId !== null) return;
-    setEditingRowId(id);
-  };
-
-  
-  // ✅ Sort
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [page, setPage] = useState(0);
+ 
+  // ... Sorting ...
   const handleSort = (columnKey) => {
     let direction = 'asc';
     if (sortConfig.key === columnKey && sortConfig.direction === 'asc') {
       direction = 'desc';
     }
 
-    const sorted = [...temporaryData].sort((a, b) => {
+    const sorted = [...data].sort((a, b) => {
       const aVal = a[columnKey]?.toString().toLowerCase() ?? '';
       const bVal = b[columnKey]?.toString().toLowerCase() ?? '';
       return direction === 'asc'
@@ -221,18 +193,15 @@ export default function RefItemClass({useProps, openTab,}) {
         : bVal.localeCompare(aVal);
     });
 
-    setTemporaryData(sorted);
+    setData(sorted);
     setSortConfig({ key: columnKey, direction });
   };
 
-  // ✅ Filter + Paginate
-  const filteredData = temporaryData.filter(item =>
-   // Always include the currently edited row in results
+  const filteredData = data.filter(item =>
     item.id === editingRowId ||
-    // Normal search filter for other rows
     item.itemClass?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.classCode?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.id?.toString().includes(searchQuery)
+    item.category?.toLowerCase().includes(searchQuery.toLowerCase()) 
   );
 
   const paginatedRows = filteredData.slice(
@@ -240,16 +209,14 @@ export default function RefItemClass({useProps, openTab,}) {
     page * rowsPerPage + rowsPerPage
   );
 
-
   if (loading) return <div className="p-4 text-gray-600">Loading data...</div>;
   if (error) return <div className="p-4 text-red-600">Error ref Cat loading data.. {error.message}</div>;
     
-
   return (
     <>
       {openTab === 'Asset Class' &&
         <ThemeProvider theme={customTheme}>
-          <div key = {rows.id} className='w-auto h-full p-4 bg-white shadow-lg rounded-xl'>
+          <div className='w-auto h-full p-4 bg-white shadow-lg rounded-xl'>
             
             <Snackbar
                 open={snackbar.open}
@@ -265,45 +232,18 @@ export default function RefItemClass({useProps, openTab,}) {
                 </Alert>
             </Snackbar>
 
-            {/* ---------------Title and Buttons --------------- */}
             {/* Search input */}
-              <div className='flex justify-end mb-3'>
-              <Autocomplete
-                freeSolo
-                options={rows.map(item => item.itemClass)}
-                value={inputQuery}
-                inputValue={inputQuery}
-                // Update inputQuery as the user types (real-time typing)
-                onInputChange={(_, newInputValue) => { 
-                  setInputQuery(newInputValue);
-                }}
-                // ON CHANGE: Fired when an item is explicitly selected from the dropdown
-                onChange={(event, newValue) => {
-                  // When selected from dropdown, update both states and trigger filter
-                  setInputQuery(newValue || "");
-                  setSearchQuery(newValue || "");
-                  setPage(0);
-                }}
-                // ON KEY DOWN: The critical 'Enter' listener for filtering
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    // Only update searchQuery and trigger filtering when Enter is pressed
-                    setSearchQuery(inputQuery); 
-                    setPage(0);
-                    e.preventDefault(); // Good practice to prevent form submission
-                  }
-                }}
-                renderInput={(params) =>
-                  <TextField 
-                    {...params} 
-                    label="Search here" 
-                  />
-                }
-                sx={{ width: 300 }}
-              />
+              <div className='flex justify-end mb-3'>              
+                <TextField
+                  label="Search"
+                  value={searchQuery}
+                  onChange={(e) => { setSearchQuery(e.target.value); setPage(0); }}
+                  size="small"
+                  sx={{width : 250 }}
+                />  
               </div>
               
-            {/* Edit, Add, and Download button */}
+            {/* Title + Buttons */}
             <div className='flex items-center justify-between mb-4'>
               <h1 className='text-lg font-semibold text-gray-800'>Asset Class List</h1>
                 <div className="flex space-x-1">
@@ -313,6 +253,7 @@ export default function RefItemClass({useProps, openTab,}) {
                       title='Save Changes'
                       color="primary"
                       onClick={handleSave}
+                      disabled={isNewRowEmpty}
                       size="small"
                       sx={{ border: 1 }}
                     >
@@ -325,7 +266,7 @@ export default function RefItemClass({useProps, openTab,}) {
                     <IconButton
                       title='Cancel Changes'
                       color="secondary"
-                      onClick={handleCancelEdit}
+                      onClick={cancelEdit}
                       className='transition duration-150 hover:bg-indigo-100'
                       size="small"
                       sx={{ border: 1 }}
@@ -349,7 +290,6 @@ export default function RefItemClass({useProps, openTab,}) {
                     title='Refresh Data'
                     onClick={() => {
                       refreshItemClasses();
-                      setInputQuery("");
                       setSearchQuery( "");
                       setPage(0);
                     }}
@@ -368,106 +308,78 @@ export default function RefItemClass({useProps, openTab,}) {
                 </div>
             </div>
             
-            {/* ------------------------------------------------- 
-            -               TABLE STARTS HERE 
-            --------------------------------------------------- */}
+            {/* .......  C u s t o m   T a b l e  ...... */}
 
             <div className='overflow-x-auto border rounded-lg '>
               <table className="w-full border-collapse">
 
-                {/* ----------------------- > TABLE HEADER  <------------------------*/}
+                 {/* ... Table Header ... */}
                 <thead>
                   <tr className='bg-gray-100 border-b'>
 
-                    {/* itemClass CODE */}
+                    {/* Asset Class Code */}
                     <th
                       className='relative p-2 text-sm font-semibold text-left text-gray-700 border-r border-gray-200'
                       style={theaderStyle('Code')}
                       onClick={() => handleSort('classCode')}
                     >
-                      Asset Class Code
-                      <span className="ml-8 text-gray-500">
-                        {sortConfig.key === 'classCode' ? (
-                          sortConfig.direction === 'asc' ? (
-                            <ArrowUpwardIcon fontSize="inherit" sx={{ fontSize: 16 }} />
-                          ) : (
-                            <ArrowDownwardIcon fontSize="inherit" sx={{ fontSize: 16 }} />
-                          )
-                        ) : (
-                          <UnfoldMoreIcon fontSize="inherit" sx={{ fontSize: 16, opacity: 0.4 }} />
-                        )}
-                      </span>
-                      <div
-                        onMouseDown={(e) => handleResizeMouseDown('classCode', e)}
-                        style={resizeColumn }
-                        title="Resize column"
-                      />
+                      <div className='flex justify-between'>
+                        <span className='mr-2'>Asset Class Code</span>
+                        <RenderSortIcon columnKey='classCode'  sortConfig={sortConfig} />                         
+                        <div
+                          onMouseDown={(e) => handleResizeMouseDown('classCode', e)}
+                          style={resizeColumn }
+                          title="Resize column"
+                        />
+                      </div>
+                      
                     </th>
 
-                    {/* itemClass NAME */}
+                    {/* Asset Class Name */}
 
                     <th
                       className='relative p-2 text-sm font-semibold text-left text-gray-700 border-r border-gray-200'
                       style={theaderStyle('Name')}
                       onClick={() => handleSort('itemClass')}
                     >
-                      Asset Class
-                      <span className="ml-8 text-gray-500">
-                        {sortConfig.key === 'itemClass' ? (
-                          sortConfig.direction === 'asc' ? (
-                            <ArrowUpwardIcon fontSize="inherit" sx={{ fontSize: 16 }} />
-                          ) : (
-                            <ArrowDownwardIcon fontSize="inherit" sx={{ fontSize: 16 }} />
-                          )
-                        ) : (
-                          <UnfoldMoreIcon fontSize="inherit" sx={{ fontSize: 16, opacity: 0.4 }} />
-                        )}
-                      </span>
-                      <div
-                        onMouseDown={(e) => handleResizeMouseDown('itemClass', e)}
-                        style={resizeColumn }
-                        title="Resize column"
-                      />
+                      <div className='flex justify-between'>
+                        <span className='mr-2'>Asset Class</span>
+                        <RenderSortIcon columnKey='itemClass'  sortConfig={sortConfig} />
+                        <div
+                          onMouseDown={(e) => handleResizeMouseDown('itemClass', e)}
+                          style={resizeColumn }
+                          title="Resize column"
+                        />
+                      </div>
                     </th>
 
-                    {/* itemClass CATEGORY */}
+                    {/* Category */}
 
                     <th
                       className='relative p-2 text-sm font-semibold text-left text-gray-700 border-r border-gray-200'
                       style={{width: 500}}
                       onClick={() => handleSort('category')}
                     >
-                      Asset Group
-                      <span className="ml-8 text-gray-500">
-                        {sortConfig.key === 'itemClass' ? (
-                          sortConfig.direction === 'asc' ? (
-                            <ArrowUpwardIcon fontSize="inherit" sx={{ fontSize: 16 }} />
-                          ) : (
-                            <ArrowDownwardIcon fontSize="inherit" sx={{ fontSize: 16 }} />
-                          )
-                        ) : (
-                          <UnfoldMoreIcon fontSize="inherit" sx={{ fontSize: 16, opacity: 0.4 }} />
-                        )}
-                      </span>
-                      <div
-                        onMouseDown={(e) => handleResizeMouseDown('itemClass', e)}
-                        style={resizeColumn }
-                        title="Resize column"
-                      />
+                      <div className='flex justify-between'>
+                        <span className='mr-2'>Asset Category</span>
+                        <RenderSortIcon columnKey='category'  sortConfig={sortConfig} />
+                        <div
+                          onMouseDown={(e) => handleResizeMouseDown('itemClass', e)}
+                          style={resizeColumn }
+                          title="Resize column"
+                        />
+                        </div>
                     </th>
                     <th className='p-2 text-sm text-center'>Action</th>
                   </tr>
                 </thead>
 
 
-                {/* ------------------ Table Body Starts Here -----------------------*/}
+                 {/* ... Table Body ... */}
 
                 <tbody>
                   {paginatedRows.map((row) => (
-                    <tr
-                      key={row.id}
-                      className={`border-b ${editingRowId === row.id ? 'bg-blue-100' : 'hover:bg-gray-50'}`}
-                    >
+                    <tr key={row.id} className={`border-b ${editingRowId === row.id ? 'bg-blue-100' : 'hover:bg-gray-50'}`}>
 
                     {/* itemClass Code column */}
                     <td className='p-1 pl-2' style={tbodyStyle('classCode')}>
@@ -475,7 +387,7 @@ export default function RefItemClass({useProps, openTab,}) {
                         <input
                           type="text"
                           value={row.classCode ?? ''}
-                          onChange={(e) => handleTempChange(row.id, 'classCode', e.target.value)}
+                          onChange={(e) => updateCell(row.id, 'classCode', e.target.value)}
                           className="w-full p-1 border-b"
                         />
                       ) : (
@@ -489,7 +401,7 @@ export default function RefItemClass({useProps, openTab,}) {
                         <input
                           type="text"
                           value={row.itemClass ?? ''}
-                          onChange={(e) => handleTempChange(row.id, 'itemClass', e.target.value)}
+                          onChange={(e) => updateCell(row.id, 'itemClass', e.target.value)}
                           className="w-full p-1 border-b"
                         />
                       ) : (
@@ -503,8 +415,7 @@ export default function RefItemClass({useProps, openTab,}) {
                           value={row.category || ''}
                           options={assetGrp}
                           onChange={(e, newValue) => {
-                            console.log("Selected category:", newValue);
-                            handleTempChange(row.id, 'category', newValue || "")
+                            updateCell(row.id, 'category', newValue || "")
                           }}
                           className="w-full p-1 border-b"
                           renderInput={(params) => (<TextField {...params} size="small" />)}
@@ -516,7 +427,7 @@ export default function RefItemClass({useProps, openTab,}) {
                       {/* Edit Action */}
                       <td className='p-1 pl-2 text-center'>
                         {editingRowId === null && (
-                          <IconButton size="small" onClick={() => handleEditExistingRow(row.id)}>
+                          <IconButton size="small" onClick={() => handleEditExistingRow(row)}>
                             <EditIcon fontSize="small" />
                           </IconButton>
                         )}
@@ -524,42 +435,25 @@ export default function RefItemClass({useProps, openTab,}) {
                   </tr>
                   ))}                  
                 </tbody>                
-              </table>
-              {/* ------------------------ TABLE ENDS HERE ---------------------------- */}            
+              </table> 
 
-
-              <TablePagination
-                component="div"
-                count={rows.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={(e, p) => setPage(p)}
-                onRowsPerPageChange={(e) => {
-                  setRowsPerPage(parseInt(e.target.value, 10));
-                  setPage(0);
-                }}
-              />
+                <TablePagination
+                  component="div"
+                  count={data.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={(e, p) => setPage(p)}
+                  onRowsPerPageChange={(e) => {
+                    setRowsPerPage(parseInt(e.target.value, 10));
+                    setPage(0);
+                  }}
+                />
             </div>
-
-            <p className="mt-3 text-sm text-gray-500">
-              {editingRowId !== null
-                ? 'Editing enabled. Click the save icon to commit changes.'
-                : `Click Edit or Add Row to begin editing.`
-              }
-            </p>
+          
+              <Dialog open={confirmDeleteEmptyOpen} onClose={cancelDeleteEmpty}>
+                <RenderDialog cancel={cancelDeleteEmpty}  confirm={confirmDeleteEmpty}/>        
+              </Dialog>
           </div>
-          <Dialog open={confirmDeleteEmptyOpen} onClose={cancelDeleteEmpty}>
-            <DialogTitle>Confirm Empty Row</DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                This row is empty. Saving will remove this row. Do you want to continue?
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={cancelDeleteEmpty}>Cancel</Button>
-              <Button color="error" onClick={confirmDeleteEmpty}>Yes, Remove</Button>
-            </DialogActions>
-          </Dialog>
         </ThemeProvider>
       }
     </>

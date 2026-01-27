@@ -28,13 +28,9 @@ export const useRefLocation = () => {
           setError(null);
           
           // Test API first
-          await testAPI();
-          
-          // Then fetch locations
-          // console.log('Fetching location...');
-          const response = await api.get('/refLocation');
-          // console.log('Locations response:', response.data);
-          
+          await testAPI();          
+
+          const response = await api.get('/refLocation');          
           const data = response.data;
           
           if (!Array.isArray(data)) {
@@ -44,14 +40,14 @@ export const useRefLocation = () => {
           const dataWithID = data.map((item, index) => ({
             ...item,
             id: item.id || `temp-${index}`,
-            LocationName: item.LocationName || item.name || 'LocationName'
+            LocationName: item.LocationName 
           }));
           
           setRefLocData(dataWithID);
           
         } catch (error) {
-          console.error('Error in getrefLocation:', error);
           setError(error.response?.data?.error || error.message || 'Failed to fetch locations');
+
         } finally {
           setLoading(false);
         }
@@ -60,24 +56,27 @@ export const useRefLocation = () => {
       getrefLocation();
     }, []);
   
-    // Create LocationName - UPDATED TO SEND CORRECT FIELDS
+    // Create LocationName 
     const createRefLocation = async (LocationName ='') => {
       try {
         setActionLoading(true);
-        console.log('Creating Location:', { LocationName });
+        setError(null)
         
         const response = await api.post('/refLocation', { LocationName });
-        console.log('Create response:', response.data);
         
-        // Refresh the list
-        await refreshRefLocation();
+        const created = {
+          id: response.data.id,
+          LocationName: response.data.LocationName
+        }
         
-        return response.data;
+        setRefLocData(prev => [...prev, created])
+        return created;
+
       } catch (error) {
-        console.error('Error creating Location:', error);
         const errorMsg = error.response?.data?.error || error.message || 'Failed to create Location';
         setError(errorMsg);
         throw new Error(errorMsg);
+
       } finally {
         setActionLoading(false);
       }
@@ -87,24 +86,19 @@ export const useRefLocation = () => {
     const updateRefLocation = async (id,  LocationName = '') => {
       try {
         setActionLoading(true);
-        console.log(`Updating LocationName ${id} to:`, { LocationName });
         
         const response = await api.put(`/refLocation/${id}`, { LocationName });
-        console.log('Update response:', response.data);
         
         // Update local state
-        setRefLocData(prev => 
-          prev.map(item => 
-            item.id == id ? { ...item, LocationName} : item
-          )
-        );
+        setRefLocData(prev => prev.map(item => item.id == id ? { ...item, LocationName} : item));
         
         return response.data;
+
       } catch (error) {
-        console.error('Error updating LocationName:', error);
         const errorMsg = error.response?.data?.error || error.message || 'Failed to update LocationName';
         setError(errorMsg);
         throw new Error(errorMsg);
+
       } finally {
         setActionLoading(false);
       }
@@ -113,21 +107,19 @@ export const useRefLocation = () => {
     // Delete LocationName
     const deleteRefLocation = async (id) => {
       try {
-        setActionLoading(true);
-        console.log('Deleting LocationName:', id);
-        
+        setActionLoading(true);        
         const response = await api.delete(`/refLocation/${id}`);
-        console.log('Delete response:', response.data);
         
         // Update local state
         setRefLocData(prev => prev.filter(item => item.id != id));
         
         return response.data;
+
       } catch (error) {
-        console.error('Error deleting LocationName:', error);
         const errorMsg = error.response?.data?.error || error.message || 'Failed to delete LocationName';
         setError(errorMsg);
         throw new Error(errorMsg);
+
       } finally {
         setActionLoading(false);
       }
@@ -137,21 +129,16 @@ export const useRefLocation = () => {
     const refreshRefLocation = async () => {
       try {
         setLoading(true);
-        const response = await api.get('/refLocation');
-        const data = response.data;
-        
-        const dataWithID = data.map((item, index) => ({
-          ...item,
-          id: item.id || `temp-${index}`,
-          LocationName: item.LocationName || item.name || 'Unnamed LocationName'
-        }));
-        
-        setRefLocData(dataWithID);
         setError(null);
+        
+        const response = await api.get('/refLocation');
+        
+        setRefLocData(response.data);
+
       } catch (error) {
-        console.error('Error fetching locations:', error);
         setError(error.response?.data?.error || error.message || 'Failed to fetch locations');
         throw error;
+
       } finally {
         setLoading(false);
       }

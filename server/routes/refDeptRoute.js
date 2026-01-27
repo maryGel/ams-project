@@ -13,44 +13,38 @@ router.get('/test', (req, res) => {
 
 // Get all Locations
 router.get('/', (req, res) => {
-  // console.log('Get api/refDepartment = Fetching all Locations')
 
   db.getConnection((error, connection) => {
     if(error){
-      console.log('Error getting Locations from pool:' + error.stack)
       return res.status(500).json({error: 'Database connection error'});
     }
 
-    const sqlSelect = 'SELECT * FROM refDepartment';
+    const sqlSelect = 'SELECT * FROM refdepartment';
 
     connection.query(sqlSelect, (error, result) => {
-      connection.release(); //release connecition back to pool
+      connection.release();
 
       if(error){
-        console.error('Error executing query' + error.stack)
         return res.status(500).json({error: 'Error fetching the data'})
       }
-      console.log(`Found ${result.length} Locations`)
       res.json(result);
     }) 
   })
 })
 
-// Get single Location id 
+// Get single Department id 
 router.get('/:id', (req, res) => {
   const { id } = req.params;
-  // console.log(`GET/refDepartment/${id} - Fetching Location`)
 
   db.getConnection((error, connection) => {
     if(error){
       return res.status(500).json({error: 'Database connection failed'});
     }
 
-    connection.query('SELECT * FROM refDepartment where id = ?', [id], (error, result) => {
+    connection.query('SELECT * FROM refdepartment where id = ?', [id], (error, result) => {
       connection.release();
 
       if(error){
-        console.log('Database query error', error)
         return res.status(500).json({error: 'Database query failed'});
       }
       if(result.length === 0){
@@ -62,14 +56,13 @@ router.get('/:id', (req, res) => {
   });
 });
 
-// Post create new Location
+// Post create new Department
 
 router.post('/', (req, res) => {
-  const {Location} = req.body;
-  // console.log('POST/refDepartment - Creating Location', {Location})
+  const {Department} = req.body;
 
-  if(!Location){
-    return res.status(400).json({error: 'Location is required'})
+  if(!Department){
+    return res.status(400).json({error: 'Department is required'})
   }
 
   db.getConnection((error, connection) => {
@@ -77,35 +70,33 @@ router.post('/', (req, res) => {
       return res.status(500).json({error: 'Database connection failed'});
     }
 
-    const sql = 'INSERT INTO refDepartment (Location) VALUES (?)';
+    const sql = 'INSERT INTO refdepartment (Department) VALUES (?)';
     const params = [Department || '']
 
     connection.query(sql, params, (error, result) => {
       connection.release();
 
       if(error){
-        console.error('Database query error:', error);
         return res.status(500).json({error: 'Database query failed', details: error.message, sql: sql});
       }
 
       res.json({
-        message: 'New Location has been created',
+        message: 'New Department has been created',
         id: result.insertId,
-        Location: Location || ''
+        Department: Department || ''
       });
     });
   });
 });
 
 
-// PUT update Location
+// PUT update Department
 router.put('/:id', (req, res) => {
   const { id } = req.params;
-  const { Location } = req.body;
-  // console.log(`PUT/api/refDepartment/${id} - Creating brand`, {Location})
+  const {Department} = req.body;
 
-  if(!Location){
-    return res.status(400).json({error: 'Brand name is required'})
+  if(!Department){
+    return res.status(400).json({error: 'Department is required'})
   }
 
   db.getConnection((error, connection) => {
@@ -114,22 +105,21 @@ router.put('/:id', (req, res) => {
       return res.status(500).json({error: ' Database connection failed'});
     }
 
-    const sql = 'UPDATE refDepartment SET Department = ? where id = ?';
+    const sql = 'UPDATE refdepartment SET Department = ? where id = ?';
     const params = [Department || '', id];
 
     connection.query(sql, params, (error, result) => {
       connection.release();
 
       if(error) {
-        console.error('Database query error:' , error);
         return res.status(500).json({error: 'Database query failed'});
       }
   
       if(result.affectedRows === 0 ){
-        return res.status(404).json({error: 'Location not found'});
+        return res.status(404).json({error: 'Department not found'});
       }
 
-      res.json({message : 'Location updates has been successfully'});
+      res.json({message : 'Department updates has been successfully'});
     });
   });
 });
@@ -140,26 +130,24 @@ router.put('/:id', (req, res) => {
 
 router.delete('/:id', (req,res) => {
   const { id } = req.params;
-  // console.log(`DELETE /api/refDepartment/${id} - Deleting Location`);
 
   db.getConnection((error, connection) => {
     if(error) {
       return res.status(500).json({error: 'Database connection failed'});
     }
 
-    connection.query('Delete from refDepartment where id = ?', [id], (error, result) => {
+    connection.query('Delete from refdepartment where id = ?', [id], (error, result) => {
       connection.release();
 
       if(error){
-        console.error('Database query error:', error);
         return res.status(500).json({error: 'Database query failed'});
       }
 
       if(result.affectedRows === 0){
-        return res.status(404).json({ error: 'Location not found'});
+        return res.status(404).json({ error: 'Department not found'});
       }
 
-      res.json({message: 'Location has been deleted successfully'});
+      res.json({message: 'Department has been deleted successfully'});
     });
   });
 });

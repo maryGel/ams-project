@@ -13,7 +13,6 @@ export const useRefItemClass = () => {
   const testAPI = async () => {
     try {
       const response = await api.get('/refItemClass/test');
-      // console.log('API Test Response:', response.data);
       return response.data;
     } catch (error) {
       console.error('API Test Failed:', error);
@@ -31,11 +30,7 @@ export const useRefItemClass = () => {
         // Test API first
         await testAPI();
         
-        // Then fetch AssetClasses
-        // console.log('Fetching AssetClasses...');
-        const response = await api.get('/refItemClass');
-        // console.log('Item Class response:', response.data);
-        
+        const response = await api.get('/refItemClass');       
         const data = response.data;
         
         if (!Array.isArray(data)) {
@@ -45,16 +40,16 @@ export const useRefItemClass = () => {
         const dataWithID = data.map((item, index) => ({
           ...item,
           id: item.id || `temp-${index}`,
-          classCode: item.classCode || item.code || `CODE-${item.id || index}`,
-          itemClass: item.itemClass || item.name || 'Unnamed Item Class',
-          category: item.category || item.category || 'Unnamed Item Class'
+          classCode: item.classCode,
+          itemClass: item.itemClass,
+          category: item.category
         }));
         
         setRefItemClassData(dataWithID);
         
       } catch (error) {
-        console.error('Error in getRefItemClass:', error);
         setError(error.response?.data?.error || error.message || 'Failed to fetch AssetClasses');
+
       } finally {
         setLoading(false);
       }
@@ -63,74 +58,76 @@ export const useRefItemClass = () => {
     getRefItemClass();
   }, []);
 
-  // Create itemClass - UPDATED TO SEND CORRECT FIELDS
+  // Create asset class
   const createRefItemClass = async (classCode = '', itemClass, category) => {
     try {
       setActionLoading(true);
-      console.log('Creating itemClass:', {itemClass, classCode, category});
-      
+      setError(null)
+
       const response = await api.post('/refItemClass', { itemClass, classCode, category });
-      console.log('Create response:', response.data);
+
+      const created = {
+        id: response.data.id,
+        itemClass: response.data.itemClass,
+        classCode: response.data.classCode,
+        category: response.data.category
+      }
       
-      // Refresh the list
-      await refreshItemClasses();
-      
-      return response.data;
+      setRefItemClassData(prev => [...prev, created]);           
+      return created;
+
     } catch (error) {
-      console.error('Error creating itemClass:', error);
       const errorMsg = error.response?.data?.error || error.message || 'Failed to create itemClass';
       setError(errorMsg);
       throw new Error(errorMsg);
+      
     } finally {
       setActionLoading(false);
     }
   };
 
-  // Update itemClass - UPDATED TO SEND CORRECT FIELDS
+  // Update asset class
   const updateRefItemClass = async (id, classCode = '', itemClass, category) => {
     try {
       setActionLoading(true);
-      console.log(`Updating itemClass ${id} to:`, { classCode, itemClass, category });
+      setError(null);
       
       const response = await api.put(`/refItemClass/${id}`, { classCode, itemClass, category });
-      console.log('Update response:', response.data);
       
       // Update local state
       setRefItemClassData(prev => 
-        prev.map(item => 
-          item.id == id ? { ...item, classCode, itemClass, category} : item
-        )
+        prev.map(item => item.id == id ? { ...item, classCode, itemClass, category} : item)
       );
       
       return response.data;
+
     } catch (error) {
-      console.error('Error updating itemClass:', error);
       const errorMsg = error.response?.data?.error || error.message || 'Failed to update itemClass';
       setError(errorMsg);
       throw new Error(errorMsg);
+
     } finally {
       setActionLoading(false);
     }
   };
 
-  // Delete itemClass
+  // Delete asset class
   const deleteRefItemClass = async (id) => {
     try {
       setActionLoading(true);
-      console.log('Deleting itemClass:', id);
       
       const response = await api.delete(`/refItemClass/${id}`);
-      console.log('Delete response:', response.data);
       
       // Update local state
       setRefItemClassData(prev => prev.filter(item => item.id != id));
       
       return response.data;
+
     } catch (error) {
-      console.error('Error deleting itemClass:', error);
       const errorMsg = error.response?.data?.error || error.message || 'Failed to delete itemClass';
       setError(errorMsg);
       throw new Error(errorMsg);
+
     } finally {
       setActionLoading(false);
     }
@@ -140,23 +137,15 @@ export const useRefItemClass = () => {
   const refreshItemClasses = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/refItemClass');
-      const data = response.data;
-      
-      const dataWithID = data.map((item, index) => ({
-        ...item,
-        id: item.id || `temp-${index}`,
-        classCode: item.classCode || item.code || `CODE-${item.id || index}`,
-        itemClass: item.itemClass || item.name || 'Unnamed itemClass',
-        category: item.category || ''
-      }));
-      
-      setRefItemClassData(dataWithID);
       setError(null);
+
+      const response = await api.get('/refItemClass');
+      setRefItemClassData(response.data);
+      
     } catch (error) {
-      console.error('Error fetching AssetClasses:', error);
       setError(error.response?.data?.error || error.message || 'Failed to fetch AssetClasses');
       throw error;
+
     } finally {
       setLoading(false);
     }

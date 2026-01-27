@@ -14,23 +14,22 @@ router.get('/test', (req, res) => {
 
 // GET all categories
 router.get('/', (req, res) => {
-  // console.log('GET /refItemClass - Fetching all categories');
   
   db.getConnection((err, connection) => {
     if (err) {
       console.error('Database connection error:', err);
       return res.status(500).json({ error: 'Database connection failed' });
     }
+
+    const sql = 'SELECT * FROM refItemclass';
     
-    connection.query('SELECT * FROM refItemclass ', (error, results) => {
+    connection.query(sql, (error, results) => {
       connection.release();
       
       if (error) {
-        console.error('Database query error:', error);
         return res.status(500).json({ error: 'Database query failed', details: error.message });
       }
       
-      console.log(`Found ${results.length} categories`);
       res.json(results);
     });
   });
@@ -39,14 +38,15 @@ router.get('/', (req, res) => {
 // GET single itemClass by ID
 router.get('/:id', (req, res) => {
   const { id } = req.params;
-  // console.log(`GET /refItemClass/${id} - Fetching itemClass`);
   
   db.getConnection((err, connection) => {
     if (err) {
       return res.status(500).json({ error: 'Database connection failed' });
     }
+
+    const sql = 'SELECT * FROM refItemclass WHERE id = ?';
     
-    connection.query('SELECT * FROM refItemclass WHERE id = ?', [id], (error, results) => {
+    connection.query(sql, [id], (error, results) => {
       connection.release();
       
       if (error) {
@@ -66,7 +66,6 @@ router.get('/:id', (req, res) => {
 // POST create new itemClass
 router.post('/', (req, res) => {
   const { classCode, itemClass, category } = req.body;
-  // console.log('POST /refItemClass - Creating itemClass:', {classCode, itemClass, category  });
   
   if (!itemClass) {
     return res.status(400).json({ error: 'Name is required' });
@@ -77,14 +76,13 @@ router.post('/', (req, res) => {
       return res.status(500).json({ error: 'Database connection failed' });
     }
 
-    const sql = 'INSERT INTO refItemclass(classCode, itemClass, category  ) VALUES (?, ?, ?)';
+    const sql = 'INSERT INTO refItemclass(classCode, itemClass, category) VALUES (?, ?, ?)';
     const params = [classCode, itemClass, category || ''];
     
     connection.query(sql, params, (error, result) => {
       connection.release();
       
       if (error) {
-        console.error('Database query error:', error);
         return res.status(500).json({ error: 'Database query failed', details: error.message, sql: sql });
       }
       
@@ -102,7 +100,6 @@ router.post('/', (req, res) => {
 router.put('/:id', (req, res) => {
   const { id } = req.params;
   const { classCode, itemClass, category  } = req.body;
-  // console.log(`PUT /refItemClass/${id} - Updating itemClass to:`, {classCode, itemClass, category });
   
   if (!itemClass) {
     return res.status(400).json({ error: 'Name is required' });
@@ -120,7 +117,6 @@ router.put('/:id', (req, res) => {
       connection.release();
       
       if (error) {
-        console.error('Database query error:', error);
         return res.status(500).json({ error: 'Database query failed' });
       }
       
@@ -136,18 +132,18 @@ router.put('/:id', (req, res) => {
 // DELETE itemClass
 router.delete('/:id', (req, res) => {
   const { id } = req.params;
-  // console.log(`DELETE /refItemClass/${id} - Deleting itemClass`);
   
   db.getConnection((err, connection) => {
     if (err) {
       return res.status(500).json({ error: 'Database connection failed' });
     }
+
+    const sql = 'DELETE FROM refItemclass WHERE id = ?';
     
-    connection.query('DELETE FROM refItemclass WHERE id = ?', [id], (error, result) => {
+    connection.query(sql, [id], (error, result) => {
       connection.release();
       
       if (error) {
-        console.error('Database query error:', error);
         return res.status(500).json({ error: 'Database query failed' });
       }
       

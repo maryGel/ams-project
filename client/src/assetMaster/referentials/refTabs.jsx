@@ -77,7 +77,7 @@ export default function RefTabs({handleOpenTab}){
           <Collapse in={openItemAssigment} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
               {[
-                'Asset Group',
+                'Asset Category',
                 'Asset Class',
                 'Location',
                 'Department',

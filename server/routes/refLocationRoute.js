@@ -13,24 +13,19 @@ router.get('/test', (req, res) => {
 
 // Get all Locations
 router.get('/', (req, res) => {
-  // console.log('Get api/refLocation = Fetching all Locations')
 
   db.getConnection((error, connection) => {
     if(error){
-      console.log('Error getting Locations from pool:' + error.stack)
       return res.status(500).json({error: 'Database connection error'});
     }
 
     const sqlSelect = 'SELECT * FROM reflocation';
 
     connection.query(sqlSelect, (error, result) => {
-      connection.release(); //release connecition back to pool
-
+      connection.release(); 
       if(error){
-        console.error('Error executing query' + error.stack)
         return res.status(500).json({error: 'Error fetching the data'})
       }
-      console.log(`Found ${result.length} Locations`)
       res.json(result);
     }) 
   })
@@ -39,7 +34,6 @@ router.get('/', (req, res) => {
 // Get single Location id 
 router.get('/:id', (req, res) => {
   const { id } = req.params;
-  console.log(`GET/refLocation/${id} - Fetching Location`)
 
   db.getConnection((error, connection) => {
     if(error){
@@ -50,7 +44,6 @@ router.get('/:id', (req, res) => {
       connection.release();
 
       if(error){
-        console.log('Database query error', error)
         return res.status(500).json({error: 'Database query failed'});
       }
       if(result.length === 0){
@@ -63,12 +56,10 @@ router.get('/:id', (req, res) => {
 });
 
 // Post create new Location
-
 router.post('/', (req, res) => {
-  const {Location} = req.body;
-  // console.log('POST/refLocation - Creating Location', {Location})
+  const {LocationName} = req.body;
 
-  if(!Location){
+  if(!LocationName){
     return res.status(400).json({error: 'Location is required'})
   }
 
@@ -77,21 +68,20 @@ router.post('/', (req, res) => {
       return res.status(500).json({error: 'Database connection failed'});
     }
 
-    const sql = 'INSERT INTO reflocation (Location) VALUES (?)';
+    const sql = 'INSERT INTO reflocation (LocationName) VALUES (?)';
     const params = [LocationName || '']
 
     connection.query(sql, params, (error, result) => {
       connection.release();
 
       if(error){
-        console.error('Database query error:', error);
         return res.status(500).json({error: 'Database query failed', details: error.message, sql: sql});
       }
 
       res.json({
         message: 'New Location has been created',
         id: result.insertId,
-        Location: Location || ''
+        LocationName: LocationName || ''
       });
     });
   });
@@ -101,10 +91,9 @@ router.post('/', (req, res) => {
 // PUT update Location
 router.put('/:id', (req, res) => {
   const { id } = req.params;
-  const { Location } = req.body;
-  // console.log(`PUT/api/refBrand/${id} - Creating brand`, {Location})
+  const { LocationName } = req.body;
 
-  if(!Location){
+  if(!LocationName){
     return res.status(400).json({error: 'Brand name is required'})
   }
 
@@ -121,7 +110,6 @@ router.put('/:id', (req, res) => {
       connection.release();
 
       if(error) {
-        console.error('Database query error:' , error);
         return res.status(500).json({error: 'Database query failed'});
       }
   
@@ -151,7 +139,6 @@ router.delete('/:id', (req,res) => {
       connection.release();
 
       if(error){
-        console.error('Database query error:', error);
         return res.status(500).json({error: 'Database query failed'});
       }
 

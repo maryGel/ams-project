@@ -46,7 +46,6 @@ router.get('/:id', (req, res) => {
     connection.query(sql, [id], (error, result) => {
       connection.release();
       if(error){
-        console.error('Database query error', error)
         return res.status(500).json({error: 'Database query failed'});
       }
       if(result.length === 0){

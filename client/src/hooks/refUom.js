@@ -12,10 +12,8 @@ export const useRefUom = () => {
     const testAPI = async () => {
       try {
         const response = await api.get('/api/refUnit/test');
-        // console.log('API Test Response:', response.data);
         return response.data;
       } catch (error) {
-        console.error('API Test Failed:', error);
         throw error;
       }
     };
@@ -54,7 +52,7 @@ export const useRefUom = () => {
       getrefUnit();
     }, []);
   
-    // Create Unit - UPDATED TO SEND CORRECT FIELDS
+    // Create Unit 
     const createRefUnit = async (Unit ='') => {
       try {
         setActionLoading(true);
@@ -67,6 +65,7 @@ export const useRefUom = () => {
           Unit: response.data.Unit
         };
         
+        setUomData(prev => [...prev, created]);
         return created;
       
       } catch (error) {
@@ -131,17 +130,10 @@ export const useRefUom = () => {
     const refreshRefUnit = async () => {
       try {
         setLoading(true);
-        const response = await api.get('/api/refUnit');
-        const data = response.data;
-        
-        const dataWithID = data.map((item, index) => ({
-          ...item,
-          id: item.id || `temp-${index}`,
-          Unit: item.Unit || item.name || 'Unnamed Unit'
-        }));
-        
-        setUomData(dataWithID);
         setError(null);
+        
+        const response = await api.get('/api/refUnit');     
+        setUomData(response.data);
 
       } catch (error) {
         setError(error.response?.data?.error || error.message || 'Failed to fetch categories');

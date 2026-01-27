@@ -53,7 +53,7 @@ export const useRefBrand = () => {
     getRefBrand();
   }, []);
 
-  // Create BrandName - UPDATED TO SEND CORRECT FIELDS
+  // Create BrandName 
   const createrefBrand = async (BrandID ='', BrandName ) => {
     try {
       setActionLoading(true);

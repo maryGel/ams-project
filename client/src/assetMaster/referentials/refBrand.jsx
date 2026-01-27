@@ -15,7 +15,7 @@ import { useRefBrand } from '../../hooks/refBrand';
 import { useEditableTable } from '../../Utils/useEditableTable';
 
 // Table utils
-import { customTheme, resizeColumn, RenderSortIcon, RenderDialog  } from '../../Utils/customTable';
+import { customTheme, resizeColumn, RenderSortIcon, RenderDialog } from '../../Utils/customTable';
 import useColumnWidths from '../../Utils/customTable';
 
 
@@ -226,10 +226,11 @@ export default function RefBrand({ openTab, useProps }) {
               />
             </div>
 
-            {/* Title + Actions */}
+            {/* Title + Buttons */}
             <div className="flex items-center justify-between mb-4">
               <h1 className="text-lg font-semibold text-gray-800">Brand List</h1>
               <div className="flex space-x-1">
+                {/* Save */}
                 {editingRowId !== null && (
                   <IconButton
                     title="Save"
@@ -241,6 +242,8 @@ export default function RefBrand({ openTab, useProps }) {
                     <SaveIcon />
                   </IconButton>
                 )}
+
+                {/* Cancel */}
                 {editingRowId !== null && (
                   <IconButton
                     title="Cancel"
@@ -251,6 +254,7 @@ export default function RefBrand({ openTab, useProps }) {
                     <CancelIcon />
                   </IconButton>
                 )}
+                {/* Add Row */}
                 <IconButton
                   title="Add Row"
                   onClick={handleAddRow}
@@ -259,6 +263,8 @@ export default function RefBrand({ openTab, useProps }) {
                 >
                   <AddIcon />
                 </IconButton>
+
+                {/* Download */}
                 <IconButton size="small" sx={{ border: 1 }}>
                   <DownloadIcon />
                 </IconButton>
@@ -269,83 +275,90 @@ export default function RefBrand({ openTab, useProps }) {
             <div className="overflow-x-auto border rounded-lg">
               <table className="w-full border-collapse">
                   
-            {/* ... Table Header ... */}
-                <thead>
-                  <tr className="bg-gray-100 border-b">
-                    <th
-                      className="relative p-2 font-semibold text-left border-r border-gray-200 cursor-pointer"
-                      onClick={() => handleSort('BrandID')}
-                      style={theaderStyle('xCode')}
-                    >
-                      <span className='mr-2'>Branch Code</span>
-                      <RenderSortIcon columnKey='BrandID'  sortConfig={sortConfig} /> 
-                      <div
-                        onMouseDown={(e) => handleResizeMouseDown('BrandID', e)}
-                        style={resizeColumn }
-                        title="Resize column"
-                      />
-                    </th>
-                    <th
-                      className="relative p-2 font-semibold text-left border-r border-gray-200 cursor-pointer"
-                      onClick={() => handleSort('BrandName')}
-                      style={theaderStyle('Name')}
-                    >
-                      <span className='mr-2'> Branch Name </span>
-                      <RenderSortIcon columnKey='BrandName'  sortConfig={sortConfig} /> 
-                      <div
-                        onMouseDown={(e) => handleResizeMouseDown('BrandName', e)}
-                        style={resizeColumn }
-                        title="Resize column"
-                      />
-                    </th>
-                    <th className="p-2 text-center">Action</th>
-                  </tr>
-                </thead>
-                  
-            {/* ... Table Body ... */}
-                <tbody>
-                  {paginatedRows.map(row => (
-                    <tr key={row.id} className={`border-b ${editingRowId === row.id ? 'bg-blue-100' : 'hover:bg-gray-50'}`}>
-                      <td className="p-1 pl-2" style={tbodyStyle('BrandID')}>
-                        {editingRowId === row.id 
-                          ? <input
-                                type="text"
-                                value={row.BrandID}
-                                onChange={(e) => updateCell(row.id, 'BrandID', e.target.value)}
-                                className="w-full p-1 border-b"
-                            />
-                          : row.BrandID}
-                      </td>
-                      <td className="p-1 pl-2" style={tbodyStyle('BrandName')}>
-                        {editingRowId === row.id 
-                        ? <input
-                            type="text"
-                            value={row.BrandName}
-                            onChange={(e) => updateCell(row.id, 'BrandName', e.target.value)}
-                            className="w-full p-1 border-b"
+                {/* ... Table Header ... */}
+                  <thead>
+                    <tr className="bg-gray-100 border-b">
+                      {/* Brand ID */}
+                      <th
+                        className="relative p-2 font-semibold text-left border-r border-gray-200 cursor-pointer"
+                        onClick={() => handleSort('BrandID')}
+                        style={theaderStyle('Code')}
+                      >
+                        <div className='flex justify-between'>
+                          <span className='mr-2'>Branch Code</span>
+                          <RenderSortIcon columnKey='BrandID'  sortConfig={sortConfig} /> 
+                          <div
+                            onMouseDown={(e) => handleResizeMouseDown('BrandID', e)}
+                            style={resizeColumn }
+                            title="Resize column"
                           />
-                        : row.BrandName}
-                      </td>
-                      <td className="p-1 pl-2 text-center">
-                        {editingRowId === null && (
-                          <IconButton size="small" onClick={() => handleEditExistingRow(row)}>
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        )}
-                      </td>
+                        </div>
+                      </th>
+                       {/* Brand Name */}
+                      <th
+                        className="relative p-2 font-semibold text-left border-r border-gray-200 cursor-pointer"
+                        onClick={() => handleSort('BrandName')}
+                        style={theaderStyle('Name')}
+                      >
+                        <div className='flex justify-between'>
+                          <span className='mr-2'> Branch Name </span>
+                          <RenderSortIcon columnKey='BrandName'  sortConfig={sortConfig} /> 
+                          <div
+                            onMouseDown={(e) => handleResizeMouseDown('BrandName', e)}
+                            style={resizeColumn }
+                            title="Resize column"
+                          />
+                        </div>
+                      </th>
+                      <th className="p-2 text-center">Action</th>
                     </tr>
-                  ))}
-                </tbody>
+                  </thead>
+                      
+                {/* ... Table Body ... */}
+                  <tbody>
+                    {paginatedRows.map(row => (
+                      <tr key={row.id} className={`border-b ${editingRowId === row.id ? 'bg-blue-100' : 'hover:bg-gray-50'}`}>
+                        <td className="p-1 pl-2" style={tbodyStyle('BrandID')}>
+                          {editingRowId === row.id 
+                            ? <input
+                                  type="text"
+                                  value={row.BrandID}
+                                  onChange={(e) => updateCell(row.id, 'BrandID', e.target.value)}
+                                  className="w-full p-1 border-b"
+                              />
+                            : row.BrandID}
+                        </td>
+                        <td className="p-1 pl-2" style={tbodyStyle('BrandName')}>
+                          {editingRowId === row.id 
+                          ? <input
+                              type="text"
+                              value={row.BrandName}
+                              onChange={(e) => updateCell(row.id, 'BrandName', e.target.value)}
+                              className="w-full p-1 border-b"
+                            />
+                          : row.BrandName}
+                        </td>
+                        {/* Edit Button */}
+                        <td className="p-1 pl-2 text-center">
+                          {editingRowId === null && (
+                            <IconButton size="small" onClick={() => handleEditExistingRow(row)}>
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
               </table>
 
-              <TablePagination
-                component="div"
-                count={data.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={(e, p) => setPage(p)}
-                onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
-              />
+                <TablePagination
+                  component="div"
+                  count={data.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={(e, p) => setPage(p)}
+                  onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+                />
             </div>
 
             <Dialog open={confirmDeleteEmptyOpen} onClose={cancelDeleteEmpty}>

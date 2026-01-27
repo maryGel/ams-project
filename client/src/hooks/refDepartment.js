@@ -13,17 +13,16 @@ export const useRefDepartment = () => {
     const testAPI = async () => {
       try {
         const response = await api.get('/refDepartment/test');
-        // console.log('API Test Response:', response.data);
         return response.data;
+
       } catch (error) {
-        console.error('API Test Failed:', error);
         throw error;
       }
     };
   
     // GET all locations
     useEffect(() => {
-      const getrefLocation = async () => {
+      const getrefDepartment = async () => {
         try {
           setLoading(true);
           setError(null);
@@ -31,11 +30,7 @@ export const useRefDepartment = () => {
           // Test API first
           await testAPI();
           
-          // Then fetch Departments
-          // console.log('Fetching Departments...');
-          const response = await api.get('/refDepartment');
-          // console.log('Deparment response:', response.data);
-          
+          const response = await api.get('/refDepartment');          
           const data = response.data;
           
           if (!Array.isArray(data)) {
@@ -45,67 +40,65 @@ export const useRefDepartment = () => {
           const dataWithID = data.map((item, index) => ({
             ...item,
             id: item.id || `temp-${index}`,
-            Department: item.Department || item.name || 'Department'
+            Department: item.Department 
           }));
           
           setRefDeptData(dataWithID);
           
         } catch (error) {
-          console.error('Error in getrefLocation:', error);
           setError(error.response?.data?.error || error.message || 'Failed to fetch Departments');
+
         } finally {
           setLoading(false);
         }
       };
       
-      getrefLocation();
+      getrefDepartment();
     }, []);
   
     // Create Department - UPDATED TO SEND CORRECT FIELDS
     const createRefDepartment = async (Department ='') => {
       try {
         setActionLoading(true);
-        console.log('Creating Location:', { Department });
+        setError(null)
         
         const response = await api.post('/refDepartment', { Department });
-        console.log('Create response:', response.data);
         
-        // Refresh the list
-        await refreshRefDepartment();
+        const created = {
+          id: response.data.id,
+          Department: response.data.Department,
+        }
         
-        return response.data;
+        setRefDeptData(prev => [...prev, created]);
+        return created;
+
       } catch (error) {
-        console.error('Error creating Location:', error);
         const errorMsg = error.response?.data?.error || error.message || 'Failed to create Location';
         setError(errorMsg);
         throw new Error(errorMsg);
+
       } finally {
         setActionLoading(false);
       }
     };
   
-    // Update Department - UPDATED TO SEND CORRECT FIELDS
+    // Update Department 
     const updateRefDepartment = async (id,  Department = '') => {
       try {
         setActionLoading(true);
-        console.log(`Updating Department ${id} to:`, { Department });
         
         const response = await api.put(`/refDepartment/${id}`, { Department });
-        console.log('Update response:', response.data);
         
         // Update local state
-        setRefDeptData(prev => 
-          prev.map(item => 
-            item.id == id ? { ...item, Department} : item
-          )
-        );
+        setRefDeptData(prev => prev.map(item => item.id == id ? { ...item, Department} : item));
         
         return response.data;
+
       } catch (error) {
-        console.error('Error updating Department:', error);
         const errorMsg = error.response?.data?.error || error.message || 'Failed to update Department';
         setError(errorMsg);
         throw new Error(errorMsg);
+
       } finally {
         setActionLoading(false);
       }
@@ -115,20 +108,19 @@ export const useRefDepartment = () => {
     const deleteRefDepartment = async (id) => {
       try {
         setActionLoading(true);
-        console.log('Deleting Department:', id);
-        
+       
         const response = await api.delete(`/refDepartment/${id}`);
-        console.log('Delete response:', response.data);
         
         // Update local state
         setRefDeptData(prev => prev.filter(item => item.id != id));
         
         return response.data;
+
       } catch (error) {
-        console.error('Error deleting Department:', error);
         const errorMsg = error.response?.data?.error || error.message || 'Failed to delete Department';
         setError(errorMsg);
         throw new Error(errorMsg);
+
       } finally {
         setActionLoading(false);
       }
@@ -138,21 +130,16 @@ export const useRefDepartment = () => {
     const refreshRefDepartment = async () => {
       try {
         setLoading(true);
-        const response = await api.get('/refDepartment');
-        const data = response.data;
-        
-        const dataWithID = data.map((item, index) => ({
-          ...item,
-          id: item.id || `temp-${index}`,
-          Department: item.Department || item.name || 'Unnamed Department'
-        }));
-        
-        setRefDeptData(dataWithID);
         setError(null);
+        
+        const response = await api.get('/refDepartment');
+        
+        setRefDeptData(response.data);
+
       } catch (error) {
-        console.error('Error fetching Departments:', error);
         setError(error.response?.data?.error || error.message || 'Failed to fetch Departments');
         throw error;
+
       } finally {
         setLoading(false);
       }

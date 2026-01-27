@@ -8,24 +8,20 @@ import DownloadIcon from '@mui/icons-material/Download';
 import CancelIcon from '@mui/icons-material/Cancel';
 import Autocomplete from '@mui/material/Autocomplete';
 import AddIcon from '@mui/icons-material/Add';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 
-import { IconButton, ThemeProvider, TextField, TablePagination, Snackbar, Alert,  
-  Dialog, DialogActions, DialogContent,
-  DialogContentText, DialogTitle, Button
-} from '@mui/material';
+import { IconButton, ThemeProvider, TextField, TablePagination, Snackbar, Alert,  Dialog} from '@mui/material';
 
 // Custom hooks
-import { useRefDepartment } from '../../hooks/refDepartment'; // import the refDepartment data
+import { useRefDepartment } from '../../hooks/refDepartment'; 
+import { useEditableTable } from '../../Utils/useEditableTable';
+
 
 // Custom table utilities & theme
-import { customTheme, resizeColumn } from '../../Utils/customTable';
+import { customTheme, resizeColumn,  RenderSortIcon, RenderDialog } from '../../Utils/customTable';
 import useColumnWidths from '../../Utils/customTable';
 
 // ----------------------------------------------------------------------------
-//                       REF Department
+//          D E P A R T M E N T  L I S T  C O M P O N E N T
 // ----------------------------------------------------------------------------
 export default function RefDepartment({useProps, openTab,}) {
   const {
@@ -35,13 +31,10 @@ export default function RefDepartment({useProps, openTab,}) {
     createRefDepartment,
     updateRefDepartment,
     deleteRefDepartment,
-    refreshRefDepartment,
   } = useRefDepartment(useProps)
 
   const {handleResizeMouseDown, theaderStyle, tbodyStyle} = useColumnWidths();
-  const [rows, setRows] = useState(refDeptData || []); // To hold the refDepartment Data
-  const [temporaryData, setTemporaryData] = useState(refDeptData|| []);
-  const [editingRowId, setEditingRowId] = useState(null);
+
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
@@ -50,11 +43,21 @@ export default function RefDepartment({useProps, openTab,}) {
   const [confirmDeleteEmptyOpen, setConfirmDeleteEmptyOpen] = useState(false);
   const [pendingSaveRow, setPendingSaveRow] = useState(null);
 
-
+  // ---- Editable Table Hook ----
+  const {
+    data,
+    setData,
+    editedRow,
+    editingRowId,
+    addRow,
+    startEdit,
+    updateCell,
+    cancelEdit,
+    syncData,
+  } = useEditableTable([]);
 
   useEffect(() => {
-    setRows(refDeptData || []);
-    setTemporaryData(refDeptData || []);
+    syncData(refDeptData || [])
   }, [refDeptData]);
 
   const showSnackbar = (message, severity = 'success') => {
@@ -65,135 +68,101 @@ export default function RefDepartment({useProps, openTab,}) {
 const handleAddRow = () => {
   if (editingRowId !== null) return; // Safety block
 
-  const lastId = rows.length > 0 ? Math.max(...rows.map(row => Number(row.id))) : 0;
-  const newId = lastId + 1;
-
   const newRow = {
-    id: newId,
+    id: `tmp-${crypto.randomUUID()}`,
     Department: '',
     isNew: true
   };
 
-  setRows(prev => [...prev, newRow]);
-  setTemporaryData(prev => [...prev, newRow]);
+  addRow(newRow);
 
-  setEditingRowId(newId);
-
-  const totalRows = rows.length + 1;
-  const newLastPage = Math.floor(totalRows / rowsPerPage);
+  const totalRows = data.length + 1;
+  const newLastPage = Math.floor((totalRows -1) / rowsPerPage);
   setPage(newLastPage);
 };
 
-// ✅ Update temp data for editable row
-const handleTempChange = (id, field, value) => {
-  setTemporaryData(prev =>
-    prev.map(row =>
-      row.id === id ? { ...row, [field]: value } : row
-    )
-  );
-};
+  const handleEditExistingRow = (id) => {
+    if (editingRowId !== null) return;
+    startEdit(id);
+  };
 
- // Save One Row Only
+
+ // ... Saving ...
  const handleSave = async () => {
-  const editedRow = temporaryData.find(r => r.id === editingRowId);
-  if (!editedRow) return;
+    if (!editedRow) return;
 
-  const empty = !editedRow.Department.trim();
+    const isEmpty = !editedRow.Department.trim();
 
-  // If row is empty → ask user for confirmation
-  if (empty) {
-    setPendingSaveRow(editedRow);
-    setConfirmDeleteEmptyOpen(true);
-    return;
-  }
-
-  // Duplicate validation
-  const isDuplicate = rows.some(row =>
-    row.id !== editedRow.id && (
-      row.Department.trim().toLowerCase() === editedRow.Department.trim().toLowerCase()
-    )
-    );
-
-    if (isDuplicate) {
-      showSnackbar("Department already exists!", "error");
+    if (isEmpty) {
+      setConfirmDeleteEmptyOpen(true);
       return;
     }
 
-    try {
-      if (empty) {
-        if (!editedRow.isNew) await deleteRefDepartment(editedRow.id);
-      } else if (editedRow.isNew) {
-        await createRefDepartment(editedRow.Department);
-      } else {
-        await updateRefDepartment(editedRow.id, editedRow.Department);
+    const isDuplicate = data.some(row =>
+      row.id !== editedRow.id && (
+        row.Department.trim().toLowerCase() === editedRow.Department.trim().toLowerCase()
+      )
+      );
+
+      if (isDuplicate) {
+        showSnackbar("Department already exists!", "error");
+        return;
       }
 
-      await refreshRefDepartment();
-      setEditingRowId(null);
-      showSnackbar('Changes has been saved!');
+    try {
+      if (editedRow.isNew) {
+        await createRefDepartment(editedRow.Department);
+        showSnackbar('New Department has been created!');
+      } else {
+        await updateRefDepartment(editedRow.id, editedRow.Department);
+        showSnackbar('Changes has been saved!');
+
+      }
+
+      cancelEdit();
+
     } catch (err) {
       showSnackbar('Save failed: ' + err.message, 'error');
     }
   };
 
   const confirmDeleteEmpty = async () => {
-    if (!pendingSaveRow) return;
+    if (!editedRow) return;
 
     try {
-      // If it's NOT new, emptying = delete row
-      if (!pendingSaveRow.isNew) {
-        await deleteRefDepartment(pendingSaveRow.id);
+      if (!editedRow.isNew) {
+        await deleteRefDepartment(editedRow.id);
       }
 
-      await refreshRefDepartment();
-
+      cancelEdit();
       showSnackbar("Department has been deleted successfully!");
+
     } catch (err) {
       showSnackbar("Failed: " + err.message, "error");
     }
 
-    setEditingRowId(null);
-    setPendingSaveRow(null);
     setConfirmDeleteEmptyOpen(false);
   };
 
   const cancelDeleteEmpty = () => {
     setConfirmDeleteEmptyOpen(false);
-    setPendingSaveRow(null);
   };
 
 
-  const removeEmptyRows = () => {
-    const cleaned = rows.filter(row => {
-      const x = row.BrandID?.trim() || "";
-      const c = row.Department?.trim() || "";
-      return !(x === "" && c === "");
-    });
+  // ... Disabling Save button if new row is empty ...
+  const isNewRowEmpty = editedRow?.isNew && !editedRow.Department.trim();
+
+  // ---- F i l t e r  &   P a g i n a t i o n ----
   
-    setRows(cleaned);
-    setTemporaryData(cleaned);
-  };
-  
-  // Cancel Editing
-  const handleCancelEdit = () => {
-    removeEmptyRows()
-    setEditingRowId(null);
-  };
 
-  // Enable editing for existing rows
-  const handleEditExistingRow = (id) => {
-    if (editingRowId !== null) return;
-    setEditingRowId(id);
-  };
-
-  // Sort
+  // ... Sorting ...
   const handleSort = (columnKey) => {
     let direction = 'asc';
     if (sortConfig.key === columnKey && sortConfig.direction === 'asc') {
       direction = 'desc';
     }
 
-    const sorted = [...temporaryData].sort((a, b) => {
+    const sorted = [...data].sort((a, b) => {
       const aVal = a[columnKey]?.toString().toLowerCase() ?? '';
       const bVal = b[columnKey]?.toString().toLowerCase() ?? '';
       return direction === 'asc'
@@ -201,17 +170,14 @@ const handleTempChange = (id, field, value) => {
         : bVal.localeCompare(aVal);
     });
 
-    setTemporaryData(sorted);
+    setData(sorted);
     setSortConfig({ key: columnKey, direction });
   };
 
   // Filter + Paginate
-  const filteredData = temporaryData.filter(item =>
-    // Always include the currently edited row in results
+  const filteredData = data.filter(item =>
     item.id === editingRowId ||
-    // Normal search filter for other rows
-    item.Department?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.id?.toString().includes(searchQuery)
+    item.Department?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const paginatedRows = filteredData.slice(
@@ -227,7 +193,7 @@ const handleTempChange = (id, field, value) => {
     <>
     {openTab === 'Department' &&
       <ThemeProvider theme={customTheme}>
-        <div key = {rows.id} className='w-auto h-full p-4 bg-white shadow-lg rounded-xl'>
+        <div className='w-auto h-full p-4 bg-white shadow-lg rounded-xl'>
 
           {/* Snackbar */}
           <Snackbar
@@ -246,19 +212,13 @@ const handleTempChange = (id, field, value) => {
 
           {/* Search */}
           <div className='flex justify-end mb-3'>
-            <Autocomplete
-              freeSolo
-              options={rows.map(item => item.Department)}
+            <TextField
+              label="Search"
               value={searchQuery}
-              onInputChange={(e, v) => {
-                setSearchQuery(v);
-                setPage(0);
-              }}
-              renderInput={(params) =>
-                <TextField {...params} label="Search here" />
-              }
-              sx={{ width: 300 }}
-            />
+              onChange={(e) => { setSearchQuery(e.target.value); setPage(0); }}
+              size="small"
+              sx={{width : 250 }}
+            /> 
           </div>
 
           {/* Title + Buttons */}
@@ -273,6 +233,7 @@ const handleTempChange = (id, field, value) => {
                   title='Save Changes'
                   color="primary"
                   onClick={handleSave}
+                  disabled={isNewRowEmpty}
                   size="small"
                   sx={{ border: 1 }}
                 >
@@ -285,7 +246,7 @@ const handleTempChange = (id, field, value) => {
                 <IconButton
                   title='Cancel Changes'
                   color="secondary"
-                  onClick={handleCancelEdit}
+                  onClick={cancelEdit}
                   className='transition duration-150 hover:bg-indigo-100'
                   size="small"
                   sx={{ border: 1 }}
@@ -323,23 +284,15 @@ const handleTempChange = (id, field, value) => {
                     onClick={() => handleSort('Department')}
                     style={theaderStyle('Name')}
                   >
-                    Department of Measure
-                    <span className="ml-8 text-gray-500">
-                      {sortConfig.key === 'Department' ? (
-                        sortConfig.direction === 'asc' ? (
-                          <ArrowUpwardIcon fontSize="inherit" sx={{ fontSize: 16 }} />
-                        ) : (
-                          <ArrowDownwardIcon fontSize="inherit" sx={{ fontSize: 16 }} />
-                        )
-                      ) : (
-                        <UnfoldMoreIcon fontSize="inherit" sx={{ fontSize: 16, opacity: 0.4 }} />
-                      )}
-                    </span>
-                    <div
-                      onMouseDown={(e) => handleResizeMouseDown('Department', e)}
-                      style={resizeColumn }
-                      title="Resize column"
-                    />
+                    <div className='flex justify-between'>
+                      <span className='mr-2'>Department</span>
+                      <RenderSortIcon columnKey='Department'  sortConfig={sortConfig} />                         
+                      <div
+                        onMouseDown={(e) => handleResizeMouseDown('Department', e)}
+                        style={resizeColumn }
+                        title="Resize column"
+                      />
+                    </div>
                   </th>
                   <th className='p-2 text-sm text-center'>Action</th>
                 </tr>
@@ -347,17 +300,14 @@ const handleTempChange = (id, field, value) => {
 
               <tbody>
                 {paginatedRows.map(row => (
-                  <tr
-                    key={row.id}
-                    className={`border-b ${editingRowId === row.id ? 'bg-blue-100' : 'hover:bg-gray-50'}`}
-                  >
-                      {/* Department */}
+                  <tr key={row.id} className={`border-b ${editingRowId === row.id ? 'bg-blue-100' : 'hover:bg-gray-50'}`}>
+                    {/* Department */}
                     <td className='p-1 pl-2'style={tbodyStyle('Department')} >
                       {editingRowId === row.id ? (
                         <input
                           type="text"
                           value={row.Department ?? ''}
-                          onChange={(e) => handleTempChange(row.id, 'Department', e.target.value)}
+                          onChange={(e) => updateCell(row.id, 'Department', e.target.value)}
                           className="w-full p-1 border-b"
                         />
                       ) : (
@@ -368,7 +318,7 @@ const handleTempChange = (id, field, value) => {
                     {/* Edit Action */}
                     <td className='p-1 pl-2 text-center'>
                       {editingRowId === null && (
-                        <IconButton size="small" onClick={() => handleEditExistingRow(row.id)}>
+                        <IconButton size="small" onClick={() => handleEditExistingRow(row)}>
                           <EditIcon fontSize="small" />
                         </IconButton>
                       )}
@@ -381,7 +331,7 @@ const handleTempChange = (id, field, value) => {
 
             <TablePagination
               component="div"
-              count={rows.length}
+              count={data.length}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={(e, p) => setPage(p)}
@@ -391,26 +341,10 @@ const handleTempChange = (id, field, value) => {
               }}
             />
           </div>
-
-          <p className="mt-3 text-sm text-gray-500">
-            {editingRowId === null
-              ? 'Click Edit or Add Row to begin editing.'
-              : 'Editing one row. Save or Cancel to continue.'
-            }
-          </p>
+            <Dialog open={confirmDeleteEmptyOpen} onClose={cancelDeleteEmpty}>
+              <RenderDialog cancel={cancelDeleteEmpty}  confirm={confirmDeleteEmpty}/>        
+            </Dialog>
         </div>
-        <Dialog open={confirmDeleteEmptyOpen} onClose={cancelDeleteEmpty}>
-          <DialogTitle>Confirm Empty Row</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              This row is empty. Saving will remove this row. Do you want to continue?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={cancelDeleteEmpty}>Cancel</Button>
-            <Button color="error" onClick={confirmDeleteEmpty}>Yes, Remove</Button>
-          </DialogActions>
-        </Dialog>
       </ThemeProvider>
     }
   </>
