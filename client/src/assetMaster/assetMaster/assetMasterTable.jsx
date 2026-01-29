@@ -1,5 +1,5 @@
 import * as React from 'react';
-import  {useState, useMemo}  from 'react';
+import  {useState, useMemo, useEffect}  from 'react';
 import PropTypes from 'prop-types';
 import { alpha } from '@mui/material/styles';
 import {
@@ -26,6 +26,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
 import AddIcon from '@mui/icons-material/Add';
 import { visuallyHidden } from '@mui/utils';
+
+
 
 function descendingComparator(a, b, orderBy) {
   const aValue = a[orderBy];
@@ -219,29 +221,39 @@ EnhancedTableToolbar.propTypes = {
 
 
 // ----------------------------------------------------------------
-//                    A S S E T  T A B L E 
+//                    A S S E T   T A B L E 
 // ----------------------------------------------------------------
 
 
 export default function AssetMasterTable({ 
     loading, 
     error,
-    displayedAsset,
+    displayedAssets,
     page,
+    total,
     setPage,
     isTableActive,
     setHeaderTitle,
     selected,
     setSelected
   }) {
+
+  // Add debug at top of component
+  console.log('=== TABLE DEBUG ===');
+  console.log('displayedAssets prop:', displayedAssets);
+  console.log('displayedAssets isArray?', Array.isArray(displayedAssets));
+  console.log('displayedAssets length:', displayedAssets?.length);
+  console.log('total:', total);
+  console.log('isTableActive:', isTableActive);
+
   // MUI States
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState('FacNO');  
   const [dense, setDense] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-
-  const rows = displayedAsset;
+  const rows = Array.isArray(displayedAssets) ? displayedAssets : [];
+    console.log('rows after processing:', rows);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -249,16 +261,18 @@ export default function AssetMasterTable({
     setOrderBy(property);
   };
 
+  const isSelected = (id) => selected.indexOf(id) !== -1;
+
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelected = visibleRows.map((n) => n.FacNO || n.id); // Use FacNO if available, otherwise id    
-      setSelected(newSelected);
-      return;
+      const newSelected = visibleRows.map(row => row.id); 
+      setSelected(newSelected)
+    } else {
+      setSelected([]);
     }
-    setSelected([]);
   };
 
-  const handleClick = (event, id) => {
+  const handleClick = (id) => {
     const selectedIndex = selected.indexOf(id);
     let newSelected = [];
 
@@ -310,27 +324,30 @@ export default function AssetMasterTable({
   }
 
 
+  useEffect(() => {
+    if (page > 0 && page * rowsPerPage >= rows.length) {
+      setPage(0);
+    }
+  }, [rows.length, page, rowsPerPage, setPage]);
+
+
+
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
 
-  const visibleRows = useMemo(
-    () => { 
-      // ➡️ NEW/MODIFIED: If the table is not active, return the placeholders immediately.
-      if (!isTableActive) {
-        return [];
-      }
-      
-      // If the table IS active, proceed with sorting and pagination of the actual data
-      return [...rows]
-          .sort(getComparator(order, orderBy))
-          .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-    },
-  
-    // ➡️ Add the new flag to the dependency array
-    [rows, order, orderBy, page, rowsPerPage, isTableActive] 
-  );
+  const visibleRows = useMemo(() => {
+    if (!isTableActive) return [];
+
+    return rows
+      .slice() 
+      .sort(getComparator(order, orderBy))
+      .slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+  }, [rows, order, orderBy, page, rowsPerPage]);
 
   if(loading){
     return (
@@ -349,6 +366,7 @@ export default function AssetMasterTable({
       </Box>
     );
   }
+  
   
   return (
     <Box sx={{ width: '100%',  padding: 2}}>
@@ -374,35 +392,41 @@ export default function AssetMasterTable({
               sx={{ cursor: 'pointer', fontWeight: 'bold' }}          
             />
 
-            {/* -----------------------------------------
-            -           T A B L E  B O D Y             -
-            -------------------------------------------*/}
+            {/*  ... T a b l e  B o d y ... */}
+
             <TableBody>
-              {visibleRows.map((row, index) => {
-                const uniqueId = row.FacNO || row.id;
-                const isItemSelected = selected.includes(uniqueId);
-                const labelId = `enhanced-table-checkbox-${index}`;
+              {visibleRows.map((row) => {
+              
+              const labelId = `enhanced-table-checkbox-${row.FacNO}`;
+              const isItemSelected = isSelected(row.FacNO);
 
                 return (
                   <TableRow
-                    key = {row.id}
+                    key={row.FacNO} // use FacNO as key
+                    selected={isItemSelected}
+
                     hover   // disable hover for blank rows
-                    onClick={(event) => handleClick(event, uniqueId)}                    
+                    onClick={(event) => handleClick(row.FacNO)}                    
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
-                    selected={isItemSelected}
                     sx={{ cursor: 'pointer' }}
                   >
                     <TableCell 
                       padding="checkbox"
                       sx={{ width: 25 }}
-                      onClick={(event) => handleClick(event, uniqueId)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleClick
+                      }}
                     >
                       <Checkbox
                         color="primary"
                         checked={isItemSelected}
-                        onClick={(event) => handleClick(event, uniqueId)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleClick(row.FacNO)
+                        }}
                       />
                     </TableCell>
                     <TableCell
@@ -447,10 +471,10 @@ export default function AssetMasterTable({
         <TablePagination
           rowsPerPageOptions={[5, 10, 25, 50]}
           component="div"
-          count={rows.length}
+          count={total}
           rowsPerPage={rowsPerPage}
           page={page}
-          onPageChange={handleChangePage}
+          onPageChange={(event, newPage) => setPage(newPage)}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
