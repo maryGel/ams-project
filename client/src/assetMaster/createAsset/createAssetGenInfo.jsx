@@ -4,31 +4,53 @@ import {
   Box,
   TextField, 
   TextareaAutosize,
-  Checkbox,
-  FormControlLabel, 
-  Autocomplete
+  Autocomplete,
+  Alert,
+  CircularProgress
 } from '@mui/material';
 // Custom hooks
-import { useRefUom } from '../../hooks/refUom'; // import the refUnit data
+import { useRefBrand } from '../../hooks/refBrand';
 
 {/* --------------------------------------------------
-//                    CREATE ASSET 
+   G E N E R A L   I N F O   C O M P O N E N T
 ---------------------------------------------------- */}
 
 export default function CreateAssetGenInfo({
-  useProps, 
-  asset,
+  assetData,
+  updateAssetData,
+  originalAsset,
   loading,
   error
   }) {
 
-  const { uomData } = useRefUom(useProps);
-  const [ checked, setChecked ] = useState(false);
+  const { refBrandData } = useRefBrand();
+  const [ brandOptions, setBrandOptions ] = useState([]);
 
 
-  if (loading) return <p className="p-5">Loading asset...</p>;
-  if (error) return <p className="p-5 text-red-600">Error loading asset data.</p>;
+  useEffect(() => {
+    if (refBrandData && Array.isArray(refBrandData)){
+      setBrandOptions(refBrandData.map(item => item.BrandName).filter(Boolean))
+    }
+  }, [refBrandData]);
+
+  if (loading) return (
+    <Box className='flex justify-center p-5'>
+      <CircularProgress />
+      <Typography className="p-5">Loading asset data...</Typography>
+    </Box>
+  );
   
+  if (error) return ( 
+    <Box className='p-5'>
+      <Alert severity="error">Error loading asset data: {error}</Alert>
+    </Box>
+  );
+  
+  const handleInputChange = ( field, value) => {
+    updateAssetData({ [field]: value });
+  };
+
+
   return (
     <Box className='flex justify-center p-4 m-4'  >
       <Box className='grid mt-10 '>
@@ -36,27 +58,22 @@ export default function CreateAssetGenInfo({
           General Information
       </Typography>
 
-      {/* NAME and DESCRIPTION  */}
-
+        {/* ... Asset Name, and Description ... */}
         <TextField
           label={'Asset Name'}
           sx={{ width: '60rem' }}
           margin="normal"
-          value={asset.FacName || ''}
-          onChange={(e) =>
-            setAsset({
-              ...assetData,
-              generalInfo: { ...assetData.generalInfo, assetName: e.target.value },
-            })
-          }
+          value={assetData.FacName || ''}
+          onChange={(e) => handleInputChange('FacName', e.target.value)}
+          required
         />
-        <label className='pt-4 pl-3 text-gray-500' htmlFor="asset-description">Asset Description:</label>
+        <label className='pt-4 pl-3 text-gray-500' htmlFor="asset-description">Asset Description * </label>
         <TextareaAutosize
           id="asset-description"
           aria-label="minimum height"
           minRows={2}
           label={'Asset Description'}
-          value={asset.Description || ''}
+          value={assetData.Description || ''}
           style={{ 
             width: '60rem',
             resize: 'both',
@@ -65,104 +82,61 @@ export default function CreateAssetGenInfo({
             border: '1px solid #ccc',
             marginTop: '.5rem'
           }}    
-          onChange={(e) =>
-            setAsset({
-              ...assetData,
-              generalInfo: { ...assetData.generalInfo, assetName: e.target.value },
-            })
-          }
+          onChange={(e) => handleInputChange('Description', e.target.value)}
         />
 
-      {/* Date, UOM, QUANTITY, SPLIT */}
 
-        <Box className = "flex gap-2 mt-2">
+        {/* ... Serial Number and Brand ... */}        
+        <Box className = "flex gap-2">
           <TextField
-            label="Acquisition Date"
-            sx={{ 
-              width: '16rem',
-              color: 'gray',
-              "& .MuiInputBase-input": {
-              color: "gray",
-              }
-            }}
-            type="date"
-            margin="normal" 
-            // value={date}
-            // onChange={(e) => setDate(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-            
+            label={'Serial Number'}
+            sx={{ width: '30rem' }}
+            margin="normal"
+            value={assetData.serialNo || ''}
+            onChange={(e) => handleInputChange('serialNo', e.target.value)}
           />
 
           <Autocomplete
-            key = {`Unit of Measure`}
-            sx={{ width: '10rem', marginTop: '1rem'}}
+            key = {`Brand`}
+            sx={{ width: '25rem', marginTop: '1rem'}}
             margin="normal" 
-            options = {uomData.map(item => item.Unit)}  
-            value = {asset.Unit || []}       
-          
+            options = {brandOptions} 
+            value={assetData.Brand || ''}   
+            onChange={(event, newValue) => handleInputChange('Brand', newValue)}          
             renderInput={(params) => (
               <TextField {...params} 
-                label="UOM" 
-                placeholder="UOM" 
-                sx ={{'& .MuiInputBase-input': { fontSize: '14px'}}}
+                label="Brand" 
+                placeholder="Brand" 
               />              
             )}          
           />
-
-          <TextField
-            label="Quantity"
-            sx={{ width: '15rem' }}
-            margin="normal" 
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={checked}
-                onChange={(e) => setChecked(e.target.checked)}
-                sx={{ color: 'gray' }}
-              />
-            }
-            label="Split Asset"
-            sx={{ color: 'gray' }}
-          />
         </Box>
 
-        <Box className = "flex gap-2">
-          <TextField
-          label={'Serial Number'}
-          value={asset.serialNo || ''}
-          sx={{ width: '30rem' }}
-          margin="normal"
-          />
-
-          <TextField
-          label={'Brand'}
-          value={asset.Brand || ''}
-          sx={{ width: '20rem' }}
-          margin="normal" 
-          />
-        </Box>
-
+        {/* ... Supplier and Reference ... */}
         <TextField
           label={'Supplier'}
-          value={asset.suppName || ''}
           sx={{ width: '60rem' }}
           margin="normal" 
+          value={assetData.suppName || ''}
+          onChange={(e) => handleInputChange('suppName', e.target.value)}
         />
 
         <TextField
           label="Reference"
           sx={{ width: '60rem' }}
           margin="normal" 
-          value= {asset.ReferenceNo || ''}
+          value= {assetData.ReferenceNo || ''}
+          onChange={(e) => handleInputChange('ReferenceNo', e.target.value)}
         />
 
+        {/* ... Color and Warranty Dates ... */}
         <Box className= 'flex gap-2'>
           <TextField
             label={'Color'}
-            value={asset.Color || ''}
             sx={{ width: '10rem' }}
             margin="normal" 
+            value={assetData.Color || ''}
+            onChange={(e) => handleInputChange('Color', e.target.value)}
           />
           <TextField
             label="Warranty Start date"
@@ -175,8 +149,8 @@ export default function CreateAssetGenInfo({
             }}
             type="date"
             margin="normal" 
-            // value={asset.StartDate || ''}
-            // onChange={(e) => setDate(e.target.value)}
+            value={assetData.StartDate || ''}
+            onChange={(e) => handleInputChange('StartDate',e.target.value)}
             InputLabelProps={{ shrink: true }}          
           />
 
@@ -191,8 +165,8 @@ export default function CreateAssetGenInfo({
             }}
             type="date"
             margin="normal" 
-            // value={date}
-            // onChange={(e) => setDate(e.target.value)}
+            value={assetData.EndDate || ''}
+            onChange={(e) => handleInputChange('EndDate',e.target.value)}
             InputLabelProps={{ shrink: true }}          
           /> 
         </Box>         

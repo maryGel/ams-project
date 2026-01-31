@@ -51,7 +51,13 @@ function AssetMasterListPage({ useProps, setHeaderTitle, setNavLink }) {
   const location = useMemo(() => refLocData.map(item => item.LocationName), [refLocData])
   const department = useMemo(() => refDeptData.map(item => item.Department), [refDeptData])
 
-  const isTableActive = searchQuery.trim() !== "" || selectedAssets.length > 0 || selectedAssetCategory.length > 0 || selectedAssetClass.length > 0 || selectedLocation.length > 0 || selectedDepartment.length > 0; // Flag to control when data is displayed
+  const isTableActive = searchQuery.trim() !== "" 
+    || selectedAssets.length > 0 
+    || selectedAssetCategory.length > 0 
+    || selectedAssetClass.length > 0 
+    || selectedLocation.length > 0 
+    || selectedDepartment.length > 0; 
+    
   const filterOptions = createFilterOptions({
     stringify: (option) =>
       `${option.FacNO} ${option.FacName} ${option.Description}`, // searchable text
@@ -74,22 +80,21 @@ function AssetMasterListPage({ useProps, setHeaderTitle, setNavLink }) {
       // 3. Filter by Asset Category
       const matchesAssetCat = 
         selectedAssetCategory.length === 0 ||
-        selectedAssetCategory.includes(item.CATEGORY); // Assuming item.CATEGORY holds the Asset Group value
-
+        selectedAssetCategory.includes(item.CATEGORY); 
       // 4. Filter by Asset Class
       const matchesAssetClass = 
         selectedAssetClass.length === 0 ||
-        selectedAssetClass.includes(item.ItemClass); // Assuming item.CATEGORY holds the Asset Group value
+        selectedAssetClass.includes(item.ItemClass); 
 
       // 5. Filter by Location
       const matchesLocation = 
       selectedLocation.length === 0 ||
-      selectedLocation.includes(item.ItemLocation); // Assuming item.CATEGORY holds the Asset Group value
+      selectedLocation.includes(item.ItemLocation); 
 
       // 6. Filter by Department
       const matchesDepartment = 
       selectedDepartment.length === 0 ||
-      selectedDepartment.includes(item.Department); // Assuming item.CATEGORY holds the Asset Group value
+      selectedDepartment.includes(item.Department); 
 
       return (matchesText && matchesSelected && matchesAssetCat && matchesAssetClass && matchesLocation && matchesDepartment);
     });

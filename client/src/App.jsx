@@ -101,7 +101,7 @@ function App() {
                           setHeaderTitle={saveTitleUpdate}
                         />} 
         />
-        <Route path="/assetFolder/assetMasterDisplay/:facno" 
+        <Route path="/assetFolder/assetMasterDisplay/:facNo" 
                 element={<AssetMasterDisplay
                           setHeaderTitle={saveTitleUpdate}
                         />} 

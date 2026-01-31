@@ -306,11 +306,9 @@ export default function AssetMasterTable({
 
   const handleSelectItem = (row) => {
     const facNo = row.FacNO || row.FacNo;
-
-    // Navigate to display page
     const path = `/assetFolder/assetMasterDisplay/${facNo}`;
+    
     setHeaderTitle(`Asset Master Display`);
-    // setNavLink('/assetFolder/pages/assetMasterList');
     window.open(path, '_blank');
 
   }; 

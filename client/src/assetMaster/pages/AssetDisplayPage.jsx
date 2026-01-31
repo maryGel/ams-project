@@ -12,7 +12,7 @@ import { useRefUom } from '../../hooks/refUom'; // import the refUnit data
 export default function AssetMasterDisplay({}){
 
   // State to hold API Asset data
-  const { itemList, loading, error } = useAssetMasterData(); 
+  const { assets, loading, error } = useAssetMasterData(); 
   const { facno } = useParams();
   const [asset, setAsset] = useState({});
   const [isEditing, setIsEditing] = useState(false);
@@ -23,10 +23,10 @@ export default function AssetMasterDisplay({}){
   // Fetch Asset data from API on component mount
   useEffect(() => {
 
-    if (!itemList || itemList.length === 0) return;
+    if (!assets || assets.length === 0) return;
     // Clean the route facno
     const targetFacNoClean = facno?.replace(/\s/g, '').toUpperCase();    
-    const matchingAsset = itemList.find(item => {
+    const matchingAsset = assets.find(item => {
       if (!item.FacNO || typeof item.FacNO !== 'string') return false;
       const itemFacNoClean = item.FacNO
         .replace(/\u00A0/g, '')   // Remove NBSP
@@ -36,7 +36,7 @@ export default function AssetMasterDisplay({}){
     });
     setAsset(matchingAsset || {});
     
-  }, [itemList, facno]);
+  }, [assets, facno]);
 
   const handleEditButton = () => {
     setIsEditing(prev => !prev)

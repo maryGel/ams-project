@@ -3,6 +3,7 @@ import { db } from '../server.js';
 
 const router = express.Router();
 
+//Get all itemlist
 router.get('/assetMasterlist', (req, res) => {
 
   const sqlSelect = 'SELECT * FROM itemlist';
@@ -26,6 +27,40 @@ router.get('/assetMasterlist', (req, res) => {
   })
 })
 
+// Get a single asset by facNo
+router.get('/assetMasterlist/:facNo', (req, res) => {
+  const { facNo } = req.params;
+  console.log(`fromRoute.FacN0: ${facNo}`)
+  // Decode URL parameter and clean it
+  const decodedFacNo = decodeURIComponent(facNo);
+  const cleanFacNo = decodedFacNo
+    .replace(/\u00A0/g, '') // Remove NBSP
+    .replace(/\s/g, '') // Remove normal whitespace
+    .toUpperCase();
+  
+  console.log(`fromRoute.cleanFacNO: ${cleanFacNo}`)
+  
+  const sqlSelect = 'SELECT * FROM itemlist WHERE REPLACE(REPLACE(UPPER(FacNO), CHAR(160), ""), " ", "") = ?';
+  
+  
+  db.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error getting connection from pool:' + err.stack);
+      return res.status(500).json({error:'Database connection error'});
+    }
+
+    connection.query(sqlSelect, [cleanFacNo], (error, results) => {
+      connection.release();
+      
+      if (error){
+        console.error('Error executing query:' + error.stack);
+        return res.status(500).json({error: 'Error fetching the data'});
+      }
+
+      res.json(results.length > 0 ? results[0] : null);
+    });
+  });
+});
 
 router.post('/createAsset', (req, res) => {
 
@@ -38,11 +73,7 @@ router.post('/createAsset', (req, res) => {
     Unit,
     serialNo,
     Department,
-    Holder,
     Adate,
-    AAmount,
-    Percent,
-    Abre,
     ItemLocation,
     balance_unit,
     suppName,
@@ -50,12 +81,24 @@ router.post('/createAsset', (req, res) => {
     // OPTIONAL
     Brand,
     Color,
+    ReferenceNo,
     StartDate,
     EndDate,
-    ReferenceNo,
+
+    // splitAsset,
+
+    AAmount,
+    Percent,
+    Abre,
     Remarks,
-    splitAsset
   } = req.body;
+
+   // ADD THIS VALIDATION
+  if (!FacNO || FacNO.trim() === '') {
+    return res.status(400).json({
+      error: 'FacNO is required and cannot be empty'
+    });
+  }
 
   // REQUIRED FIELD CHECK
   const requiredFields = {
@@ -63,16 +106,13 @@ router.post('/createAsset', (req, res) => {
     FacName,
     Description,
     CATEGORY,
+    ItemClass,
     Unit,
-    serialNo,
-    Department,
-    Holder,
     Adate,
     AAmount,
-    Percent,
     ItemLocation,
-    balance_unit,
-    suppName
+    Department,
+    ReferenceNo
   };
 
   for (const [key, value] of Object.entries(requiredFields)) {
@@ -86,10 +126,10 @@ router.post('/createAsset', (req, res) => {
   const sqlInsert = `
     INSERT INTO itemlist (
       FacNO, FacName, Description, ItemClass, CATEGORY, Unit, serialNo,
-      Department, Holder, Adate, AAmount, Percent, Abre, ItemLocation,
+      Department, Adate, AAmount, Percent, Abre, ItemLocation,
       balance_unit, suppName, Brand, Color, StartDate, EndDate,
-      ReferenceNo, Remarks, xStatus, Picpath, splitAsset
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+      ReferenceNo, xStatus, Picpath, Remarks
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
   `;
 
   const values = [
@@ -101,7 +141,6 @@ router.post('/createAsset', (req, res) => {
     Unit,
     serialNo,
     Department,
-    Holder,
     Adate,
     AAmount,
     Percent,
@@ -114,11 +153,16 @@ router.post('/createAsset', (req, res) => {
     StartDate || null,
     EndDate || null,
     ReferenceNo || null,
-    Remarks || null,
     'ACTIVE',
     null,
-    splitAsset ?? 0
+    // splitAsset ?? 0,
+    Remarks || null,
   ];
+
+  console.log('SQL Insert:', sqlInsert);
+  console.log('Number of columns in SQL:', sqlInsert.match(/\(([^)]+)\)/)[1].split(',').length);
+  console.log('Number of values:', values.length);
+  console.log('Values:', values);
 
   db.getConnection((err, connection) => {
     if (err) {
@@ -130,6 +174,11 @@ router.post('/createAsset', (req, res) => {
       connection.release();
 
       if (error) {
+        console.error('=== SQL ERROR DETAILS ===');
+        console.error('Error message:', error.message);
+        console.error('Error code:', error.code);
+        console.error('SQL state:', error.sqlState);
+        console.error('Full error:', error);
         console.error('Error executing query:' + error.stack);
         return res.status(500).json({ error: 'Error inserting asset' });
       }
@@ -170,7 +219,7 @@ router.put('/updateAsset/:id', (req, res) => {
     EndDate,
     ReferenceNo,
     Remarks,
-    splitAsset
+    // splitAsset
   } = req.body;
 
   if (!id) {
@@ -201,7 +250,6 @@ router.put('/updateAsset/:id', (req, res) => {
       EndDate = ?,
       ReferenceNo = ?,
       Remarks = ?,
-      splitAsset = ?
     WHERE id = ?
   `;
 
@@ -228,7 +276,7 @@ router.put('/updateAsset/:id', (req, res) => {
     EndDate || null,
     ReferenceNo || null,
     Remarks || null,
-    splitAsset ?? 0,
+    // splitAsset ?? 0,
     id
   ];
 

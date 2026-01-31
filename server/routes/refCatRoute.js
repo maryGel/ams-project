@@ -31,7 +31,6 @@ router.get('/', (req, res) => {
         return res.status(500).json({ error: 'Database query failed', details: error.message });
       }
       
-      console.log(`Found ${results.length} categories`);
       res.json(results);
     });
   });
