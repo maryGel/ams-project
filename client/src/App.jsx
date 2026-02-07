@@ -5,11 +5,15 @@ import Header from './Utils/header.jsx';
 import HomePage from './pages/HomePage.jsx'; 
 import LoginPage from './pages/LoginPage.jsx';
 
+// Asset Master Pages
 import AssetMasterListPage from './assetMaster/pages/AssetMasterListPage.jsx';
 import CreateAssetPage from './assetMaster/pages/CreateAssetPage.jsx';
 import AssetMasterDisplay from './assetMaster/pages/AssetDisplayPage.jsx';
 import Practice from './Utils/practice.jsx';
 import ReferentialPage from './assetMaster/pages/ReferentialPage.jsx';
+
+// Asset Movement Pages
+import JOFormPage from './assetMovement/pages/JOFormPage.jsx';
 
 // To initialize the header title based on the current page
   const getInitialTitle = () => {
@@ -84,7 +88,7 @@ function App() {
                           tabPaths = {tabPaths}
                         />} 
         /> 
-        
+        {/* Asset Master Pages */}
         <Route path="/assetFolder/pages/assetMasterList" 
                 element={<AssetMasterListPage 
                           setHeaderTitle={saveTitleUpdate}
@@ -101,14 +105,16 @@ function App() {
                           setHeaderTitle={saveTitleUpdate}
                         />} 
         />
-        <Route path="/assetFolder/assetMasterDisplay/:facNo" 
+        <Route path="/assetFolder/assetMasterDisplay" 
                 element={<AssetMasterDisplay
                           setHeaderTitle={saveTitleUpdate}
                         />} 
         />
 
-        <Route path="/practiceJsx" 
-                element={<Practice
+        {/* Asset Movement Pages */}
+        <Route path="/assetMovement/pages/JOFormPage" 
+                element={<JOFormPage
+                          setHeaderTitle={saveTitleUpdate}
                         />} 
         />
 

@@ -14,11 +14,11 @@ function createData(id, docDate, postingDate, docNum, depType) {
 }
 
 const rows = [
-  createData('1', '01/01/2024', '01/01/2024', '93849402', 'Strght Line'),
-  createData('2', '02/01/2024', '02/01/2024', '93849402', 'Strght Line'),
-  createData('3', '03/01/2024', '03/01/2024', '93849402', 'Strght Line'),
-  createData('4', '04/01/2024', '04/01/2024', '93849402', 'Strght Line'),
-  createData('5', '05/01/2024', '05/01/2024', '93849402', 'Strght Line'),
+  createData('1', '01/01/2024', '01/01/2024', '93849402', 'Straight Line'),
+  createData('2', '02/01/2024', '02/01/2024', '93849402', 'Straight Line'),
+  createData('3', '03/01/2024', '03/01/2024', '93849402', 'Straight Line'),
+  createData('4', '04/01/2024', '04/01/2024', '93849402', 'Straight Line'),
+  createData('5', '05/01/2024', '05/01/2024', '93849402', 'Straight Line'),
 ];
 
 export default function AssetDisplayDepDocs(){  

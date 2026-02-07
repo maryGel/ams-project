@@ -77,7 +77,7 @@ export default function AssetDisplayGenInfo({useProps, asset, isEditing, onField
           {/* Item Assignment Fields*/}
           <span className='pl-5 text-blue-800'>Item Assignment</span>
           <div className='grid grid-cols-[10rem_1fr] mt-2 mb-8 mr-5 text-base gap-2'>
-            <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Asset Group:</span>
+            <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Category:</span>
             <Autocomplete 
               disabled={!isEditing} 
               size = 'small'
@@ -109,7 +109,7 @@ export default function AssetDisplayGenInfo({useProps, asset, isEditing, onField
               size = 'small'
               options= {refDeptData.map(item => item.Department)} 
               value={asset.Department || ''}  
-              onChange={(event, newValue) => onFieldChange('Category', newValue)}
+              onChange={(event, newValue) => onFieldChange('Department', newValue)}
               renderInput={(params) => (
                 <TextField {...params} 
                   sx={getAutocompleteSx(isEditing)}
@@ -122,7 +122,7 @@ export default function AssetDisplayGenInfo({useProps, asset, isEditing, onField
               size = 'small'
               options= {refLocData.map(item => item.LocationName)} 
               value={asset.ItemLocation || ''}  
-              onChange={(event, newValue) => onFieldChange('Category', newValue)}
+              onChange={(event, newValue) => onFieldChange('Location', newValue)}
               renderInput={(params) => (
                 <TextField {...params} 
                   sx={getAutocompleteSx(isEditing)}

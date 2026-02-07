@@ -38,7 +38,7 @@ export default function RefTabs({handleOpenTab}){
             <ListItemIcon sx={{ minWidth: 0, marginRight: 1 }}>
               <SettingsIcon  />
             </ListItemIcon>
-            <ListItemText primary="General Settings" />
+            <ListItemText primary="General" />
             {openGenSet === 'settings' ? <ExpandLess /> : <ExpandMore />}
           </ListItemButton>
 
@@ -82,7 +82,7 @@ export default function RefTabs({handleOpenTab}){
                 'Location',
                 'Department',
                 'Depreciation Type',
-                'Account Determination'
+                'Journal Entries'
               ].map((item) => (
                 <ListItemButton
                   key={item}

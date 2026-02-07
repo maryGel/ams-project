@@ -190,7 +190,7 @@ function AssetMasterListPage({ useProps, setHeaderTitle, setNavLink }) {
               getOptionLabel={(option) => option}
             // defaultValue={[]}
               renderInput={(params) => (
-                <TextField {...params} label="Asset Group" placeholder="Asset Group" />
+                <TextField {...params} label="Category" placeholder="Category" />
               )}
             sx={{ width: '15rem', marginRight: '1rem' }}
           />

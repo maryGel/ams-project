@@ -8,7 +8,10 @@ export const headerTitleMap = {
   "/Home/Utilities": "Asset Management System",
   '/assetFolder/pages/assetMasterList': 'Asset List',
   "/assetFolder/pages/assetMasterList": "Asset Master List",
-  "/assetFolder/assetMasterDisplay/*": "Display Asset",
+  "/assetFolder/assetMasterDisplay?*": "Display Asset",
   "/assetFolder/createAsset": "Create New Asset",
   "/assetFolder/pages/referentialPage": "Referential Data",
+
+  // Asset Movement Pages
+  "/assetMovement/pages/JOFormPage": "Job Order Page",
 };

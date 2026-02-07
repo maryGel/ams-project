@@ -74,6 +74,7 @@ export default function CreateAssetGenInfo({
           minRows={2}
           label={'Asset Description'}
           value={assetData.Description || ''}
+          onChange={(e) => handleInputChange('Description', e.target.value)}
           style={{ 
             width: '60rem',
             resize: 'both',
@@ -82,7 +83,6 @@ export default function CreateAssetGenInfo({
             border: '1px solid #ccc',
             marginTop: '.5rem'
           }}    
-          onChange={(e) => handleInputChange('Description', e.target.value)}
         />
 
 

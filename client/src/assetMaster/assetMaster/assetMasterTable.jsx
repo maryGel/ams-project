@@ -62,7 +62,7 @@ const headCells = [
     id: 'ItemClass', numeric: true, disablePadding: false, label: 'Asset Class',
   },
   {
-    id: 'CATEGORY', numeric: true, disablePadding: false, label: 'Asset Group',
+    id: 'CATEGORY', numeric: true, disablePadding: false, label: 'Category',
   },
   {
     id: 'balance_unit', numeric: true, disablePadding: false, label: 'Quantity',
@@ -306,9 +306,9 @@ export default function AssetMasterTable({
 
   const handleSelectItem = (row) => {
     const facNo = row.FacNO || row.FacNo;
-    const path = `/assetFolder/assetMasterDisplay/${facNo}`;
+    const path = `/assetFolder/assetMasterDisplay?copyFrom=${facNo}`;
     
-    setHeaderTitle(`Asset Master Display`);
+    setHeaderTitle(`Asset Display`);
     window.open(path, '_blank');
 
   }; 

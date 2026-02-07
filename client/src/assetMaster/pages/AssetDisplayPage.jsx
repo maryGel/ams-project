@@ -1,42 +1,82 @@
-import React, {useState, useEffect} from 'react'
-import AssetDisplayTabs from '../assetDisplay/assetDisplayTabs'
+import {useState, useEffect} from 'react'
+
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import EditIcon from '@mui/icons-material/Edit';
-import { useParams } from 'react-router-dom';
 import { useAssetMasterData } from '../../hooks/assetMasterHooks';
 // Custom Hooks
 import { useRefUom } from '../../hooks/refUom'; // import the refUnit data
+import { useSearchParams } from 'react-router-dom';
+import { assetMasterFields } from '../createAsset/assetMasterFields';
+// Components
+import AssetDisplayTabs from '../assetDisplay/assetDisplayTabs'
 
 
 export default function AssetMasterDisplay({}){
 
   // State to hold API Asset data
-  const { assets, loading, error } = useAssetMasterData(); 
-  const { facno } = useParams();
-  const [asset, setAsset] = useState({});
-  const [isEditing, setIsEditing] = useState(false);
+  const { 
+    assets, 
+    singleAsset,
+    fetchAssetByFacN0,
+    clearSingleAsset,
+    updateAsset,
+    isLoading, 
+    isMutating,
+    isLoadingSingle, 
+    error: assetError
+  } = useAssetMasterData(); 
 
-  console.log( `facno: ${facno}`)
+  const [ searchParams ] = useSearchParams();
+  const [ asset, setAsset ] = useState({assetMasterFields});
+  const [ isEditing, setIsEditing ] = useState(false);
 
+
+  const copyFacN0 = searchParams.get('copyFrom');  
 
   // Fetch Asset data from API on component mount
   useEffect(() => {
-
-    if (!assets || assets.length === 0) return;
-    // Clean the route facno
-    const targetFacNoClean = facno?.replace(/\s/g, '').toUpperCase();    
-    const matchingAsset = assets.find(item => {
-      if (!item.FacNO || typeof item.FacNO !== 'string') return false;
-      const itemFacNoClean = item.FacNO
-        .replace(/\u00A0/g, '')   // Remove NBSP
-        .replace(/\s/g, '')       // Remove normal whitespace
-        .toUpperCase();
-      return itemFacNoClean === targetFacNoClean;
-    });
-    setAsset(matchingAsset || {});
+    if(copyFacN0){
+      fetchAssetByFacN0(copyFacN0);
+    } else {
+      clearSingleAsset();
+    }
     
-  }, [assets, facno]);
+    return () => {
+      clearSingleAsset();
+    }    
+  }, [copyFacN0, fetchAssetByFacN0, clearSingleAsset]);
+
+
+  useEffect(() => {
+    if(singleAsset){
+      setAsset(prev => ({
+        ...prev,
+        singleAsset,
+        FacNO: singleAsset.FacNO, 
+        FacName: singleAsset.FacName ? `${singleAsset.FacName}` : '',
+        Description: singleAsset.Description || '',
+        Unit: singleAsset.Unit || '',
+        ItemClass: singleAsset.ItemClass || '',
+        CATEGORY: singleAsset.CATEGORY || '',
+        ItemLocation: singleAsset.ItemLocation || '',
+        Department: singleAsset.Department || '',  
+        ReferenceNo: singleAsset.ReferenceNo || '', 
+        Brand: singleAsset.Brand || '',
+        serialNo: singleAsset.serialNo || '',
+        Color: singleAsset.Color || '',
+        StartDate: singleAsset.StartDate || '',
+        EndDate: singleAsset.EndDate || '',
+        Adate: singleAsset.Adate || '',
+        balance_unit: singleAsset.balance_unit || '',
+        AAmount: singleAsset.AAmount || '',
+        Percent: singleAsset.Percent || '',
+        Abre: singleAsset.Abre || '',
+      }))
+    }
+  }, [singleAsset]);
+
+  // ...  H a n d l e r s ... //
 
   const handleEditButton = () => {
     setIsEditing(prev => !prev)
@@ -49,15 +89,15 @@ export default function AssetMasterDisplay({}){
     }));
   };
 
-  if (loading) return <p className="p-5">Loading asset...</p>;
-  if (error) return <p className="p-5 text-red-600">Error loading asset data.</p>;
+  // if (loading) return <p className="p-5">Loading asset...</p>;
+  // if (error) return <p className="p-5 text-red-600">Error loading asset data.</p>;
 
   return(
     <>
       <div className='grid px-10 py-3 mx-32'>
-          {/* ----------------
-          -  B U T T O N S   -
-          -------------------*/}
+
+          {/* ... B u t t o n s ... */}
+          
           {/* Edit Button */}          
           <div className='flex justify-end gap-2 mt-8 mb-3'>
             
@@ -92,9 +132,7 @@ export default function AssetMasterDisplay({}){
           </div>
 
 
-          {/* ------------------
-          -    F I E L D S     -
-          ---------------------*/}
+          {/* ... F i e l d s ... */}
       
           <div  className='mb-1'>
             <p className='p-3 pl-16 font-medium tracking-wide bg-white border rounded-md shadow-md text-normal shadow-slate-300 border-slate-300 text-slate-800'
@@ -105,7 +143,7 @@ export default function AssetMasterDisplay({}){
               <div className='mt-3'>
                 <div className='grid grid-cols-[10rem_2fr] shadow-sm shadow-slate-200 mt-2 ml-16 py-2 text-base bg-gray-100'>
                   <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Asset Name:</span>
-                <input type="text" className='p-2 mr-5 text-base'  disabled={!isEditing} value={asset.FacName|| ''} readOnly={!isEditing} onChange={(e) => handleChange('Description', e.target.value)}/>
+                <input type="text" className='p-2 mr-5 text-base'  disabled={!isEditing} value={asset.FacName|| ''} readOnly={!isEditing} onChange={(e) => handleChange('FacName', e.target.value)}/>
 
                 </div>
                 <div className='grid grid-cols-[10rem_2fr] shadow-sm shadow-slate-200 mt-2 ml-16 py-2 text-base bg-gray-100'>

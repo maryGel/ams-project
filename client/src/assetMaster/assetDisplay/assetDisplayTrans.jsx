@@ -32,7 +32,7 @@ export default function AssetDisplayTrans(){
                 <TableCell>Doc. Date</TableCell>
                 <TableCell align="right">Date Posted</TableCell>
                 <TableCell align="right">Doc. Number</TableCell>
-                <TableCell align="right">Depreciation Type</TableCell>
+                <TableCell align="right">Transaction Type</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

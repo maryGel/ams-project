@@ -34,17 +34,22 @@ function Header({tabPaths = []}) {
   }, [headerTitle]);
 
   const getBackPath = () => {
-    if (currentPath.startsWith("/assetFolder/assetMasterDisplay/")) {
-      headerTitle = "Display Asset";
+    if (currentPath.startsWith("/assetFolder/assetMasterDisplay")) {
       return '/assetFolder/pages/assetMasterList';
     } 
     if (currentPath.startsWith('/assetFolder/createAsset')) {
-      headerTitle = "Create New Asset";
       return '/assetFolder/pages/assetMasterList';
     } 
+
+    if (currentPath.startsWith('/assetMovement/pages/JOFormPage')) {
+      return '/Home/Movement';
+    }
+    
     if (currentPath === `/assetFolder/pages/assetMasterList` || `/assetFolder/pages/referentialPage`) {
       return '/Home/AssetMasterPage';
     } 
+
+
     return null; // Default case if no match
   }
 

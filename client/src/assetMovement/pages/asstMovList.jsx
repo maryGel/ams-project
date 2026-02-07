@@ -9,7 +9,7 @@ export const assetMovList= [
   {
     id: 2,
     title: 'JO Form',
-    link: '/assetMovement/jobOrderForm',
+    link: '/assetMovement/pages/JOFormPage',
     imgSrc: '/icons/menu_icons/joborder.png',
     headerTitle: 'Job Order Form',
   },
