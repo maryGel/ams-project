@@ -102,7 +102,7 @@ export default function AssetDisplayGenInfo({useProps, asset, isEditing, onField
                 size = 'small'
                 options= {refItemClassData.map(item => item.itemClass)} 
                 value={asset.ItemClass || ''}  
-                onChange={(event, newValue) => onFieldChange('Class', newValue)}
+                onChange={(event, newValue) => onFieldChange('ItemClass', newValue)}
                 renderInput={(params) => (
                   <TextField {...params} 
                     sx={getAutocompleteSx(isEditing)}

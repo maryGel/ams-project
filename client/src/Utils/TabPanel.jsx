@@ -9,13 +9,13 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
 // TabPanel component to render the content of each tab
-import AssetMasterTile from '../assetMaster/assetMaster/assetMasterTile'
-import AssetMovement from '../assetMovement/pages/assetMoveTile';
-import Depreciation from '../assetDep/assetDepRun';
-import AssetReports from '../assetReports/assetReport';
-import PhysicalCount from '../assetPhysical/assetPhysicalCount';
-import AssetUtilities from '../assetUtilities/assetUtilities';
-import DashboardPage from '../assetDash/dashBoardPage';
+import AssetMasterTile from '../a_assetMaster/assetMaster/assetMasterTile'
+import AssetMovement from '../a_Movement/pages/assetMoveTile';
+import Depreciation from '../a_Depreciation/assetDepRun';
+import AssetReports from '../a_Reports/assetReport';
+import PhysicalCount from '../a_Physical/assetPhysicalCount';
+import AssetUtilities from '../a_SystemSetup/assetUtilities';
+import DashboardPage from '../a_Dash/dashBoardPage';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;

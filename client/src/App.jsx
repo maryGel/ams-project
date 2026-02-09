@@ -6,14 +6,14 @@ import HomePage from './pages/HomePage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 
 // Asset Master Pages
-import AssetMasterListPage from './assetMaster/pages/AssetMasterListPage.jsx';
-import CreateAssetPage from './assetMaster/pages/CreateAssetPage.jsx';
-import AssetMasterDisplay from './assetMaster/pages/AssetDisplayPage.jsx';
+import AssetMasterListPage from './a_assetMaster/pages/AssetMasterListPage.jsx';
+import CreateAssetPage from './a_assetMaster/pages/CreateAssetPage.jsx';
+import AssetMasterDisplay from './a_assetMaster/pages/AssetDisplayPage.jsx';
 import Practice from './Utils/practice.jsx';
-import ReferentialPage from './assetMaster/pages/ReferentialPage.jsx';
+import ReferentialPage from './a_assetMaster/pages/ReferentialPage.jsx';
 
 // Asset Movement Pages
-import JOFormPage from './assetMovement/pages/JOFormPage.jsx';
+import JOFormPage from './a_Movement/pages/JOFormPage.jsx';
 
 // To initialize the header title based on the current page
   const getInitialTitle = () => {
