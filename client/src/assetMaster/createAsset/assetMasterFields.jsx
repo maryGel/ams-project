@@ -62,21 +62,21 @@ export const requiredFields = {
   }
 
 // Validation a specific steps
-export const validateStep = (step, assetData) => {  
+export const validateStep = (step, asset) => {  
   
   const validator = stepRequiredFields[step] || [];
   
-  return validator.every(field => assetData[field] && String(assetData[field].trim() !== ''));
+  return validator.every(field => asset[field] && String(asset[field].trim() !== ''));
 
 };
 
 // Get specific error messages for a step
-export const getStepValidationErrors = (step, assetData, requiredFields) => {
+export const getStepValidationErrors = (step, asset, requiredFields) => {
   const validator = stepRequiredFields[step] || [];
   const errors = [];
 
   validator.forEach(field => {
-    if (!assetData[field] || String(assetData[field]).trim() === '') {
+    if (!asset[field] || String(asset[field]).trim() === '') {
       errors.push(`${requiredFields[field]} is required.`);
     }
   }); 
@@ -85,11 +85,11 @@ export const getStepValidationErrors = (step, assetData, requiredFields) => {
 };
 
 // Final validation for all required fields
-export const validationFinalSubmission = (assetData, requiredFields) => {
+export const validationFinalSubmission = (asset, requiredFields) => {
   const error = [];
 
   Object.entries(requiredFields).forEach(([field, label]) => {
-    if(!assetData[field] || String(assetData[field]).trim() === ''){
+    if(!asset[field] || String(asset[field]).trim() === ''){
       error.push(`${label} is required`);
     }
   });
@@ -136,45 +136,45 @@ export const generateNextFacNO = async (xCode, existingAssets = []) => {
 
 
 // Prepare payload for API submission
-export const prepareAssetPayload = (assetData) => {
+export const prepareAssetPayload = (asset) => {
   return {
     // Required fields
-    FacNO: assetData.FacNO,
-    FacName: assetData.FacName,
-    Description: assetData.Description || '',
-    ItemClass: assetData.ItemClass,
-    CATEGORY: assetData.CATEGORY,
+    FacNO: asset.FacNO,
+    FacName: asset.FacName,
+    Description: asset.Description || '',
+    ItemClass: asset.ItemClass,
+    CATEGORY: asset.CATEGORY,
     
     // Optional fields with correct backend field names
-    Unit: assetData.Unit || '',
-    serialNo: assetData.serialNo || '',
-    Department: assetData.Department || '',
-    Adate: assetData.Adate || null,
-    ItemLocation: assetData.ItemLocation || '',
-    balance_unit: assetData.balance_unit || 1,
-    suppName: assetData.suppName || '',
-    Brand: assetData.Brand || '',
-    Color: assetData.Color || '',
-    ReferenceNo: assetData.ReferenceNo || '',
-    StartDate: assetData.StartDate || null,
-    EndDate: assetData.EndDate || null,
+    Unit: asset.Unit || '',
+    serialNo: asset.serialNo || '',
+    Department: asset.Department || '',
+    Adate: asset.Adate || null,
+    ItemLocation: asset.ItemLocation || '',
+    balance_unit: asset.balance_unit || 1,
+    suppName: asset.suppName || '',
+    Brand: asset.Brand || '',
+    Color: asset.Color || '',
+    ReferenceNo: asset.ReferenceNo || '',
+    StartDate: asset.StartDate || null,
+    EndDate: asset.EndDate || null,
     
     // Additional fields
-    AAmount: assetData.AAmount ? assetData.AAmount.toString().replace(/,/g, '') : '0.00',
-    Percent: assetData.Percent || 1,
-    Abre: assetData.Abre ? assetData.Abre.toString().replace(/,/g, '') : '0.00',
-    Remarks: assetData.Remarks || '',
-    Holder: assetData.Holder || ''
+    AAmount: asset.AAmount ? asset.AAmount.toString().replace(/,/g, '') : '0.00',
+    Percent: asset.Percent || 1,
+    Abre: asset.Abre ? asset.Abre.toString().replace(/,/g, '') : '0.00',
+    Remarks: asset.Remarks || '',
+    Holder: asset.Holder || ''
   };
 };
 
 // Debug logging utilities
-export const logFacNODebug = (assetData, refCategoryData, generatedFacNO) => {
+export const logFacNODebug = (asset, refCategoryData, generatedFacNO) => {
   console.log('=== FacNO Generation Debug ===');
-  console.log('1. assetData.CATEGORY:', assetData.CATEGORY);
+  console.log('1. asset.CATEGORY:', asset.CATEGORY);
   console.log('2. refCategoryData exists?:', !!refCategoryData);
   console.log('3. refCategoryData length:', refCategoryData?.length);
-  console.log('4. Current assetData.FacNO:', assetData.FacNO);
+  console.log('4. Current asset.FacNO:', asset.FacNO);
   console.log('5. generatedFacNO:', generatedFacNO);
   console.log('6. selectedCategory:', selectedCategory);
   console.log('7. selectedCategory.xCode:', selectedCategory?.xCode);

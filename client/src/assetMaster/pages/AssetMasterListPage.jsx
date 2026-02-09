@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useState, useMemo } from 'react';
 
 // MUI import
@@ -59,8 +58,7 @@ function AssetMasterListPage({ useProps, setHeaderTitle, setNavLink }) {
     || selectedDepartment.length > 0; 
     
   const filterOptions = createFilterOptions({
-    stringify: (option) =>
-      `${option.FacNO} ${option.FacName} ${option.Description}`, // searchable text
+    stringify: (option) => `${option.FacNO} ${option.FacName} ${option.Description}`, // searchable text
   });
 
   const filteredAssets = useMemo(() => {

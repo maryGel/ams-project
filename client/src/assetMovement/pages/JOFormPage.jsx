@@ -8,7 +8,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import EditIcon from '@mui/icons-material/Edit';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import PrintIcon from '@mui/icons-material/Print';
-import AddBoxIcon from '@mui/icons-material/AddBox';
+import AddIcon from '@mui/icons-material/Add';
 
 // Components
 import AssetMoveTabs from '../custom Utils/tableTabs';
@@ -38,7 +38,7 @@ export default function JOFormPage() {
         {/* Save */}
         {isEditing && (
           <button
-            className='flex justify-center pt-1 pb-1 pl-2 pr-3 text-white transition-transform duration-200 ease-in-out bg-green-500 border rounded-full shadow-black border-spacing-1 active:scale-95 hover:text-gray-600'
+            className='flex justify-center pt-1 pb-1 pl-2 pr-3 text-white transition-transform duration-200 ease-in-out bg-green-500 border rounded-full shadow-black border-spacing-1 active:scale-95 hover:bg-green-700'
             title='Save Changes'
             color="primary"
             sx={{ border: 1 }}
@@ -70,7 +70,7 @@ export default function JOFormPage() {
             color="primary"
             sx={{ border: 1 }}
           >           
-            <AddBoxIcon />
+            <AddIcon />
             Create
           </button>
           <button
@@ -118,7 +118,7 @@ export default function JOFormPage() {
                 <label className='text-base font-normal text-gray-500 w-28 '>Department :</label>
                 <Autocomplete 
                   disabled={!isEditing} 
-                  sx={{width: '15rem', color: 'gray-500', border: '1px solid #ccc',}}
+                  className={`rounded-sm ${!isEditing ? 'border' : 'border-none' } border-gray-300 w-48`}
                   size = 'small'
                   options= {refDeptData.map(item => item.Department)} 
                   value={'IT Office' || ''}  
@@ -132,7 +132,7 @@ export default function JOFormPage() {
                 <label className='text-base font-normal text-gray-500 w-38 '>Maintenance Service :</label>
                 <Autocomplete 
                   disabled={!isEditing} 
-                  sx={{width: '15rem', color: 'gray-500', border: '1px solid #ccc',}}
+                  className={`rounded-sm ${!isEditing ? 'border' : 'border-none' } border-gray-300 w-48`}
                   size = 'small'
                   options= {refDeptData.map(item => item.Department)} 
                   value={'Electrical Unit' || ''}  
@@ -155,7 +155,7 @@ export default function JOFormPage() {
                   aria-label = "minimum height"
                   minRows={2}
                   value={'This is a sample remarks.' || ''}
-                  className="text-gray-400"
+                  className={`${!isEditing ? 'text-gray-400' : 'text-black'} rounded-sm border-gray-300 `}
                   style={{ 
                     width: '50rem',
                     resize: 'both',

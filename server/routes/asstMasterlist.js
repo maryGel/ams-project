@@ -192,9 +192,9 @@ router.post('/createAsset', (req, res) => {
 });
 
 
-router.put('/updateAsset/:id', (req, res) => {
+router.put('/updateAsset/:facNo', (req, res) => {
 
-  const { id } = req.params;
+  const { facNo } = req.params;
 
   const {
     FacNO,
@@ -222,8 +222,8 @@ router.put('/updateAsset/:id', (req, res) => {
     // splitAsset
   } = req.body;
 
-  if (!id) {
-    return res.status(400).json({ error: 'Asset ID is required' });
+  if (!facNo) {
+    return res.status(400).json({ error: 'FacNO is required' });
   }
 
   const sqlUpdate = `
@@ -249,8 +249,9 @@ router.put('/updateAsset/:id', (req, res) => {
       StartDate = ?,
       EndDate = ?,
       ReferenceNo = ?,
-      Remarks = ?,
-    WHERE id = ?
+      Remarks = ?
+
+    WHERE FacNO = ?
   `;
 
   const values = [
@@ -277,8 +278,15 @@ router.put('/updateAsset/:id', (req, res) => {
     ReferenceNo || null,
     Remarks || null,
     // splitAsset ?? 0,
-    id
+    facNo
   ];
+
+
+  const m = sqlUpdate.match(/\(([^)]+)\)/);
+  console.log('Number of columns in SQL:', m );
+  console.log('PUT /updateAsset', facNo);
+
+
 
   db.getConnection((err, connection) => {
     if (err) {

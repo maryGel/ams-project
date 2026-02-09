@@ -22,19 +22,19 @@ function assetReducer(state, action) {
   switch (action.type) {
     
     case 'LOADING':
-      return {...state, status: 'loading', error: 'null'};
+      return {...state, status: 'loading', error: null };
     
     case 'LOADING_SINGLE':
-       return {...state, status: 'loadingSingle', error: 'null'}
+       return {...state, status: 'loadingSingle', error: null}
 
     case 'MUTATING':
-      return {...state, status: 'mutating', error: 'null'};
+      return {...state, status: 'mutating', error: null};
     
     case 'ERROR':
       return {...state, status: 'error', error: action.payload};
     
     case 'SUCCESS':
-      return {...state, status: 'idle'};
+      return {...state, status: 'idle', error: null};
   
     case 'SET_DATA':
       return {
@@ -58,7 +58,7 @@ function assetReducer(state, action) {
        return {
         ...state,
         singleAsset: null,
-        state: 'idle',
+        status: 'idle',
         error: null
        }
     
@@ -72,8 +72,7 @@ function assetReducer(state, action) {
     case 'UPDATE_ASSET':
       return {
         ...state,
-        assets: state.assets.map( a => a.id !== action.payload),
-        total: state.total - 1,
+        assets: state.assets.map( a => a.FacNO === action.payload.FacNO ? action.payload : a),
       }
     
     case 'SELECT_ASSET':
@@ -142,7 +141,7 @@ export const useAssetMasterData = () => {
 
       const cleanFacNo = facNo.replace(/\s/g,'').toUpperCase(); // Clean the facNo for API call
       const res = await api.get(`/itemlist/assetMasterlist/${cleanFacNo}`)
-      console.log(`cleanFacN0: ${cleanFacNo}`)
+
       dispatch({
         type: 'SET_SINGLE_ASSET',
         payload: res.data
@@ -187,14 +186,14 @@ export const useAssetMasterData = () => {
 
   // ... Update ...
 
-  const updateAsset = async(payload) => {
+  const updateAsset = async(facNo, payload) => {
     try{
       dispatch({ type: 'MUTATING'});
 
-      const res = await api.put(`/itemlist/updateAsset/${id}`, payload);
+      const res = await api.put(`/itemlist/updateAsset/${facNo}`, payload);
       dispatch({
         type: 'UPDATE_ASSET',
-        payload: { id, ...payload}
+        payload: { FacNO: facNo, ...payload}
       })
 
       dispatch({ type: 'SUCCESS'});

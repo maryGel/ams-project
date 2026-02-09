@@ -21,7 +21,7 @@ import formatWithCommas from '../../Utils/formatWithCommas';
 import formatDateForInput from '../../Utils/formatDateForInput';
 
 export default function CreateAssetCapitalization({
-  assetData,
+  asset,
   updateAssetData,
   originalAsset,
   loading,
@@ -100,7 +100,7 @@ export default function CreateAssetCapitalization({
         sx={{ width: '50rem', marginTop: '1rem'}}
         margin="normal" 
         options = {categoryOptions}  
-        value = {assetData.CATEGORY || ''}       
+        value = {asset.CATEGORY || ''}       
         onChange={(event, newValue) => handleInputChange('CATEGORY', newValue)}
         renderInput={(params) => (
           <TextField 
@@ -119,7 +119,7 @@ export default function CreateAssetCapitalization({
         sx={{ width: '50rem', marginTop: '1rem'}}
         margin="normal" 
         options = {itemClassOptions}  
-        value = {assetData.ItemClass || ''}       
+        value = {asset.ItemClass || ''}       
         onChange={(event, newValue) => handleInputChange('ItemClass', newValue)}
         renderInput={(params) => (
           <TextField {...params} 
@@ -146,7 +146,7 @@ export default function CreateAssetCapitalization({
           }}
           type="date"
           margin="normal" 
-          value={formatDateForInput(assetData.Adate) || ''}
+          value={formatDateForInput(asset.Adate) || ''}
           onChange={(e) => handleInputChange('Adate', e.target.value)}
           InputLabelProps={{ shrink: true }}   
           required         
@@ -157,7 +157,7 @@ export default function CreateAssetCapitalization({
           sx={{ width: '10rem', marginTop: '1rem'}}
           margin="normal" 
           options = {uomOptions}  
-          value = {assetData.Unit || []}      
+          value = {asset.Unit || []}      
           onChange={(e, newValue) => handleInputChange('Unit', newValue)}
           renderInput={(params) => (
             <TextField {...params} 
@@ -172,7 +172,7 @@ export default function CreateAssetCapitalization({
           label="Quantity"
           sx={{ width: '15rem' }}
           margin="normal" 
-          value={assetData.balance_unit || 1}
+          value={asset.balance_unit || 1}
           onChange={(e) => handleInputChange('balance_unit', e.target.value)} 
           InputProps={{ inputProps: { min: 1 } }}
         />
@@ -180,7 +180,7 @@ export default function CreateAssetCapitalization({
         <FormControlLabel
           control={
             <Checkbox
-              // checked={assetData.splitAsset || 0}
+              // checked={asset.splitAsset || 0}
               // onChange={(e) => handleInputChange('splitAsset',e.target.checked ? 1 : 0)}
               sx={{ color: 'gray' }}
             />
@@ -201,7 +201,7 @@ export default function CreateAssetCapitalization({
           thousandSeparator=","
           allowNegative={false}
           decimalScale={2}
-          value={assetData.AAmount || ''}
+          value={asset.AAmount || ''}
           onChange={(e) => handleInputChange('AAmount', e.target.value)} 
           InputProps={{ inputProps: { min: 1 } }}
           required
@@ -215,7 +215,7 @@ export default function CreateAssetCapitalization({
           thousandSeparator=","
           allowNegative={false}
           decimalScale={2}
-          value={assetData.Abre || ''}
+          value={asset.Abre || ''}
           onChange={(e) => handleInputChange('Abre', e.target.value)} 
           InputProps={{ inputProps: { min: 1 } }}
         />
@@ -228,7 +228,7 @@ export default function CreateAssetCapitalization({
           thousandSeparator=","
           allowNegative={false}
           decimalScale={2}
-          value={assetData.Percent || 1}
+          value={asset.Percent || 1}
           onChange={(e) => handleInputChange('Percent', e.target.value)} 
           InputProps={{ inputProps: { min: 1 } }}
           required
@@ -241,7 +241,7 @@ export default function CreateAssetCapitalization({
         sx={{ width: '50rem', marginTop: '1rem'}}
         margin="normal" 
         options = {departmentOptions}  
-        value = {assetData.Department || ''}       
+        value = {asset.Department || ''}       
         onChange={(event, newValue) => handleInputChange('Department', newValue)}
         renderInput={(params) => (
           <TextField {...params} 
@@ -257,7 +257,7 @@ export default function CreateAssetCapitalization({
         sx={{ width: '50rem', marginTop: '1rem'}}
         margin="normal" 
         options = {(locationOptions)}  
-        value = {assetData.ItemLocation || ''}    
+        value = {asset.ItemLocation || ''}    
         onChange={(event, newValue) => handleInputChange('ItemLocation', newValue)}        
         renderInput={(params) => (
           <TextField {...params} 

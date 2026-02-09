@@ -23,6 +23,7 @@ export default function AssetDisplayGenInfo({useProps, asset, isEditing, onField
   const { refItemClassData } = useRefItemClass(useProps);
   const { refDeptData } = useRefDepartment(useProps);
   const { refLocData } = useRefLocation(useProps);
+  const { refBrandData } = useRefBrand(useProps);
 
 
 
@@ -30,7 +31,9 @@ export default function AssetDisplayGenInfo({useProps, asset, isEditing, onField
     <>
       <div  className='px-10'>
         <div className='py-5 text-base bg-gray-100 shadow-sm shadow-slate-200'>
-          {/* General Information Fields */}
+
+          {/* ..... General Information Fields ..... */}
+
           <span className='pl-5 mb-5 text-blue-800'>General Information</span>
           <div key= {asset.id} className='flex gap-2 mt-2'>
             <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>UOM:</span>
@@ -60,84 +63,77 @@ export default function AssetDisplayGenInfo({useProps, asset, isEditing, onField
               sx={{ color: 'gray', marginX: ".2rem" }}
             />
           </div>
-          <div className='grid grid-cols-[10rem_1fr] mt-2 mb-8 mr-5 text-base gap-2'>
-            <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Brand:</span>
-            <input type= 'text' className='p-2 text-base text-gray-500' value={asset.Brand} disabled={!isEditing} readOnly={!isEditing} onChange={(e) => onFieldChange('Brand', e.target.value)}/>
-            <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Serial Number:</span>
-            <input type= 'text' className='p-2 text-base text-gray-500' value={asset.serialNo} disabled={!isEditing} readOnly={!isEditing} onChange={(e) => onFieldChange('serialNo', e.target.value)}/>
-            <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Supplier:</span>
-            <input type= 'text' className='p-2 text-base text-gray-500' value={asset.suppName} disabled={!isEditing} readOnly={!isEditing} onChange={(e) => onFieldChange('suppName', e.target.value)}/>
-            <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Reference:</span>
-            <input type= 'text' className='p-2 text-base text-gray-500' value={asset.ReferenceNo} disabled={!isEditing} readOnly={!isEditing} onChange={(e) => onFieldChange('ReferenceNo', e.target.value)}/>
-            <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Color:</span>
-            <input type= 'text' className='p-2 text-base text-gray-500' value={asset.Color} disabled={!isEditing} readOnly={!isEditing} onChange={(e) => onFieldChange('ReferenceNo', e.target.value)}/>
-
+          
+          <div className='grid grid-cols-[10rem_1fr] mt-2 mb-8 mr-5 text-base gap-2 pr-28'>              
+              <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Brand:</span>
+              <Autocomplete 
+                disabled={!isEditing} 
+                className='w-64'
+                size = 'small'
+                options= {refBrandData.map(item => item.BrandName)} 
+                value={asset.Brand || ''}  
+                onChange={(event, newValue) => onFieldChange('Brand', newValue)}
+                renderInput={(params) => (
+                  <TextField {...params} 
+                    sx={getAutocompleteSx(isEditing)}
+                  />              
+                )} 
+              />
+              <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Serial Number:</span>
+              <input type= 'text' className='p-2 text-base text-gray-500' value={asset.serialNo} disabled={!isEditing} readOnly={!isEditing} onChange={(e) => onFieldChange('serialNo', e.target.value)}/>
+              <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Supplier:</span>
+              <input type= 'text' className='p-2 text-base text-gray-500' value={asset.suppName} disabled={!isEditing} readOnly={!isEditing} onChange={(e) => onFieldChange('suppName', e.target.value)}/>
+              <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Reference:</span>
+              <input type= 'text' className='p-2 text-base text-gray-500' value={asset.ReferenceNo} disabled={!isEditing} readOnly={!isEditing} onChange={(e) => onFieldChange('ReferenceNo', e.target.value)}/>
+              <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Color:</span>
+              <input type= 'text' className='w-64 p-2 text-base text-gray-500' value={asset.Color} disabled={!isEditing} readOnly={!isEditing} onChange={(e) => onFieldChange('Color', e.target.value)}/>
           </div>
 
-          {/* Item Assignment Fields*/}
+          {/* ..... Item Assignment Fields ..... */}
+
           <span className='pl-5 text-blue-800'>Item Assignment</span>
-          <div className='grid grid-cols-[10rem_1fr] mt-2 mb-8 mr-5 text-base gap-2'>
-            <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Category:</span>
-            <Autocomplete 
-              disabled={!isEditing} 
-              size = 'small'
-              options= {refCategoryData.map(item => item.category)} 
-              value={asset.CATEGORY || ''}  
-              onChange={(event, newValue) => onFieldChange('Category', newValue)}
-              renderInput={(params) => (
-                <TextField {...params} 
-                  sx={getAutocompleteSx(isEditing)}
-                />              
-              )} 
-            />
-            <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Asset Class:</span>
-            <Autocomplete 
-              disabled={!isEditing} 
-              size = 'small'
-              options= {refItemClassData.map(item => item.itemClass)} 
-              value={asset.ItemClass || ''}  
-              onChange={(event, newValue) => onFieldChange('Class', newValue)}
-              renderInput={(params) => (
-                <TextField {...params} 
-                  sx={getAutocompleteSx(isEditing)}
-                />              
-              )} 
-            />
-            <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Department:</span>
-            <Autocomplete 
-              disabled={!isEditing} 
-              size = 'small'
-              options= {refDeptData.map(item => item.Department)} 
-              value={asset.Department || ''}  
-              onChange={(event, newValue) => onFieldChange('Department', newValue)}
-              renderInput={(params) => (
-                <TextField {...params} 
-                  sx={getAutocompleteSx(isEditing)}
-                />              
-              )} 
-            />
-            <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Location:</span>
-            <Autocomplete 
-              disabled={!isEditing} 
-              size = 'small'
-              options= {refLocData.map(item => item.LocationName)} 
-              value={asset.ItemLocation || ''}  
-              onChange={(event, newValue) => onFieldChange('Location', newValue)}
-              renderInput={(params) => (
-                <TextField {...params} 
-                  sx={getAutocompleteSx(isEditing)}
-                />              
-              )} 
-            />
-            <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Assigned to:</span>
-            <input type= 'text' className='p-2 text-base text-gray-500' value={asset.Holder} disabled={!isEditing} readOnly={!isEditing} onChange={(e) => onFieldChange('mcagulada', e.target.value)}/>
-            <box className='flex justify-between gap-2 w-100'>
-              <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Warranty:</span>
-              <span className='p-2 pl-5 mr-4 text-base tracking-wider text-gray-500'>From</span>
-              <input type= 'date' className='p-2 text-base text-gray-500' value={asset.StartDate} disabled={!isEditing} readOnly={!isEditing} />
-              <span className='p-2 pl-5 mr-4 text-base tracking-wider text-gray-500'>to</span>
-              <input type= 'date' className='p-2 text-base text-gray-500' value={asset.EndDate} disabled={!isEditing} readOnly={!isEditing} />
-            </box>
+          <div className='grid grid-cols-[10rem_15rem_10rem_25rem] mt-2 mb-8 mr-5 text-base gap-2 pr-28'>
+              <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Category:</span>
+              <input type= 'text' className='p-2 text-base text-gray-500' value={asset.CATEGORY} disabled />
+
+              <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Asset Class:</span>
+              <Autocomplete 
+                disabled={!isEditing} 
+                size = 'small'
+                options= {refItemClassData.map(item => item.itemClass)} 
+                value={asset.ItemClass || ''}  
+                onChange={(event, newValue) => onFieldChange('Class', newValue)}
+                renderInput={(params) => (
+                  <TextField {...params} 
+                    sx={getAutocompleteSx(isEditing)}
+                  />              
+                )} 
+              />
+              <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Location:</span>
+              <input type= 'text' className='p-2 text-base text-gray-500' value={asset.ItemLocation || ''} disabled />
+
+              <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Department:</span>
+              <Autocomplete 
+                disabled={!isEditing} 
+                size = 'small'
+                options= {refDeptData.map(item => item.Department)} 
+                value={asset.Department || ''}  
+                onChange={(event, newValue) => onFieldChange('Department', newValue)}
+                renderInput={(params) => (
+                  <TextField {...params} 
+                    sx={getAutocompleteSx(isEditing)}
+                  />              
+                )} 
+              />
+              <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Assigned to:</span>
+              <input type= 'text' className='p-2 text-base text-gray-500' value={asset.Holder} disabled={!isEditing} readOnly={!isEditing} onChange={(e) => onFieldChange('Holder', e.target.value)}/>
+              <box className='flex justify-between gap-2 w-100'>
+                <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Warranty:</span>
+                <span className='p-2 pl-5 mr-4 text-base tracking-wider text-gray-500'>From</span>
+                <input type= 'date' className='p-2 text-base text-gray-500' value={asset.StartDate} disabled={!isEditing} readOnly={!isEditing} onChange={(e) => onFieldChange('StartDate', e.target.value)}  />
+                <span className='p-2 pl-5 mr-4 text-base tracking-wider text-gray-500'>to</span>
+                <input type= 'date' className='p-2 text-base text-gray-500' value={asset.EndDate} disabled={!isEditing} readOnly={!isEditing} onChange={(e) => onFieldChange('EndDate', e.target.value)}/>
+              </box>
           </div>
           
           {/* Physical Count Information*/}

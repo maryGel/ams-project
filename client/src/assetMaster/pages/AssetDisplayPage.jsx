@@ -1,5 +1,7 @@
 import {useState, useEffect} from 'react'
 
+// MUI
+import {Snackbar, Alert} from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import EditIcon from '@mui/icons-material/Edit';
@@ -7,7 +9,7 @@ import { useAssetMasterData } from '../../hooks/assetMasterHooks';
 // Custom Hooks
 import { useRefUom } from '../../hooks/refUom'; // import the refUnit data
 import { useSearchParams } from 'react-router-dom';
-import { assetMasterFields } from '../createAsset/assetMasterFields';
+import { assetMasterFields, prepareAssetPayload } from '../createAsset/assetMasterFields';
 // Components
 import AssetDisplayTabs from '../assetDisplay/assetDisplayTabs'
 
@@ -24,12 +26,15 @@ export default function AssetMasterDisplay({}){
     isLoading, 
     isMutating,
     isLoadingSingle, 
-    error: assetError
+    error
   } = useAssetMasterData(); 
-
+  
+  // State variables
   const [ searchParams ] = useSearchParams();
-  const [ asset, setAsset ] = useState({assetMasterFields});
+  const [ asset, setAssetData ] = useState({assetMasterFields});
   const [ isEditing, setIsEditing ] = useState(false);
+  const [ saveError, setSaveError ] = useState(null);
+  const [ snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
 
   const copyFacN0 = searchParams.get('copyFrom');  
@@ -50,7 +55,7 @@ export default function AssetMasterDisplay({}){
 
   useEffect(() => {
     if(singleAsset){
-      setAsset(prev => ({
+      setAssetData(prev => ({
         ...prev,
         singleAsset,
         FacNO: singleAsset.FacNO, 
@@ -76,6 +81,10 @@ export default function AssetMasterDisplay({}){
     }
   }, [singleAsset]);
 
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbar({ open: true, message, severity });
+  };
+
   // ...  H a n d l e r s ... //
 
   const handleEditButton = () => {
@@ -83,18 +92,48 @@ export default function AssetMasterDisplay({}){
   }
 
   const handleChange = (field, value) => {
-    setAsset(prev => ({
+    setAssetData(prev => ({
       ...prev,
       [field]: value
     }));
   };
+  const handleSave = async () => {
+    try{
+      setSaveError(null);
+      const payload = prepareAssetPayload(asset);
+      console.log('Saving', asset.FacNO, payload);
+      await updateAsset(asset.FacNO, payload);
+      showSnackbar('Changes have been saved successfully.');
+      setIsEditing(false);
 
-  // if (loading) return <p className="p-5">Loading asset...</p>;
-  // if (error) return <p className="p-5 text-red-600">Error loading asset data.</p>;
+
+    } catch (error) {
+      setSaveError(error.message || 'Failed to save asset');
+    }
+
+  }
+
+  if (isLoading) return <p className="p-5">Loading asset...</p>;
+  if (error) return <p className="p-5 text-red-600">Error loading asset data.</p>;
 
   return(
     <>
       <div className='grid px-10 py-3 mx-32'>
+
+          {/* Snackbar */}
+          <Snackbar
+            open={snackbar.open}
+            autoHideDuration={4000}
+            onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          >
+            <Alert
+              severity={snackbar.severity}
+              onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+            >
+              {snackbar.message}
+            </Alert>
+          </Snackbar>
 
           {/* ... B u t t o n s ... */}
           
@@ -104,11 +143,11 @@ export default function AssetMasterDisplay({}){
             {/* SAVE BUTTON */}
             {isEditing && (
               <button
-                className='flex justify-center pt-1 pb-1 pl-2 pr-3 text-white transition-transform duration-200 ease-in-out bg-green-500 border rounded-full shadow-black border-spacing-1 active:scale-95 hover:text-gray-600'
+                className='flex justify-center pt-1 pb-1 pl-2 pr-3 text-white transition-transform duration-200 ease-in-out bg-green-500 border rounded-full shadow-black border-spacing-1 active:scale-95 hover:bg-green-700'
                 title='Save Changes'
                 color="primary"
                 sx={{ border: 1 }}
-                // onClick={handleSave}
+                onClick={handleSave}
               >
                 <SaveIcon />
                 Save
@@ -141,19 +180,16 @@ export default function AssetMasterDisplay({}){
             <div className='grid grid-cols-[2fr_1fr] mt-3 py-2 shadow-md shadow-slate-300 bg-white border rounded-md border-slate-300 text-slate-800'>
               {/* Column 1: Asset Name and Description */}
               <div className='mt-3'>
-                <div className='grid grid-cols-[10rem_2fr] shadow-sm shadow-slate-200 mt-2 ml-16 py-2 text-base bg-gray-100'>
+                <div className='grid grid-cols-[10rem_2fr] gap-4 shadow-sm shadow-slate-200 mt-4 ml-16 py-5 px-3 text-base bg-gray-100'>
                   <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Asset Name:</span>
-                <input type="text" className='p-2 mr-5 text-base'  disabled={!isEditing} value={asset.FacName|| ''} readOnly={!isEditing} onChange={(e) => handleChange('FacName', e.target.value)}/>
-
-                </div>
-                <div className='grid grid-cols-[10rem_2fr] shadow-sm shadow-slate-200 mt-2 ml-16 py-2 text-base bg-gray-100'>
+                  <input type="text" className='p-2 mr-5 text-base'  disabled={!isEditing} value={asset.FacName|| ''} readOnly={!isEditing} onChange={(e) => handleChange('FacName', e.target.value)}/>
+                  
                   <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Description:</span>
                   <input type="text" className='p-2 mr-5 text-base'  disabled={!isEditing} value={asset.Description || ''} readOnly={!isEditing} onChange={(e) => handleChange('Description', e.target.value)}/>
-                </div>  
-                <div className='grid grid-cols-[10rem_2fr] shadow-sm shadow-slate-200 mt-2 ml-16 py-2 text-base bg-gray-100'>
+
                   <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Status:</span>
                   <input type="text" className='p-2 text-base font-semibold tracking-wider text-green-600' disabled value={asset.xxStats || 'Active'} readOnly />
-                </div>          
+                </div>         
               </div>
     
               {/* Column 2: Display Photo */}

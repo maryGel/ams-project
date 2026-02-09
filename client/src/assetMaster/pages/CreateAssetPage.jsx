@@ -23,7 +23,14 @@ import { useRefCategory } from '../../hooks/refCategory';
 import { useAssetMasterData } from '../../hooks/assetMasterHooks'; // import the itemlist
 
 // fields and utilities
-import { assetMasterFields, requiredFields, prepareAssetPayload, validationFinalSubmission, validateStep, getStepValidationErrors } from '../createAsset/assetMasterFields';
+import { 
+  assetMasterFields, 
+  requiredFields, 
+  prepareAssetPayload, 
+  validationFinalSubmission, 
+  validateStep, 
+  getStepValidationErrors 
+} from '../createAsset/assetMasterFields';
 
 
 // Define your step labels
@@ -47,8 +54,7 @@ export default function CreateAsset(setHeaderTitle) {
   const navigate = useNavigate();
 
   // State variables
-  const [ assetData, setAssetData ] = useState(assetMasterFields);
-  const [ asset, setAsset ] = useState({}); // Copy to New asset
+  const [ asset, setAsset ] = useState(assetMasterFields);
   const [ activeStep, setActiveStep ] = useState(0);
   const [ submitError, setSubmitError ] = useState(null);
   const [ submitSuccess, setSubmitSucess] = useState(false);
@@ -58,18 +64,14 @@ export default function CreateAsset(setHeaderTitle) {
 
   // Effects
   useEffect(() => {
-    console.log('CreateAsset useEffect - copyFacN0:', copyFacN0);
     if (copyFacN0){
-      console.log('Fetching asset for:', copyFacN0);
       fetchAssetByFacN0(copyFacN0);
     } else {
-      console.log('Clearing single asset');
       clearSingleAsset();
     }
 
     // Cleanup when component unmounts or copyFacN0 changes
     return () => {
-      console.log('Cleanup running');
       clearSingleAsset();
     }
   }, [copyFacN0, fetchAssetByFacN0, clearSingleAsset]); 
@@ -77,7 +79,7 @@ export default function CreateAsset(setHeaderTitle) {
   // Populate from data when singleAsset is fetched
   useEffect(() => {
     if (singleAsset) {
-      setAssetData(prev => ({
+      setAsset(prev => ({
         ...prev,
         ...singleAsset,
         FacNO: '', // Will generate based on new category
@@ -90,28 +92,27 @@ export default function CreateAsset(setHeaderTitle) {
         Department: singleAsset.Department || '',  
         ReferenceNo: singleAsset.ReferenceNo || '',      
       }));
-      setAsset(singleAsset);
     }
   }, [singleAsset]);
 
   // Generate FacNO when category is selected
   useEffect(() => {
-    if (assetData.CATEGORY && refCategoryData && refCategoryData.length > 0) {
+    if (asset.CATEGORY && refCategoryData && refCategoryData.length > 0) {
       // Find the selected category in refCategoryData
       const selectedCategory = refCategoryData.find(
-        cat => cat.category === assetData.CATEGORY
+        cat => cat.category === asset.CATEGORY
       );
 
       if (selectedCategory && selectedCategory.xCode) {
         generateNextFacNO(selectedCategory.xCode).then(newFacNO => {         
           if (newFacNO && typeof newFacNO === 'string') {
             setGeneratedFacNO(newFacNO);
-            setAssetData(prev => ({...prev, FacNO: newFacNO }));
+            setAsset(prev => ({...prev, FacNO: newFacNO }));
           } 
         }).catch(console.error);
       } 
     } 
-  }, [assetData.CATEGORY, refCategoryData, assets]);
+  }, [asset.CATEGORY, refCategoryData, assets]);
 
   // Function to generate next asset number
   const generateNextFacNO = useCallback(async (xCode) => {
@@ -145,9 +146,10 @@ export default function CreateAsset(setHeaderTitle) {
     }    
   }, []);
 
-  // Handlers
+  // .... H a n d l e r s ....
+  
   const updateAssetData = (fieldsUpdates) => {
-    setAssetData(prev => ({
+    setAsset(prev => ({
       ...prev,
       ...fieldsUpdates
     }));
@@ -157,7 +159,7 @@ export default function CreateAsset(setHeaderTitle) {
     // Clear previous errors
     setSubmitError(null);
     
-    const validationErrors = getStepValidationErrors(activeStep, assetData, requiredFields);
+    const validationErrors = getStepValidationErrors(activeStep, asset, requiredFields);
 
     if (validationErrors.length > 0) {
       setSubmitError(validationErrors);
@@ -185,12 +187,12 @@ export default function CreateAsset(setHeaderTitle) {
 
   const handleReset = () => {
     // Clean up object URL if exists
-    if (assetData.uploadPicture.preview) {
-      URL.revokeObjectURL(assetData.uploadPicture.preview);
+    if (asset.uploadPicture.preview) {
+      URL.revokeObjectURL(asset.uploadPicture.preview);
     }
 
     setActiveStep(0);
-    setAssetData(assetMasterFields);
+    setAsset(assetMasterFields);
     setGeneratedFacNO('');
     setSubmitError(null);
     setSubmitSucess(false);
@@ -203,26 +205,26 @@ export default function CreateAsset(setHeaderTitle) {
       setSubmitError(null);
 
       // Check if FacNO is empty or an object
-      if (!assetData.FacNO || typeof assetData.FacNO === 'object') {
+      if (!asset.FacNO || typeof asset.FacNO === 'object') {
         setSubmitError('Asset Number could not be generated. Please check category selection.');
         return;
       }
 
       // Final Validation
-      const validationErrors = validationFinalSubmission(assetData, requiredFields);
+      const validationErrors = validationFinalSubmission(asset, requiredFields);
       if (validationErrors.length > 0) {
         setSubmitError(validationErrors);
         return;
       }
     
       // TEMPORARY: Force a FacNO for testing
-      const finalFacNO = assetData.FacNO && typeof assetData.FacNO === 'string' 
-        ? assetData.FacNO 
+      const finalFacNO = asset.FacNO && typeof asset.FacNO === 'string' 
+        ? asset.FacNO 
         : 'TEST-000001';
       
       // Prepare payload for API
       const payload = prepareAssetPayload({
-        ...assetData,
+        ...asset,
         FacNO: finalFacNO
       });
     
@@ -231,7 +233,7 @@ export default function CreateAsset(setHeaderTitle) {
       setSubmitSucess(true);
 
       setTimeout(() => {
-        navigate(`/assetFolder/assetMasterDisplay?copyFrom=${assetData.FacNO}`);
+        navigate(`/assetFolder/assetMasterDisplay?copyFrom=${asset.FacNO}`);
         setHeaderTitle(`Asset Master Display`);
       }, 2000);
 
@@ -251,7 +253,7 @@ export default function CreateAsset(setHeaderTitle) {
   // Function to render content for each step
   const getStepContent = (step) => {
     const stepProps = {
-      assetData,
+      asset,
       updateAssetData,
       originalAsset: singleAsset,
       loading: isLoadingSingle,
@@ -265,7 +267,7 @@ export default function CreateAsset(setHeaderTitle) {
       case 1:
         return <CreateAssetCapitalization {...stepProps} refCategoryData={refCategoryData} />;
       case 2:
-        return <AssetFileUpload assetData={assetData} updateAssetData={updateAssetData} />;
+        return <AssetFileUpload asset={asset} updateAssetData={updateAssetData} />;
       default:
         return 'Unknown step';
     }
@@ -276,37 +278,37 @@ export default function CreateAsset(setHeaderTitle) {
     {
       title: 'General Information',
       fields: [
-        { label: 'Asset Number', value: assetData.FacNO || 'Not generated yet' },
-        { label: 'Asset Name', value: assetData.FacName },
-        { label: 'Description', value: assetData.Description },
-        { label: 'Serial Number', value: assetData.serialNo || 'N/A' },
-        { label: 'Brand', value: assetData.Brand || 'N/A' },
-        { label: 'Reference No.', value: assetData.ReferenceNo },
-        { label: 'Supplier', value: assetData.suppName || 'N/A' },
-        { label: 'Color', value: assetData.Color || 'N/A' },
+        { label: 'Asset Number', value: asset.FacNO || 'Not generated yet' },
+        { label: 'Asset Name', value: asset.FacName },
+        { label: 'Description', value: asset.Description },
+        { label: 'Serial Number', value: asset.serialNo || 'N/A' },
+        { label: 'Brand', value: asset.Brand || 'N/A' },
+        { label: 'Reference No.', value: asset.ReferenceNo },
+        { label: 'Supplier', value: asset.suppName || 'N/A' },
+        { label: 'Color', value: asset.Color || 'N/A' },
       ],
       stepIndex: 0
     },
     {
       title: 'Capitalization Details',
       fields: [
-        { label: 'Category', value: assetData.CATEGORY },
-        { label: 'Item Class', value: assetData.ItemClass },
-        { label: 'Unit', value: assetData.Unit },
-        { label: 'Quantity', value: assetData.balance_unit },
-        { label: 'Acquisition Date', value: assetData.Adate },
-        { label: 'Acquired Value', value: assetData.AAmount },
-        { label: 'Residual Value', value: assetData.Abre },
-        { label: 'Life in Years', value: assetData.Percent},
-        { label: 'Location', value: assetData.ItemLocation },
-        { label: 'Department', value: assetData.Department },
+        { label: 'Category', value: asset.CATEGORY },
+        { label: 'Item Class', value: asset.ItemClass },
+        { label: 'Unit', value: asset.Unit },
+        { label: 'Quantity', value: asset.balance_unit },
+        { label: 'Acquisition Date', value: asset.Adate },
+        { label: 'Acquired Value', value: asset.AAmount },
+        { label: 'Residual Value', value: asset.Abre },
+        { label: 'Life in Years', value: asset.Percent},
+        { label: 'Location', value: asset.ItemLocation },
+        { label: 'Department', value: asset.Department },
       ],
       stepIndex: 1
     },
     {
       title: 'Additional Information',
       fields: [
-        { label: 'Picture Uploaded', value: assetData.uploadPicture.file ? 'Yes' : 'No' },
+        { label: 'Picture Uploaded', value: asset.uploadPicture.file ? 'Yes' : 'No' },
       ],
       stepIndex: 2
     }
@@ -314,7 +316,7 @@ export default function CreateAsset(setHeaderTitle) {
 
   // Render final step summary
   const renderFinalStepSummary = () => {
-    const validationErrors = validationFinalSubmission(assetData, requiredFields);
+    const validationErrors = validationFinalSubmission(asset, requiredFields);
 
     return (
       <React.Fragment>

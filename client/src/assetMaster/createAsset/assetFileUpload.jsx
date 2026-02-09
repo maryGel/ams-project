@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
 
-const AssetFileUpload = ({ assetData, updateAssetData }) => {
+const AssetFileUpload = ({ asset, updateAssetData }) => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -34,21 +34,21 @@ const AssetFileUpload = ({ assetData, updateAssetData }) => {
           />
         </Button>
         
-        {assetData.uploadPicture.file && (
+        {asset.uploadPicture.file && (
           <Typography variant="body2" sx={{ mt: 1, ml: 1 }}>
-            Selected: {assetData.uploadPicture.file.name}
+            Selected: {asset.uploadPicture.file.name}
           </Typography>
         )}
       </Box>
       
-      {assetData.uploadPicture.preview && (
+      {asset.uploadPicture.preview && (
         <Box mt={3}>
           <Typography variant="subtitle2" gutterBottom>
             Preview:
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
             <img
-              src={assetData.uploadPicture.preview}
+              src={asset.uploadPicture.preview}
               alt="Asset Preview"
               style={{ 
                 maxWidth: '300px', 

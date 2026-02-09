@@ -16,7 +16,7 @@ import { useRefBrand } from '../../hooks/refBrand';
 ---------------------------------------------------- */}
 
 export default function CreateAssetGenInfo({
-  assetData,
+  asset,
   updateAssetData,
   originalAsset,
   loading,
@@ -63,7 +63,7 @@ export default function CreateAssetGenInfo({
           label={'Asset Name'}
           sx={{ width: '60rem' }}
           margin="normal"
-          value={assetData.FacName || ''}
+          value={asset.FacName || ''}
           onChange={(e) => handleInputChange('FacName', e.target.value)}
           required
         />
@@ -73,7 +73,7 @@ export default function CreateAssetGenInfo({
           aria-label="minimum height"
           minRows={2}
           label={'Asset Description'}
-          value={assetData.Description || ''}
+          value={asset.Description || ''}
           onChange={(e) => handleInputChange('Description', e.target.value)}
           style={{ 
             width: '60rem',
@@ -92,7 +92,7 @@ export default function CreateAssetGenInfo({
             label={'Serial Number'}
             sx={{ width: '30rem' }}
             margin="normal"
-            value={assetData.serialNo || ''}
+            value={asset.serialNo || ''}
             onChange={(e) => handleInputChange('serialNo', e.target.value)}
           />
 
@@ -101,7 +101,7 @@ export default function CreateAssetGenInfo({
             sx={{ width: '25rem', marginTop: '1rem'}}
             margin="normal" 
             options = {brandOptions} 
-            value={assetData.Brand || ''}   
+            value={asset.Brand || ''}   
             onChange={(event, newValue) => handleInputChange('Brand', newValue)}          
             renderInput={(params) => (
               <TextField {...params} 
@@ -117,7 +117,7 @@ export default function CreateAssetGenInfo({
           label={'Supplier'}
           sx={{ width: '60rem' }}
           margin="normal" 
-          value={assetData.suppName || ''}
+          value={asset.suppName || ''}
           onChange={(e) => handleInputChange('suppName', e.target.value)}
         />
 
@@ -125,7 +125,7 @@ export default function CreateAssetGenInfo({
           label="Reference"
           sx={{ width: '60rem' }}
           margin="normal" 
-          value= {assetData.ReferenceNo || ''}
+          value= {asset.ReferenceNo || ''}
           onChange={(e) => handleInputChange('ReferenceNo', e.target.value)}
         />
 
@@ -135,7 +135,7 @@ export default function CreateAssetGenInfo({
             label={'Color'}
             sx={{ width: '10rem' }}
             margin="normal" 
-            value={assetData.Color || ''}
+            value={asset.Color || ''}
             onChange={(e) => handleInputChange('Color', e.target.value)}
           />
           <TextField
@@ -149,7 +149,7 @@ export default function CreateAssetGenInfo({
             }}
             type="date"
             margin="normal" 
-            value={assetData.StartDate || ''}
+            value={asset.StartDate || ''}
             onChange={(e) => handleInputChange('StartDate',e.target.value)}
             InputLabelProps={{ shrink: true }}          
           />
@@ -165,7 +165,7 @@ export default function CreateAssetGenInfo({
             }}
             type="date"
             margin="normal" 
-            value={assetData.EndDate || ''}
+            value={asset.EndDate || ''}
             onChange={(e) => handleInputChange('EndDate',e.target.value)}
             InputLabelProps={{ shrink: true }}          
           /> 
