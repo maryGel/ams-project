@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
-// import { HeaderTitle } from './Utils/headerTitleList';
+import ProtectedRoute from './api/ProtectedRoute.jsx';
+
 import Header from './Utils/header.jsx';
 import HomePage from './pages/HomePage.jsx'; 
 import LoginPage from './pages/LoginPage.jsx';
@@ -13,13 +14,17 @@ import Practice from './Utils/practice.jsx';
 import ReferentialPage from './a_assetMaster/pages/ReferentialPage.jsx';
 
 // Asset Movement Pages
-import JOFormPage from './a_Movement/pages/JOFormPage.jsx';
+import JOFormPage from './a_Movement/pages/jobOrderPage.jsx';
+
+
+// System Setup Pages
+import UserAccessPage from './a_SystemSetup/userProfile/userAccessPage.jsx';
 
 // To initialize the header title based on the current page
   const getInitialTitle = () => {
     const savedTitle = localStorage.getItem('currentHeaderTitle');
     return savedTitle ? savedTitle : 'Asset Management System';
-  }
+  };
 
 
   // To initialize the nav link based on the current page
@@ -27,7 +32,7 @@ import JOFormPage from './a_Movement/pages/JOFormPage.jsx';
   const getInitialNavLink = () => {
     const savedLink = localStorage.getItem('navLink');
     return savedLink 
-  }
+  };
 
 
 function App() {
@@ -35,18 +40,28 @@ function App() {
   const location = useLocation();
   const [ headerTitle, setHeaderTitle] = useState(getInitialTitle);
   const [ navLink, setNavLink ] = useState(getInitialNavLink);
-  
+  const [ username, setUsername] = useState(() => localStorage.getItem('username') || 'User');
+
+ 
 
   // To save the header title to localStorage whenever it changes
   const saveTitleUpdate = (newTitle) => {
     localStorage.setItem('currentHeaderTitle', newTitle);
     setHeaderTitle(newTitle);
-  }
+  };
 
   // To save the nav link to localStorage whenever it changes
   const saveNavLinkUpdate = (newLink) => {
     localStorage.setItem('navLink', newLink);
     setNavLink(newLink);
+  };
+
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    localStorage.removeItem('isLoggedIn'); 
+    window.location.href = '/'; // Redirect to login page
   }
 
   const tabPaths = [
@@ -56,7 +71,7 @@ function App() {
     '/Home/Depreciation',
     '/Home/Reports',
     '/Home/PhysicalCount',
-    '/Home/Utilities'
+    '/Home/SystemSetup'
   ];
 
   return (
@@ -71,6 +86,8 @@ function App() {
           navLink={navLink}
           setNavLink={saveNavLinkUpdate}
           tabPaths = {tabPaths}
+          username={username}
+          onLogout={handleLogout}
         />
       )}
       
@@ -79,43 +96,73 @@ function App() {
                 element={<LoginPage 
                   headerTitle ={headerTitle}
                   setHeaderTitle={saveTitleUpdate}
+                  setUsername={setUsername}
                 />} 
         />
-        <Route  path="/Home/*" 
-                element={<HomePage
-                          headerTitle ={headerTitle}
-                          setHeaderTitle={saveTitleUpdate}
-                          tabPaths = {tabPaths}
-                        />} 
+        <Route  path="/Home/*" element={
+          <ProtectedRoute>
+                <HomePage
+                    headerTitle ={headerTitle}
+                    setHeaderTitle={saveTitleUpdate}
+                    tabPaths = {tabPaths}
+                />
+          </ProtectedRoute>
+        } 
         /> 
         {/* Asset Master Pages */}
-        <Route path="/assetFolder/pages/assetMasterList" 
-                element={<AssetMasterListPage 
-                          setHeaderTitle={saveTitleUpdate}
-                          setNavLink={setNavLink}
-                        />} 
+        <Route path="/assetFolder/pages/assetMasterList" element={
+            <ProtectedRoute>
+                <AssetMasterListPage 
+                    setHeaderTitle={saveTitleUpdate}
+                    setNavLink={setNavLink}
+                />
+            </ProtectedRoute>
+        } 
         />
-        <Route path="/assetFolder/createAsset" 
-                element={<CreateAssetPage
-                          setHeaderTitle={saveTitleUpdate}
-                        />} 
+        <Route path="/assetFolder/createAsset" element={
+            <ProtectedRoute>
+                <CreateAssetPage
+                    setHeaderTitle={saveTitleUpdate}
+                />
+            </ProtectedRoute>
+        } 
         />
-        <Route path="/assetFolder/pages/referentialPage" 
-                element={<ReferentialPage
-                          setHeaderTitle={saveTitleUpdate}
-                        />} 
+        <Route path="/assetFolder/pages/referentialPage" element={
+            <ProtectedRoute>
+                <ReferentialPage
+                    setHeaderTitle={saveTitleUpdate}
+                />
+            </ProtectedRoute>
+        } 
         />
-        <Route path="/assetFolder/assetMasterDisplay" 
-                element={<AssetMasterDisplay
-                          setHeaderTitle={saveTitleUpdate}
-                        />} 
+        <Route path="/assetFolder/assetMasterDisplay" element={
+            <ProtectedRoute>
+                <AssetMasterDisplay
+                    setHeaderTitle={saveTitleUpdate}
+                />
+            </ProtectedRoute>
+
+        } 
         />
 
         {/* Asset Movement Pages */}
-        <Route path="/assetMovement/pages/JOFormPage" 
-                element={<JOFormPage
-                          setHeaderTitle={saveTitleUpdate}
-                        />} 
+        <Route path="/assetMovement/pages/JOFormPage" element={
+            <ProtectedRoute>
+                <JOFormPage
+                    setHeaderTitle={saveTitleUpdate}
+                />
+            </ProtectedRoute>
+        } 
+        />
+
+        {/* System Setup Pages */}
+        <Route path="/systemSetup/user/userProfile" element={
+            <ProtectedRoute>
+                <UserAccessPage
+                    setHeaderTitle={saveTitleUpdate}
+                />
+            </ProtectedRoute>
+        } 
         />
 
         {/* If you add a register page, define its route here: */}

@@ -97,6 +97,7 @@ export default function AssetMasterDisplay({}){
       [field]: value
     }));
   };
+
   const handleSave = async () => {
     try{
       setSaveError(null);
@@ -112,6 +113,15 @@ export default function AssetMasterDisplay({}){
     }
 
   }
+
+  const cancelEdit = () => {
+    setIsEditing(false);
+    setAssetData(prev => ({
+      ...prev,
+      ...singleAsset
+    }));
+  };
+  
 
   if (isLoading) return <p className="p-5">Loading asset...</p>;
   if (error) return <p className="p-5 text-red-600">Error loading asset data.</p>;
@@ -161,7 +171,7 @@ export default function AssetMasterDisplay({}){
                   border-slate-300 active:scale-95`}
                 title={isEditing? 'Cancel Edit' : 'Edit Asset'}
                 type="button" // Use this to prevent from submission
-                onClick={handleEditButton}
+                onClick={isEditing? cancelEdit : handleEditButton}
               >
                 {isEditing ? 
                   <><CancelIcon size ="small"/> <span>Cancel </span></>:
@@ -177,10 +187,10 @@ export default function AssetMasterDisplay({}){
             <p className='p-3 pl-16 font-medium tracking-wide bg-white border rounded-md shadow-md text-normal shadow-slate-300 border-slate-300 text-slate-800'
             >Asset Number: {asset.FacNO}</p>
     
-            <div className='grid grid-cols-[2fr_1fr] mt-3 py-2 shadow-md shadow-slate-300 bg-white border rounded-md border-slate-300 text-slate-800'>
+            <div className='grid grid-cols-[2fr_1fr] mt-3  shadow-md shadow-slate-300 bg-white border rounded-md border-slate-300 text-slate-800'>
               {/* Column 1: Asset Name and Description */}
               <div className='mt-3'>
-                <div className='grid grid-cols-[10rem_2fr] gap-4 shadow-sm shadow-slate-200 mt-4 ml-16 py-5 px-3 text-base bg-gray-100'>
+                <div className='grid grid-cols-[10rem_2fr] gap-4 shadow-sm shadow-slate-200 mt-1 ml-16 py-2 px-2 text-base bg-gray-100'>
                   <span className='p-2 pl-5 text-base tracking-wider text-gray-500'>Asset Name:</span>
                   <input type="text" className='p-2 mr-5 text-base'  disabled={!isEditing} value={asset.FacName|| ''} readOnly={!isEditing} onChange={(e) => handleChange('FacName', e.target.value)}/>
                   

@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 import { api } from '../api/axios';
 import { useNavigate } from "react-router-dom";
 
 
-function LoginPage({setHeaderTitle}) {
-  const [username, setUsername] = useState("");
+function LoginPage({setHeaderTitle, setUsername}) {
+  const [localUsername, setLocalUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -19,25 +19,27 @@ function LoginPage({setHeaderTitle}) {
     if (e) e.preventDefault();
     
     // Input validation
-    if (!username.trim() || !password.trim()) {
+    if (!localUsername.trim() || !password.trim()) {
       setErrorMsg("Please enter both username and password");
       return;
     }
 
     setIsLoading(true);
     setErrorMsg("");
-    console.log(`username: ${username}, password: ${password}`)
+ 
 
     try {
       const res = await api.post("/login", {
-        user: username.trim(),
+        user: localUsername.trim(),
         password: password.trim(),
       });
 
       if (res.data.success) {
-        console.log("✅ Login successful, navigating to home");
-        // Store user data in localStorage if needed
-        localStorage.setItem('user', JSON.stringify(res.data.user));
+
+        localStorage.setItem('isLoggedIn', 'true');
+
+        localStorage.setItem('username', localUsername.trim());
+        if (setUsername) setUsername(localUsername.trim());  // Store user data in localStorage 
         navigate('/Home');
       } else {
         setErrorMsg(res.data.message || "Login failed");
@@ -45,15 +47,12 @@ function LoginPage({setHeaderTitle}) {
     } catch (err) {
       console.error("❌ Login error:", err);
       
-      // More specific error handling
+
       if (err.response) {
-        // Server responded with error status
         setErrorMsg(err.response.data.message || "Server error occurred");
       } else if (err.request) {
-        // Request was made but no response received
         setErrorMsg("Cannot connect to server. Please check your connection.");
       } else {
-        // Other errors
         setErrorMsg("An unexpected error occurred");
       }
     } finally {
@@ -97,8 +96,8 @@ function LoginPage({setHeaderTitle}) {
               type="text" 
               placeholder="Username" 
               className="p-2 m-2 mb-4 border rounded w-72 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={localUsername}
+              onChange={(e) => setLocalUsername(e.target.value)}
               onKeyPress={handleKeyPress}
               disabled={isLoading}
             /> 
@@ -114,6 +113,7 @@ function LoginPage({setHeaderTitle}) {
             /> 
             
             <button 
+              type="submit"
               className={`p-2 m-2 text-white rounded transition-colors ${
                 isLoading 
                   ? 'bg-gray-400 cursor-not-allowed' 

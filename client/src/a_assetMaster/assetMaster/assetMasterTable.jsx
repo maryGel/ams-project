@@ -2,6 +2,7 @@ import * as React from 'react';
 import  {useState, useMemo, useEffect}  from 'react';
 import PropTypes from 'prop-types';
 import { alpha } from '@mui/material/styles';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import {
   Box,
   Table,
@@ -52,33 +53,15 @@ function getComparator(order, orderBy) {
 }
 
 const headCells = [
-  {
-    id: 'FacNO', numeric: false, disablePadding: true, label: 'Asset Number',
-  },
-  {
-    id: 'FacName', numeric: true, disablePadding: false, label: 'Asset Name',
-  },
-  {
-    id: 'ItemClass', numeric: true, disablePadding: false, label: 'Asset Class',
-  },
-  {
-    id: 'CATEGORY', numeric: true, disablePadding: false, label: 'Category',
-  },
-  {
-    id: 'balance_unit', numeric: true, disablePadding: false, label: 'Quantity',
-  },
-  {
-    id: 'Unit', numeric: true, disablePadding: false,label: 'UOM',
-  },
-  {
-    id: 'ItemLocation', numeric: true, disablePadding: false, label: 'Location',
-  },
-  {
-    id: 'Department', numeric: true, disablePadding: false, label: 'Department',
-  },
-  {
-    id: 'status', numeric: true, disablePadding: false, label: 'Status',
-  },
+  { id: 'FacNO', numeric: false, disablePadding: true, label: 'Asset Number'},
+  { id: 'FacName', numeric: true, disablePadding: false, label: 'Asset Name'},
+  { id: 'ItemClass', numeric: true, disablePadding: false, label: 'Asset Class' },
+  { id: 'CATEGORY', numeric: true, disablePadding: false, label: 'Category'},
+  { id: 'balance_unit', numeric: true, disablePadding: false, label: 'Quantity'},
+  { id: 'Unit', numeric: true, disablePadding: false,label: 'UOM'},
+  { id: 'ItemLocation', numeric: true, disablePadding: false, label: 'Location'},
+  { id: 'Department', numeric: true, disablePadding: false, label: 'Department'},
+  {id: 'status', numeric: true, disablePadding: false, label: 'Status'},
 ];
 
 function EnhancedTableHead(props) {
@@ -105,7 +88,7 @@ function EnhancedTableHead(props) {
           )}
         </TableCell>
         {headCells.map((headCell) => (
-          <TableCell
+          <TableCell          
             key={headCell.id}
             align='left'
             padding={headCell.disablePadding ? 'none' : 'normal'}
@@ -141,7 +124,7 @@ EnhancedTableHead.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
-  const { numSelected, selected, onCopyToNew } = props;
+  const { numSelected, selected, onCopyToNew, onExportCsv } = props;
 
   return (
     <Toolbar
@@ -204,8 +187,8 @@ function EnhancedTableToolbar(props) {
         </IconButton>
       </Tooltip>
 
-      <Tooltip title="Download list">
-        <IconButton>
+      <Tooltip title="Export CSV">
+        <IconButton onClick={onExportCsv}>
           <DownloadIcon />
         </IconButton>
       </Tooltip>
@@ -217,6 +200,7 @@ EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired,
   selected: PropTypes.array.isRequired,
   onCopyToNew: PropTypes.func.isRequired,
+  onExportCsv: PropTypes.func.isRequired,
 };
 
 
@@ -291,9 +275,6 @@ export default function AssetMasterTable({
     setSelected(newSelected);
   };
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
@@ -347,6 +328,33 @@ export default function AssetMasterTable({
       );
   }, [rows, order, orderBy, page, rowsPerPage]);
 
+
+  const handleExportCsv = () => {
+    const header = headCells.map((c) => `"${c.label}"`).join(',');
+    const body = rows
+      .map((row) =>
+        headCells
+          .map((c) => {
+            const val = row[c.id] ?? '';
+            return `"${String(val).replace(/"/g, '""')}"`;
+          })
+          .join(',')
+      )
+      .join('\n');
+
+    const csv = `${header}\n${body}`;
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'asset_master.csv');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
+
   if(loading){
     return (
       <Box sx={{ width: '100%',  padding: 2}}>
@@ -373,6 +381,7 @@ export default function AssetMasterTable({
           numSelected={selected.length} 
           selected={selected}
           onCopyToNew = {handleClickCopytoNew}
+          onExportCsv={handleExportCsv}
         />
         <TableContainer>
           <Table

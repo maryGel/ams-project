@@ -10,7 +10,7 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 //import display tabs fields
-import JOLineItems from '../JOFolder/joLineItems';
+import JOLineItems from '../jobOrder/joLineItems';
 
 
 function TabPanel(props) {

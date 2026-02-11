@@ -10,12 +10,12 @@ import Box from '@mui/material/Box';
 
 // TabPanel component to render the content of each tab
 import AssetMasterTile from '../a_assetMaster/assetMaster/assetMasterTile'
-import AssetMovement from '../a_Movement/pages/assetMoveTile';
+import AssetMovement from '../a_Movement/custom Utils/assetMoveTile';
 import Depreciation from '../a_Depreciation/assetDepRun';
 import AssetReports from '../a_Reports/assetReport';
 import PhysicalCount from '../a_Physical/assetPhysicalCount';
-import AssetUtilities from '../a_SystemSetup/assetUtilities';
 import DashboardPage from '../a_Dash/dashBoardPage';
+import SystemSetup from '../a_SystemSetup/systemSetupTile';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -105,7 +105,7 @@ export default function FullWidthTabs({
           <Tab label="DEPRECIATION" {...a11yProps(3)} />
           <Tab label="REPORTS" {...a11yProps(4)} />
           <Tab label="PHYSICAL COUNT" {...a11yProps(5)} />
-          <Tab label="UTILITIES" {...a11yProps(6)} />
+          <Tab label="SYSTEM SETUP" {...a11yProps(6)} />
         </Tabs>
       </AppBar>
       <TabPanel value={value} index={0} dir={theme.direction}>
@@ -130,7 +130,7 @@ export default function FullWidthTabs({
         <PhysicalCount/>
       </TabPanel>
       <TabPanel value={value} index={6} dir={theme.direction}>
-        <AssetUtilities/>
+        <SystemSetup/>
       </TabPanel>
     </Box>
   );

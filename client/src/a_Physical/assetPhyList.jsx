@@ -8,7 +8,7 @@ export const assetPhyList= [
   },
   {
     id: 2,
-    title: 'PhysicalCount',
+    title: 'Physical Count',
     link: '/assetPhysical/physicalCount',
     imgSrc: '/icons/menu_icons/auditing.png',
     headerTitle: 'Asset Count',

@@ -30,7 +30,6 @@ router.get('/assetMasterlist', (req, res) => {
 // Get a single asset by facNo
 router.get('/assetMasterlist/:facNo', (req, res) => {
   const { facNo } = req.params;
-  console.log(`fromRoute.FacN0: ${facNo}`)
   // Decode URL parameter and clean it
   const decodedFacNo = decodeURIComponent(facNo);
   const cleanFacNo = decodedFacNo
@@ -38,7 +37,6 @@ router.get('/assetMasterlist/:facNo', (req, res) => {
     .replace(/\s/g, '') // Remove normal whitespace
     .toUpperCase();
   
-  console.log(`fromRoute.cleanFacNO: ${cleanFacNo}`)
   
   const sqlSelect = 'SELECT * FROM itemlist WHERE REPLACE(REPLACE(UPPER(FacNO), CHAR(160), ""), " ", "") = ?';
   
@@ -159,10 +157,10 @@ router.post('/createAsset', (req, res) => {
     Remarks || null,
   ];
 
-  console.log('SQL Insert:', sqlInsert);
-  console.log('Number of columns in SQL:', sqlInsert.match(/\(([^)]+)\)/)[1].split(',').length);
-  console.log('Number of values:', values.length);
-  console.log('Values:', values);
+  // console.log('SQL Insert:', sqlInsert);
+  // console.log('Number of columns in SQL:', sqlInsert.match(/\(([^)]+)\)/)[1].split(',').length);
+  // console.log('Number of values:', values.length);
+  // console.log('Values:', values);
 
   db.getConnection((err, connection) => {
     if (err) {
@@ -282,9 +280,9 @@ router.put('/updateAsset/:facNo', (req, res) => {
   ];
 
 
-  const m = sqlUpdate.match(/\(([^)]+)\)/);
-  console.log('Number of columns in SQL:', m );
-  console.log('PUT /updateAsset', facNo);
+  // const m = sqlUpdate.match(/\(([^)]+)\)/);
+  // console.log('Number of columns in SQL:', m );
+  // console.log('PUT /updateAsset', facNo);
 
 
 

@@ -15,6 +15,7 @@ import { Delete, Save, Undo, Add, Edit } from '@mui/icons-material';
 
 
 
+
 export default function JOLineItems() {
   // State management
   const [selectionModel, setSelectionModel] = useState([]);
@@ -420,30 +421,30 @@ export default function JOLineItems() {
     isNew: true,
   };
 
-  setRows(prev => [newRow, ...prev]);
-  setSelectionModel([newId]);
-  setEditingRowId(newId);
+    setRows(prev => [newRow, ...prev]);
+    setSelectionModel([newId]);
+    setEditingRowId(newId);
 
-  // 🔥 THIS IS THE KEY PART
-  setEditedRows(prev => ({
-    ...prev,
-    [newId]: {
-      oldRow: newRow,
-      newRow: newRow,
-    },
+    // 🔥 THIS IS THE KEY PART
+    setEditedRows(prev => ({
+      ...prev,
+      [newId]: {
+        oldRow: newRow,
+        newRow: newRow,
+      },
   }));
 
-  // Put row into edit mode immediately
-  setRowModesModel(prev => ({
-    ...prev,
-    [newId]: { mode: GridRowModes.Edit },
-  }));
+    // Put row into edit mode immediately
+    setRowModesModel(prev => ({
+      ...prev,
+      [newId]: { mode: GridRowModes.Edit },
+    }));
 
-  setSnackbar({
-    open: true,
-    message: 'New row added. Start editing!',
-    severity: 'info'
-  });
+    setSnackbar({
+      open: true,
+      message: 'New row added. Start editing!',
+      severity: 'info'
+    });
 };
 
 const handleCellClick = (params) => {

@@ -1,8 +1,8 @@
-import React, {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import {headerTitleMap} from './headerTitleMap'
 import HomeIcon from '@mui/icons-material/Home';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import { Box, InputBase, IconButton } from '@mui/material';
+import { Box, InputBase, Menu, MenuItem } from '@mui/material';
 
 
 // MUI Icons
@@ -13,13 +13,16 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 
-function Header({tabPaths = []}) {
+function Header({tabPaths = [], username , onLogout}) {
 
   const pagePath = useLocation();
   const currentPath = pagePath.pathname;
   const [isExpanded, setIsExpanded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const isHomeTab = tabPaths.includes(currentPath); //Determine if we are on a "Home" tab
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const isMenuOpen = Boolean(anchorEl);
 
   const toggleSearch = () => {
     setIsExpanded(!isExpanded);
@@ -40,9 +43,11 @@ function Header({tabPaths = []}) {
     if (currentPath.startsWith('/assetFolder/createAsset')) {
       return '/assetFolder/pages/assetMasterList';
     } 
-
     if (currentPath.startsWith('/assetMovement/pages/JOFormPage')) {
       return '/Home/Movement';
+    }
+    if (currentPath.startsWith('/systemSetup/user/userProfile')) {
+      return '/Home/SystemSetup';
     }
     
     if (currentPath === `/assetFolder/pages/assetMasterList` || `/assetFolder/pages/referentialPage`) {
@@ -54,12 +59,16 @@ function Header({tabPaths = []}) {
   }
 
   const backPath = getBackPath();
+  const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
+  const handleMenuClose = () => setAnchorEl(null);
+  const handleLogout = () => {
+    handleMenuClose();
+    if (onLogout) onLogout();
+  };
 
   return (
     <>
-      <header
-        className="flex items-center p-2 pl-6 tracking-wider text-black bg-blue-100"      
-      >
+      <header className="flex items-center p-2 pl-6 tracking-wider text-black bg-blue-100" >
 
           <button className='transition-transform duration-150 active:translate-y-0.5 hover:scale-x-95'> 
             {isHomeTab? (
@@ -77,26 +86,19 @@ function Header({tabPaths = []}) {
             )}
           </button>
 
-
         <h1>{headerTitle}</h1>
         
-        <div
-          className="flex ml-auto mr-6 space-x-6 place-items-center"
-        >
+        <div className="flex ml-auto mr-6 space-x-6 place-items-center">
           <Box
-            // Triggers when mouse enters the area
             onMouseEnter={() => setIsHovered(true)}
-            // Triggers when mouse leaves the area
-            onMouseLeave={() => setIsHovered(false)}
-            placeholder="Search"
-          
+            onMouseLeave={() => setIsHovered(false)}  
+            placeholder="Search"          
             sx={{
               display: 'flex',
               alignItems: 'center',
               backgroundColor: 'white',
               padding: '0.1rem 0.5rem',
               borderRadius: '10rem',
-              // Expansion logic
               width: isHovered ? '30rem' : '5rem', 
               transition: 'width 0.4s ease-in-out',
               overflow: 'hidden',
@@ -113,10 +115,8 @@ function Header({tabPaths = []}) {
               sx={{
                 ml: 1,
                 flex: 1,
-                // Fade text in/out
                 opacity: isHovered ? 1 : 0,
                 transition: 'opacity 0.3s ease-in-out',
-                // Ensures the input doesn't take up space when hidden
                 visibility: isHovered ? 'visible' : 'hidden'
               }}
             />
@@ -131,11 +131,24 @@ function Header({tabPaths = []}) {
               sx ={{ fontSize: 30, marginRight: 1  }}
             />
           </button>
-          <button>
-            <AccountCircleIcon
-              sx ={{ fontSize: 30, marginRight: 1  }}
-            />
-          </button>
+          <div  className="flex items-center gap-2">
+            <button onClick={handleMenuOpen} aria-controls={isMenuOpen ? 'account-menu' : undefined} aria-haspopup="true">
+              <AccountCircleIcon
+                sx ={{ fontSize: 30, marginRight: 1  }}
+              />
+            </button>
+            <span>Hi, {username}! </span>
+             <Menu
+              id="account-menu"
+              anchorEl={anchorEl}
+              open={isMenuOpen}
+              onClose={handleMenuClose}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+              <MenuItem onClick={handleLogout}>Logout</MenuItem>
+            </Menu>
+          </div>
         </div>
       </header>
     </>    
