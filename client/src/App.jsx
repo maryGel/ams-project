@@ -18,7 +18,7 @@ import JOFormPage from './a_Movement/pages/jobOrderPage.jsx';
 
 
 // System Setup Pages
-import UserAccessPage from './a_SystemSetup/userProfile/userAccessPage.jsx';
+import UserAccessPage from './a_SystemSetup/pages/userAccessPage.jsx';
 
 // To initialize the header title based on the current page
   const getInitialTitle = () => {

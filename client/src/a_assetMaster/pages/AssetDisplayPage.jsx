@@ -2,10 +2,10 @@ import {useState, useEffect} from 'react'
 
 // MUI
 import {Snackbar, Alert} from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Cancel';
-import EditIcon from '@mui/icons-material/Edit';
 import { useAssetMasterData } from '../../hooks/assetMasterHooks';
+
+// Custom Utils
+import { CustomBtn } from '../../Utils/groupbtns';
 // Custom Hooks
 import { useRefUom } from '../../hooks/refUom'; // import the refUnit data
 import { useSearchParams } from 'react-router-dom';
@@ -146,38 +146,34 @@ export default function AssetMasterDisplay({}){
           </Snackbar>
 
           {/* ... B u t t o n s ... */}
-          
-          {/* Edit Button */}          
-          <div className='flex justify-end gap-2 mt-8 mb-3'>
+      
+          <div className='flex justify-end gap-2 mt-8 mb-3'>            
             
             {/* SAVE BUTTON */}
             {isEditing && (
-              <button
-                className='flex justify-center pt-1 pb-1 pl-2 pr-3 text-white transition-transform duration-200 ease-in-out bg-green-500 border rounded-full shadow-black border-spacing-1 active:scale-95 hover:bg-green-700'
+              <CustomBtn
+                variant='saveBtn'
+                iconType='save'
                 title='Save Changes'
-                color="primary"
-                sx={{ border: 1 }}
                 onClick={handleSave}
               >
-                <SaveIcon />
                 Save
-              </button>
+              </CustomBtn>
             )}
             
             {/* EDIT and CANCEL BUTTON */}
-              <button
-                className= {`flex justify-center pt-1 pb-1 pl-2 pr-3 text-white transition-transform duration-200 ease-in-out border rounded-full
-                  ${isEditing? 'bg-gray-600  hover:bg-gray-400 hover:text-white' : 'bg-blue-800 text-white hover:bg-blue-600' }  
-                  border-slate-300 active:scale-95`}
+              <CustomBtn
+                variant= {`${isEditing? 'cancelBtn' : 'editBtn' }`}
+                iconType={`${isEditing? 'cancel' : 'edit'}`}
                 title={isEditing? 'Cancel Edit' : 'Edit Asset'}
                 type="button" // Use this to prevent from submission
                 onClick={isEditing? cancelEdit : handleEditButton}
               >
                 {isEditing ? 
-                  <><CancelIcon size ="small"/> <span>Cancel </span></>:
-                  <><EditIcon size ="small"/> <span>Edit</span></>
+                  <><span>Cancel </span></>:
+                  <><span>Edit</span></>
                 }
-              </button>
+              </CustomBtn>
           </div>
 
 

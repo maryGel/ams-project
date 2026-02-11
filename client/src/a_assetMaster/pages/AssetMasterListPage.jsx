@@ -7,6 +7,9 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import { createFilterOptions } from '@mui/material/Autocomplete';
 
+//Custom Utils
+import { CustomBtn } from '../../Utils/groupbtns';
+
 // Component/pages import
 import AssetMasterTable from '../assetMaster/assetMasterTable'
 import { useAssetMasterData } from '../../hooks/assetMasterHooks';
@@ -264,24 +267,22 @@ function AssetMasterListPage({ useProps, setHeaderTitle, setNavLink }) {
       {/* ...  B u t t o n s ... */}
       
 
-      <div className='flex w-full h-auto p-2 pr-5 ml-auto bg-gray-100 place-content-end'>
+      <div className='flex w-full h-auto gap-2 p-2 pr-5 ml-auto bg-gray-100 place-content-end'>
         {/* Asset Group List Table to be implemented here */}
-        <button 
-          className='pt-1 pb-1 pl-2 pr-3 mr-2 text-white transition-transform duration-200 ease-in-out bg-green-500 border rounded-full shadow-black border-spacing-1 active:scale-95 hover:text-gray-600'
+        <CustomBtn
+          variant='goBtn'
+          iconType='go'
           onClick={handleGoClick} 
-          type="button"
         >
-          <CheckCircleIcon sx={{marginX: .5}} />  
           Go  
-        </button>
-        <button 
-          className='pt-1 pb-1 pl-2 pr-3 mr-2 text-gray-600 transition-transform duration-200 ease-in-out border rounded-full border-slate-300 active:scale-95 hover:bg-gray-600 hover:text-white '
+        </CustomBtn>
+        <CustomBtn
+          variant='clearBtn'
+          iconType='clear'
           onClick={handleClearClick}
-          type="button" // Use this to prevent form submission
         >
-          <ClearAllIcon/>
           Clear   
-        </button>
+        </CustomBtn>
       </div>
 
        {/* Filter table */}

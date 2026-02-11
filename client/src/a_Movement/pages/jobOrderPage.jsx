@@ -3,19 +3,13 @@ import { useState } from 'react';
 // MUI Components
 import { Box, Autocomplete, TextField, TextareaAutosize, ThemeProvider } from '@mui/material';
 
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Cancel';
-import EditIcon from '@mui/icons-material/Edit';
-import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
-import PrintIcon from '@mui/icons-material/Print';
-import AddIcon from '@mui/icons-material/Add';
-
 // Components
 import AssetMoveTabs from '../custom Utils/tableTabs';
 
 // Custom Utils
 import { getAutocompleteSx } from '../../Utils/autocompleteStyles';  
 import { customTheme } from '../../Utils/customTable';
+import { CustomBtn } from '../../Utils/groupbtns';
 
 // Custom Hooks
 import { useRefDepartment } from '../../hooks/refDepartment'; 
@@ -37,60 +31,50 @@ export default function JOFormPage() {
         
         {/* Save */}
         {isEditing && (
-          <button
-            className='flex justify-center pt-1 pb-1 pl-2 pr-3 text-white transition-transform duration-200 ease-in-out bg-green-500 border rounded-full shadow-black border-spacing-1 active:scale-95 hover:bg-green-700'
+          <CustomBtn
+            variant='saveBtn'
+            iconType='save'
             title='Save Changes'
-            color="primary"
-            sx={{ border: 1 }}
             // onClick={handleSave}
           >
-            <SaveIcon />
             Save
-          </button>
+          </CustomBtn>
         )}
         
         {/* Edit and Cancel */}
-          <button
-            className= {`flex justify-center pt-1 pb-1 pl-2 pr-3 text-white transition-transform duration-200 ease-in-out border rounded-full
-              ${isEditing? 'bg-gray-600  hover:bg-gray-400 hover:text-white' : 'bg-blue-800 text-white hover:bg-blue-600' }  
-              border-slate-300 active:scale-95`}
-            title={isEditing? 'Cancel Edit' : 'Edit Asset'}
-            type="button" // Use this to prevent from submission
+          <CustomBtn
+            variant= {`${isEditing? 'cancelBtn' : 'editBtn' }`}
+            iconType={`${isEditing? 'cancel' : 'edit'}`}
+            title={isEditing? 'Cancel Edit' : 'Enable Edit'}
             onClick={handleEditButton}
           >
             {isEditing ? 
-              <><CancelIcon size ="small"/> <span>Cancel </span></>:
-              <><EditIcon size ="small"/> <span>Edit</span></>
+              <><span>Cancel </span></>:
+              <><span>Edit</span></>
             }
-          </button>
+          </CustomBtn>
           {/*  Create , Post, and Preview */}
-          <button
-            className='flex justify-center pt-1 pb-1 pl-2 pr-3 text-gray-600 transition-transform duration-200 ease-in-out border rounded-full bg-slate-200 shadow-black border-spacing-1 active:scale-95 hover:text-gray-800'
-            title='Post this document'
-            color="primary"
-            sx={{ border: 1 }}
+          <CustomBtn
+            variant='createBtn'
+            iconType='add'
+            title='Create New JO'
           >           
-            <AddIcon />
             Create
-          </button>
-          <button
-            className='flex justify-center pt-1 pb-1 pl-2 pr-3 text-black transition-transform duration-200 ease-in-out border rounded-full bg-slate-400 shadow-black border-spacing-1 active:scale-95 hover:text-green-700 hover:bg-slate-200'
+          </CustomBtn>
+          <CustomBtn
+            variant='postBtn'
+            iconType='post'
             title='Post this document'
-            color="primary"
-            sx={{ border: 1 }}
           >           
-            <AssignmentTurnedInIcon />
             Post
-          </button>
-          <button
-            className='flex justify-center pt-1 pb-1 pl-2 pr-3 text-gray-700 transition-transform duration-200 ease-in-out border rounded-full bg-slate-200 shadow-black border-spacing-1 active:scale-95 hover:text-gray-500'
+          </CustomBtn>
+          <CustomBtn
+            variant='printBtn'
+            iconType='print'
             title='Preview and Print'
-            color="primary"
-            sx={{ border: 1 }}
           >           
-            <PrintIcon />
             Preview
-          </button>
+          </CustomBtn>
       </div>
           
       <div className='p-6 my-4 bg-gray-100 rounded-lg shadow-lg mx-14'>

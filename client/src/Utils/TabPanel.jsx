@@ -15,7 +15,7 @@ import Depreciation from '../a_Depreciation/assetDepRun';
 import AssetReports from '../a_Reports/assetReport';
 import PhysicalCount from '../a_Physical/assetPhysicalCount';
 import DashboardPage from '../a_Dash/dashBoardPage';
-import SystemSetup from '../a_SystemSetup/systemSetupTile';
+import SystemSetup from '../a_SystemSetup/custom Utils/systemSetupTile';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
