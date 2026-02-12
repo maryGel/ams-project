@@ -17,6 +17,7 @@ import refItemClassRoute from './routes/refClassRoute.js';
 import refLocationRoute from './routes/refLocationRoute.js';
 import refDeptRoute from './routes/refDeptRoute.js';
 import authRoute from './routes/authRoute.js';
+import usersRoute from './routes/usersRoute.js';
 
 // Configure CORS
 const allowedOrigins = [ 
@@ -168,6 +169,7 @@ app.get('/health', (req, res) => {
 
 // API routes
 app.use('/login', authRoute);
+app.use('/users', usersRoute);
 app.use('/itemlist', useItemlist);
 app.use('/referentials', referentialsRoute);
 app.use('/api/refCat', refCategoryRoute);

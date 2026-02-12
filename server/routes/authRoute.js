@@ -1,9 +1,14 @@
 import express from "express";
 import { db } from "../server.js";
 import bcrypt from "bcrypt";
+import jwt from 'jsonwebtoken';
+
 
 const router = express.Router();
+const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
 
+
+// ... Login ...
 router.post("/", (req, res) => {
   const { user, password } = req.body;
 
@@ -66,10 +71,22 @@ router.post("/", (req, res) => {
       });
     }
 
+    // 3) Generate JWT
+    const token = jwt.sign(
+      {
+        username: dbUser.user,
+        isAdmin: dbUser.Admin === 1
+      },
+      JWT_SECRET,
+      { expiresIn: "1h"}
+    );
+
     res.json({
       success: true,
       message: "Login successful",
       username: { username: dbUser.user },
+      isAdmin: dbUser.Admin === 1,
+      token,
     });
   });
 });

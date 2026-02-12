@@ -1,19 +1,20 @@
 import express from 'express';
 import { db } from '../db.js';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
+
 
 import { requireAuth, requireAdmin } from'../middleware/auth.js';
 
 const router = express.Router();
 
 
-
 // .... Gell all Users , Pagination + Search ....
-router.get('/users', requireAuth, requireAdmin, (req, res) => {
+router.get('/', requireAuth, requireAdmin, (req, res) => {
 
   const q = (req.query.q || '').trim();
-  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
-  const limit = Math.max(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
+  const page = Math.max(parseInt(req.query.page, 10) || 1, 1); //TODO: apply pagination to the mdoules
+  const parsed = parseInt(req.query.limit, 10);
+  const limit = Math.min(Math.max(parsed || 20, 1), 100);
   const offset = (page - 1) * limit;
 
   const where = q ? ` WHERE user LIKE ? OR fname LIKE ? OR lname LIKE ? OR xDept LIKE ?` : '';
@@ -39,11 +40,7 @@ router.get('/users', requireAuth, requireAdmin, (req, res) => {
     LIMIT ? OFFSET ?
   `;
 
-  const countSql = `
-    SELECT COUNT(*) as total 
-    FROM user0000inv  
-    ${where}
-  `;
+  const countSql = `SELECT COUNT(*) as total FROM user0000inv  ${where}`;
 
   db.getConnection((err, connection) => {
 
@@ -71,7 +68,7 @@ router.get('/users', requireAuth, requireAdmin, (req, res) => {
 });
 
 // .... Get single user by username ....
-router.get('/users/:user', (req, res) => {
+router.get('/:user', (req, res) => {
   const sql = `
     SELECT 
       user,
@@ -111,7 +108,7 @@ router.get('/users/:user', (req, res) => {
 
 
 // .... Create new user ....
-router.post('/users', requireAuth, requireAdmin, async (req, res) => {
+router.post('/', requireAuth, requireAdmin, async (req, res) => {
   const {
     user, password, fname, mname, lname, xPosi, xDept,
     Admin, Log, xLevel, Approver, xSection,
@@ -122,7 +119,7 @@ router.post('/users', requireAuth, requireAdmin, async (req, res) => {
     return res.status(400).json({ error: 'Username and password are required' });
   }
   
-  const passwordHash = await bcrypt.has(password, 10);
+  const passwordHash = await bcrypt.hash(password, 10);
 
   const checkSql = 'SELECT user FROM user0000inv WHERE user = ?';
   const insertSql = `
@@ -160,7 +157,7 @@ router.post('/users', requireAuth, requireAdmin, async (req, res) => {
 
 
 // .... Update user ....
-router.put('/user/:user', requireAuth, requireAdmin, async (req, res) => {
+router.put('/:user', requireAuth, requireAdmin, async (req, res) => {
   const {
     password, fname, mname, lname, xPosi, xDept,
     Admin, Log, xLevel, Approver, xSection, MULTI_DEPT, MULTI_APP
@@ -212,13 +209,13 @@ router.put('/user/:user', requireAuth, requireAdmin, async (req, res) => {
 });
 
 // .... Delete user ....
-router.delete('/users/:user', requireAuth, requireAdmin, (req, res) => {
+router.delete('/:user', requireAuth, requireAdmin, (req, res) => {
   const sql = 'DELETE FROM user0000inv WHERE user = ?';
 
   db.getConnection((err, connection) => {
     if (err) return res.status(500).json({ error: 'Database connection error' });
 
-    connection.query(sql, [req.params.user], (error, result) => {
+    connection.query(sql, (error, result) => {
       connection.release();
       if (error) return res.status(500).json({ error: 'Error deleting user' });
       if (result.affectedRows === 0) return res.status(404).json({ error: 'User not found' });
