@@ -19,6 +19,7 @@ export default function UseInfo(){
                         variant="outlined"
                         size="small"
                         className='w-52'
+                        type="password"
                     />
                 </div>
                 <div className='flex gap-2'>

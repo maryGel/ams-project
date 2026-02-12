@@ -6,7 +6,7 @@ const router = express.Router();
 //Get all itemlist
 router.get('/assetMasterlist', (req, res) => {
 
-  const sqlSelect = 'SELECT * FROM itemlist';
+  const sqlSelect = 'SELECT * FROM itemlist';  //TODO implement pagination
     
   db.getConnection((err, connection) => {
     if (err) {

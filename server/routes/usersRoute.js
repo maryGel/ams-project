@@ -68,7 +68,7 @@ router.get('/', requireAuth, requireAdmin, (req, res) => {
 });
 
 // .... Get single user by username ....
-router.get('/:user', (req, res) => {
+router.get('/:user', requireAuth, requireAdmin, (req, res) => {
   const sql = `
     SELECT 
       user,
@@ -215,7 +215,7 @@ router.delete('/:user', requireAuth, requireAdmin, (req, res) => {
   db.getConnection((err, connection) => {
     if (err) return res.status(500).json({ error: 'Database connection error' });
 
-    connection.query(sql, (error, result) => {
+    connection.query(sql, [req.params.user], (error, result) => {
       connection.release();
       if (error) return res.status(500).json({ error: 'Error deleting user' });
       if (result.affectedRows === 0) return res.status(404).json({ error: 'User not found' });
