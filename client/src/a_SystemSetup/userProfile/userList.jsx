@@ -1,62 +1,91 @@
+import { useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-
+import { Box } from '@mui/material';
 
 const columns = [
-    { field: 'id', headerName: 'ID', width: 70},
-    { field: 'username', headerName: 'Username', width: 130 },
-    { field: 'auth', headerName: 'Access Level', width: 200 },
-]
-
-const rows = [
-    { id: 1, username: 'Drei', auth: 'Admin' },
-    { id: 2, username: 'Gel', auth: 'User' },
-    { id: 3, username: 'John Rey', auth: 'User' },
-    { id: 4, username: 'Miguel', auth: 'User' },
-    { id: 5, username: 'Rafael', auth: 'User' },
-    { id: 6, username: 'Maria', auth: 'User' },
-    { id: 7, username: 'Ana', auth: 'User' },
-    { id: 8, username: 'Carlos', auth: 'User' },
-    { id: 9, username: 'Luis', auth: 'User' },
-    { id: 10, username: 'Elena', auth: 'User' },
-    { id: 11, username: 'Diego', auth: 'User' },
-    { id: 12, username: 'Sofia', auth: 'User' },
-    { id: 13, username: 'Andres', auth: 'User' },
-    { id: 14, username: 'Isabella', auth: 'User' },
-    { id: 15, username: 'Mateo ', auth: 'User' },
-    { id: 16, username: 'Gel', auth: 'User' },
+  { field: 'user', headerName: 'Username', width: 100 },
+  { field: 'fname', headerName: 'First Name', width: 130 },
+  { field: 'lname', headerName: 'Last Name', width: 130 },
+  { field: 'xlevel', headerName: 'Access Level', width: 200 },
 ];
 
-export default function UseList(){
+export default function UseList({
+  users,
+  page,
+  setPage,
+  limit,
+  total,
+  loading,
+  setSelectedUser,
+  selectedUser,
+  isEditing,
+  // Optional: Add pageSize change handler
+  onPageSizeChange
+}) {
+  
+  // Remove the useEffect that calls getUsers - this is now handled by the hook's own useEffect
+  // The parent hook already has: useEffect(() => { getUsers(page, search); }, [page, search]);
 
-    return (
-        <div className='w-full h-96'>
-            <DataGrid
-                rows={rows}
-                columns={columns}
-                pageSize={5}
-                rowsPerPageOptions={[5]}
-                hideFooterSelectedRowCount
+  const rows = users.map((u) => ({
+    id: u.user, // Use username as unique ID
+    ...u,
+  }));
 
-                pagination
-                pageSizeOptions={[5, 10, 20, 50]}
-                initialState={{
-                    pagination: {
-                    paginationModel: { pageSize: 10 },
-                    },
-                    sorting: {
-                    sortModel: [{ field: 'id', sort: 'asc' }],
-                    },
-                }}
+  const handleRowClick = (params) => {
+      console.log('[userList] Row clicked:', params.row); // Add this
+      console.log('[userList] Username:', params.row.user); // Add this
+      setSelectedUser(params.row.user); // Make sure it's params.row.user, not params.row
+  };
 
-                // styles
-                sx ={{
-                    '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': {
-                    outline: 'none',
-                    },
-                }}
-            />
-            
-        </div>
-    )
+  const handlePaginationModelChange = (newModel) => {
+    setPage(newModel.page + 1); // Convert from 0-index to 1-index
+    if (onPageSizeChange && newModel.pageSize !== limit) {
+      onPageSizeChange(newModel.pageSize);
+    }
+  };
 
-};
+  return (
+    <div className='w-full h-[500px]'>
+      <Box
+        sx={{
+          pointerEvents: isEditing ? 'none' : 'auto',
+          opacity: isEditing ? 0.6 : 1,
+          height: '100%',
+          width: '100%'
+        }}
+      >
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          rowCount={total}
+          loading={loading}
+          paginationMode="server"
+          pageSizeOptions={[5, 10, 20, 50]}
+          paginationModel={{
+            page: page - 1, // Convert to 0-index for DataGrid
+            pageSize: limit,
+          }}
+          onPaginationModelChange={handlePaginationModelChange}
+          onRowClick={handleRowClick}
+          rowSelectionModel={selectedUser ? [selectedUser.user] : []}
+          disableRowSelectionOnClick={isEditing}
+          hideFooterSelectedRowCount
+          sx={{
+            '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': {
+              outline: 'none',
+            },
+            '& .MuiDataGrid-row.Mui-selected': {
+              backgroundColor: 'rgba(25, 118, 210, 0.08)',
+              '&:hover': {
+                backgroundColor: 'rgba(25, 118, 210, 0.12)',
+              }
+            },
+            '& .MuiDataGrid-row': {
+              cursor: isEditing ? 'default' : 'pointer',
+            },
+          }}
+        />
+      </Box>
+    </div>
+  );
+}

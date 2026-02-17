@@ -4,7 +4,7 @@ import { db } from '../server.js';
 const router = express.Router();
 
 //Get all itemlist
-router.get('/assetMasterlist', (req, res) => {
+router.get('/', (req, res) => {
 
   const sqlSelect = 'SELECT * FROM itemlist';  //TODO implement pagination
     
@@ -28,7 +28,7 @@ router.get('/assetMasterlist', (req, res) => {
 })
 
 // Get a single asset by facNo
-router.get('/assetMasterlist/:facNo', (req, res) => {
+router.get('/:facNo', (req, res) => {
   const { facNo } = req.params;
   // Decode URL parameter and clean it
   const decodedFacNo = decodeURIComponent(facNo);
@@ -60,7 +60,7 @@ router.get('/assetMasterlist/:facNo', (req, res) => {
   });
 });
 
-router.post('/createAsset', (req, res) => {
+router.post('/t', (req, res) => {
 
   const {
     FacNO,
@@ -190,7 +190,7 @@ router.post('/createAsset', (req, res) => {
 });
 
 
-router.put('/updateAsset/:facNo', (req, res) => {
+router.put('/:facNo', (req, res) => {
 
   const { facNo } = req.params;
 

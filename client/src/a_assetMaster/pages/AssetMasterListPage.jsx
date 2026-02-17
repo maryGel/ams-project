@@ -3,8 +3,6 @@ import { useState, useMemo } from 'react';
 // MUI import
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ClearAllIcon from '@mui/icons-material/ClearAll';
 import { createFilterOptions } from '@mui/material/Autocomplete';
 
 //Custom Utils
@@ -268,7 +266,6 @@ function AssetMasterListPage({ useProps, setHeaderTitle, setNavLink }) {
       
 
       <div className='flex w-full h-auto gap-2 p-2 pr-5 ml-auto bg-gray-100 place-content-end'>
-        {/* Asset Group List Table to be implemented here */}
         <CustomBtn
           variant='goBtn'
           iconType='go'

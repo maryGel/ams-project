@@ -105,9 +105,7 @@ export const generateNextFacNO = async (xCode, existingAssets = []) => {
     return '';
   }
 
-  try {
-    console.log('Generating FacNO for xCode:', xCode);
-    
+  try {  
     // Find the highest existing number for this xCode
     const existingAssetsWithPrefix = existingAssets.filter(asset => 
       asset.FacNO && asset.FacNO.startsWith(`${xCode}-`)

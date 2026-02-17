@@ -34,11 +34,15 @@ function LoginPage({setHeaderTitle, setUsername}) {
         password: password.trim(),
       });
 
+      console.log('Full response:', res);
+      console.log('Response data:', res.data);
+      console.log('Token from response:', res.data.token);
       if (res.data.success) {
 
         localStorage.setItem('isLoggedIn', 'true');
-
-        localStorage.setItem('username', localUsername.trim());
+        localStorage.setItem('token', res.data.token);
+        localStorage.setItem('Admin', res.data.Admin === 1 );
+        localStorage.setItem('user', localUsername.trim());
         if (setUsername) setUsername(localUsername.trim());  // Store user data in localStorage 
         navigate('/Home');
       } else {

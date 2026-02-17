@@ -100,7 +100,7 @@ export const useAssetMasterData = () => {
     try{
       dispatch({type: 'LOADING'});
 
-      const res = await api.get('/itemlist/assetMasterlist', {
+      const res = await api.get('/itemlist', {
           params: { page: page + 1, pageSize: state.pageSize }
       });
       
@@ -140,7 +140,7 @@ export const useAssetMasterData = () => {
       dispatch({type: 'LOADING_SINGLE'});
 
       const cleanFacNo = facNo.replace(/\s/g,'').toUpperCase(); // Clean the facNo for API call
-      const res = await api.get(`/itemlist/assetMasterlist/${cleanFacNo}`)
+      const res = await api.get(`/itemlist/${cleanFacNo}`)
 
       dispatch({
         type: 'SET_SINGLE_ASSET',
@@ -167,7 +167,7 @@ export const useAssetMasterData = () => {
     try{
       dispatch({type: 'MUTATING'});
       
-      const res = await api.post('/itemlist/createAsset', payload)
+      const res = await api.post('/itemlist', payload)
       dispatch({
         type: 'ADD_ASSET',
         payload: { id: res.data.assetID, ...payload},
@@ -190,7 +190,7 @@ export const useAssetMasterData = () => {
     try{
       dispatch({ type: 'MUTATING'});
 
-      const res = await api.put(`/itemlist/updateAsset/${facNo}`, payload);
+      const res = await api.put(`/itemlist/${facNo}`, payload);
       dispatch({
         type: 'UPDATE_ASSET',
         payload: { FacNO: facNo, ...payload}

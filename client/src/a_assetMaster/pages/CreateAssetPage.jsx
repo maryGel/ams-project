@@ -120,7 +120,7 @@ export default function CreateAsset(setHeaderTitle) {
 
     try {
       // Find the highest existing number for this xCode
-      const response = await api.get('/itemlist/assetMasterlist');
+      const response = await api.get('/itemlist');
       const allAssets = response.data || [];
 
       const existingAssets = allAssets.filter(asset => 

@@ -8,6 +8,9 @@ export const api = axios.create({
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0'
   },
   withCredentials: true,
 });
@@ -16,6 +19,19 @@ export const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // console.log(`Making ${config.method?.toUpperCase()} request to: ${config.baseURL}${config.url}`);
+
+    if (config.method?.toLowerCase() === 'get') {
+      config.params = {
+        ...config.params,
+        _t: Date.now() // This ensures each request is unique
+      };
+    }
+    const token = localStorage.getItem('token')
+
+    if(token){
+      config.headers.Authorization = `Bearer ${token}`
+    }
+
     return config;
   },
   (error) => {

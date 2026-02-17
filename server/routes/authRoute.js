@@ -72,20 +72,19 @@ router.post("/", (req, res) => {
     }
 
     // 3) Generate JWT
-    const token = jwt.sign(
-      {
-        username: dbUser.user,
-        isAdmin: dbUser.Admin === 1
-      },
-      JWT_SECRET,
-      { expiresIn: "1h"}
-    );
-
+      const token = jwt.sign(
+        {
+          user: dbUser.user, // Use 'user' to match DB
+          Admin: dbUser.Admin === 1 // Use 'Admin' to match Middleware
+        },
+        JWT_SECRET,
+        { expiresIn: "1d" }
+      );
     res.json({
       success: true,
       message: "Login successful",
-      username: { username: dbUser.user },
-      isAdmin: dbUser.Admin === 1,
+      user: dbUser.user ,
+      Admin: dbUser.Admin === 1,
       token,
     });
   });

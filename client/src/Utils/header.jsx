@@ -54,7 +54,6 @@ function Header({tabPaths = [], username , onLogout}) {
       return '/Home/AssetMasterPage';
     } 
 
-
     return null; // Default case if no match
   }
 

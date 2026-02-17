@@ -16,6 +16,11 @@ export function requireAuth(req, res, next) {
 }
 
 export function requireAdmin(req, res, next) {
-  if (!req.user?.isAdmin) return res.status(403).json({ error: 'Forbidden' });
-  next();
+  // This will work whether req.user.Admin is 1 OR true
+  if (req.user && (req.user.Admin === 1 || req.user.Admin === true)) {
+    next();
+  } else {
+    console.log("Access Denied. Current user object:", req.user);
+    return res.status(403).json({ error: 'Forbidden' });
+  }
 }

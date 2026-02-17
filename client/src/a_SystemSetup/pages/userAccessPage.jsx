@@ -1,100 +1,301 @@
-import { useState } from 'react';
-
-// MUI Components
-import { Box, Autocomplete, TextField, TextareaAutosize, ThemeProvider } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { useEffect } from 'react';
+import { 
+  TextField, 
+  Snackbar, 
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button
+} from '@mui/material';
 
 // Custom Utils
 import { CustomBtn } from '../../Utils/groupbtns';
+import { useUsers } from '../../hooks/useUsers';
 
 // Components
 import UseList from '../userProfile/userList';
 import UserInfo from '../userProfile/userInfo';
 import PermissionTree from '../userProfile/permissionTree';
 
-
-export default function UserAccessPage(){  
-
-    const [ isEditing, setIsEditing ] = useState(false);
-
-    const handleEditButton = () => {
-      setIsEditing(prev => !prev)
-    }
-
-    return(
-      <div className='h-auto p-5 border rounded-lg bg-gray-50 m-7 border-spacing-1'>
-
-        {/* ... B u t t o n s ... */}
-        
-        {/* Edit */}          
-        <div className='flex items-center justify-between mb-4'>
-          <div className='ml-.5'>
-            <TextField
-              size="small"
-              placeholder="Search User"
-              className='w-56 bg-white rounded-md'
-              // value={query}
-              // onChange={(e) => setQuery(e.target.value)}
-              
-            />
-          </div>
-          
-          <div className='flex gap-2'>
-              {/* Save */}
-              {isEditing && (
-                <CustomBtn
-                  variant='saveBtn'
-                  iconType='save'
-                  title='Save Changes'
-                  // onClick={handleSave}
-                >
-                  Save
-                </CustomBtn>
-              )}
-              
-              {/* Edit and Cancel */}
-              <CustomBtn
-                variant={isEditing ? 'cancelBtn' : 'editBtn'}
-                iconType={isEditing ? 'cancel' : 'edit'}
-                title={isEditing? 'Cancel Edit' : 'Edit Asset'}
-                onClick={handleEditButton}
-              >
-                {isEditing ? 
-                  <><span>Cancel</span></>:
-                  <><span>Edit</span></>
-                }
-              </CustomBtn>
-              {/*  Create and Delete */}
-              <CustomBtn
-                variant='createBtn'
-                iconType='add'
-                title='Create new user'
-              >            
-                Create
-              </CustomBtn>
-              <CustomBtn
-                variant='deleteBtn'
-                iconType='delete'
-                title='Delete user'
-              >           
-                Delete
-              </CustomBtn>
-          </div>
-        </div>
-      
-            <div className='grid grid-cols-[35rem_1fr] border border-spacing-2 bg-white rounded-lg p-2 mb-4'>
-                <div className='p-2 '>
-                  <UseList/>
-                </div>
-                <div className='p-2 '>
-                    <UserInfo/>
-                </div>
-            </div>
-            <div>
-              <div>
-                    <PermissionTree/>
-                </div>
-            </div>
-      </div>
-    )
+// Prepare payload for API submission
+const formatUserData = (data) => {
+  return {
+    user: (data?.user || '').trim(),
+    password: data?.password || '',
+    fname: data?.fname || '',
+    mname: data?.mname || '',
+    lname: data?.lname || '',
+    xPosi: data?.xPosi || '',
+    xDept: data?.xDept || '',
+    Admin: data?.Admin ?? 0,
+    Log: data?.Log ?? 0,
+    xlevel: data?.xlevel || '',
+    Approver: data?.Approver ?? 0,
+    xSection: data?.xSection || '',
+    MULTI_DEPT: data?.MULTI_DEPT || '',
+    MULTI_APP: data?.MULTI_APP || ''
+  };
 };
+
+export default function UserAccessPage() {
+  const {
+    users,
+    selectedUser,
+    formData,
+    page,
+    setPage,
+    search,
+    setSearch,
+    limit,
+    total,
+    loading,
+    saving,
+    error,
+    
+    // UI State
+    isEditing,
+    isCreating,
+    hasUnsavedChanges,    // ← Now being used!
+    cancelDialogOpen,
+    saveDialogOpen,
+    snackbar,
+    
+    // Functions
+    setSelectedUser,
+    startCreate,
+    startEdit,
+    updateForm,
+    cancelEdit,
+    confirmCancel,
+    openSaveDialog,
+    closeSaveDialog,
+    closeCancelDialog,
+    closeSnackbar,
+    createUser,
+    updateUser,
+    deleteUser,
+  } = useUsers();
+
+  const handleEditButton = () => {
+    if (selectedUser) {
+      startEdit();
+    } else {
+      // You might want to show a snackbar here
+      console.log('Please select a user to edit');
+    }
+  };
+
+  const handleCreateButton = () => {
+    startCreate();
+  };
+
+  const handleDeleteButton = async () => {
+    if (!selectedUser) return;
+    
+    if (window.confirm(`Are you sure you want to delete user ${selectedUser.user}?`)) {
+      await deleteUser(selectedUser.user);
+    }
+  };
+
+  const handleConfirmSave = async () => {
+      closeSaveDialog();
+      
+      const payload = formatUserData(formData);
+      let result;
+    
+      try {
+          if (isCreating) {
+              result = await createUser(payload);
+          } else {
+              result = await updateUser(selectedUser.user, payload);
+          }
+
+          if (result && result.success) {
+              // DON'T call cancelEdit() here if your createUser/updateUser already dispatches CANCEL_EDIT
+              // cancelEdit();  // ← Remove this line if not needed
+          }
+      } catch (err) {
+          console.error("Save failed:", err);
+      }
+  };
+
+  // Optional: Warn user before closing tab with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  return (
+    <div className='h-auto p-5 border rounded-lg bg-gray-50 m-7 border-spacing-1'>
+      {/* Header with Search and Buttons */}
+      <div className='flex items-center justify-between mb-4'>
+        <div className='ml-.5'>
+          <TextField
+            label="Search"
+            size="small"
+            className='w-56 bg-white rounded-md'
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        <div className='flex gap-2'>
+          {isEditing && (
+            <CustomBtn
+              variant='saveBtn'
+              iconType='save'
+              title='Save Changes'
+              onClick={openSaveDialog}
+              disabled={saving}
+            >
+              {saving ? 'Saving...' : 'Save'}
+            </CustomBtn>
+          )}
+
+          {(selectedUser || isCreating) && (
+            <CustomBtn
+              variant={isEditing ? 'cancelBtn' : 'editBtn'}
+              iconType={isEditing ? 'cancel' : 'edit'}
+              title={isEditing ? 'Cancel Edit' : 'Edit user'}
+              onClick={isEditing ? cancelEdit : handleEditButton}
+              disabled={saving}
+            >
+              {isEditing ? 'Cancel' : 'Edit'}
+            </CustomBtn>
+          )}
+
+          {isEditing && !isCreating && (
+            <CustomBtn
+              variant='deleteBtn'
+              iconType='delete'
+              title='Delete user'
+              onClick={handleDeleteButton}
+              disabled={saving}
+            >
+              Delete
+            </CustomBtn>
+          )}
+
+          <CustomBtn
+            variant='createBtn'
+            iconType='add'
+            title='Create new user'
+            onClick={handleCreateButton}
+            disabled={isEditing || saving}
+          >
+            Create
+          </CustomBtn>
+        </div>
+      </div>
+
+      {/* Main Content Grid */}
+      <div className='grid grid-cols-[35rem_1fr] border border-spacing-2 bg-white rounded-lg p-2 mb-4'>
+        <div className='p-2'>
+          <UseList
+            users={users}
+            page={page}
+            setPage={setPage}
+            limit={limit}
+            total={total}
+            loading={loading}
+            setSelectedUser={setSelectedUser}
+            selectedUser={selectedUser}
+            isEditing={isEditing}
+          />
+        </div>
+        <div className='p-2'>
+          <UserInfo 
+            userData={formData}
+            isEditing={isEditing}
+            onUserChange={updateForm}
+            isCreating={isCreating}
+          />
+        </div>
+      </div>
+
+      <div>
+        <PermissionTree />
+      </div>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={closeSnackbar}
+      >
+        <Alert severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
+      {/* Cancel Dialog - Now using hasUnsavedChanges from reducer */}
+      <Dialog
+        open={cancelDialogOpen}
+        onClose={closeCancelDialog}
+        aria-labelledby="cancel-dialog-title"
+      >
+        <DialogTitle id="cancel-dialog-title">
+          Discard Changes?
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            You have unsaved changes. Are you sure you want to cancel?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeCancelDialog} color="primary">
+            No, Continue Editing
+          </Button>
+          <Button onClick={confirmCancel} color="error" autoFocus>
+            Yes, Discard Changes
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Save Dialog */}
+      <Dialog
+        open={saveDialogOpen}
+        onClose={closeSaveDialog}
+        aria-labelledby="save-dialog-title"
+      >
+        <DialogTitle id="save-dialog-title">
+          {isCreating ? 'Create New User?' : 'Save Changes?'}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {isCreating 
+              ? 'Are you sure you want to create this new user?'
+              : 'Are you sure you want to save these changes?'
+            }
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeSaveDialog} color="primary">
+            No, Go Back
+          </Button>
+          <Button onClick={handleConfirmSave} color="success" autoFocus>
+            Yes, Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Optional: Visual indicator for unsaved changes */}
+      {hasUnsavedChanges && (
+        <div className="fixed flex items-center gap-2 px-4 py-2 text-yellow-800 bg-yellow-100 rounded-lg shadow-lg bottom-4 right-4">
+          <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
+          <span className="text-sm font-medium">Unsaved changes</span>
+        </div>
+      )}
+    </div>
+  );
+}
