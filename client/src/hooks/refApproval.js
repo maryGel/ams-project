@@ -1,0 +1,171 @@
+import {useState, useEffect} from 'react';
+import { api } from '../api/axios'
+
+
+function transformApprovalData(apiData) {
+  if (!apiData || !Array.isArray(apiData)) return [];
+
+  // Get unique modules in the order they appear in the API
+  const uniqueModules = [...new Set(apiData.map(item => item.MODULE))];
+
+  return uniqueModules.map((moduleName) => {
+    const moduleChildren = apiData.filter(item => item.MODULE === moduleName);
+    
+    return {
+      id: moduleName, // Use the name as the parent ID for easier checkbox logic
+      label: moduleName,
+      children: moduleChildren.map(child => ({
+        ...child,
+        id: child.ID, // Ensure every leaf has a unique ID for the checkbox
+        label: `${child.SIGNATORY} (Level ${child.APP_LEVEL})`
+      }))
+    };
+  });
+}
+
+export const useApproval= () => {
+  const [refApprovals, setRefApprovals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
+
+
+  // GET all Approvals
+  useEffect(() => {
+    const getRefApprovals = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+                
+        const response = await api.get('/approvalRoute');       
+        const data = response.data;
+        
+        if (!Array.isArray(data)) {
+          throw new Error('Expected array but got: ' + typeof data);
+        }
+        
+
+        const transformedData = transformApprovalData(data)
+        
+        setRefApprovals(transformedData);
+        
+      } catch (error) {
+        setError(error.response?.data?.error || error.message || 'Failed to fetch brands');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getRefApprovals();
+  }, []);
+
+  // Create Approval
+  const createApproval = async (APP_CODE ='', MODULE ) => {
+    try {
+      setActionLoading(true);
+      setError(null);
+      
+      const response = await api.post('/approvalRoute', { APP_CODE, MODULE });
+      
+      const created = {
+        id: response.data.id,
+        APP_CODE: response.data.APP_CODE,
+        MODULE: response.data.MODULE,
+        APP_LEVEL: item.APP_LEVEL,
+        SIGNATORY: item.SIGNATORY
+      }
+
+      setRefApprovals(prev => [...prev, created]);      
+      return created;
+
+    } catch (error) {
+      const errorMsg = error.response?.data?.error || error.message || 'Failed to create MODULE';
+      setError(errorMsg);
+      throw new Error(errorMsg);
+
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Update MODULE - UPDATED TO SEND CORRECT FIELDS
+  const updateApproval = async (id,  APP_CODE = '', MODULE) => {
+    try {
+      setActionLoading(true);
+      
+      const response = await api.put(`/approvalRoute/${id}`, { APP_CODE, MODULE });
+      
+      // Update local state
+      setRefApprovals(prev => 
+        prev.map(item => 
+          item.id == id ? { ...item, APP_CODE, MODULE} : item
+        )
+      );
+      
+      return response.data;
+
+    } catch (error) {
+      const errorMsg = error.response?.data?.error || error.message || 'Failed to update MODULE';
+      setError(errorMsg);
+      throw new Error(errorMsg);    
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Delete MODULE
+  const deleteApproval = async (id) => {
+    try {
+      setActionLoading(true);
+      
+      const response = await api.delete(`/approvalRoute/${id}`);
+      
+      // Update local state
+      setRefApprovals(prev => prev.filter(item => item.id != id));
+      
+      return response.data;
+
+    } catch (error) {
+      const errorMsg = error.response?.data?.error || error.message || 'Failed to delete MODULE';
+      setError(errorMsg);
+      throw new Error(errorMsg);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Refresh brands
+  const refreshRefApprovals = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await api.get('/approvalRoute');    
+      setRefApprovals(response.data);
+
+    } catch (error) {
+      setError(error.response?.data?.error || error.message || 'Failed to fetch brands');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    refApprovals,
+    loading,
+    error,
+    actionLoading,
+    createApproval,
+    updateApproval,
+    deleteApproval,
+    refreshRefApprovals,
+  };
+};
+
+
+
+
+
+
+

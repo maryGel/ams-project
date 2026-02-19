@@ -18,6 +18,11 @@ import refLocationRoute from './routes/refLocationRoute.js';
 import refDeptRoute from './routes/refDeptRoute.js';
 import authRoute from './routes/authRoute.js';
 import usersRoute from './routes/usersRoute.js';
+import accessRoute from './routes/accessRoute.js';
+import colorsRoute from './routes/refColorRoute.js';
+import sectionsRoute from './routes/refSecRoute.js';
+import approvalRoute from './routes/refApprovalRoute.js';
+
 
 const app = express();
 
@@ -58,7 +63,7 @@ app.use(cors(corsOptions));
 
 
 // --- DATABASE CONFIGURATION ---
-// Hardcoded to your VM to ensure Node always talks to the same DB as SQLyog
+// Hardcoded to ensure Node always talks to the same DB as SQLyog
 const dbConfig = {
   host: '192.168.64.5',
   user: 'myuser101',
@@ -116,6 +121,10 @@ app.use('/api/refUnit', refUnitRoute);
 app.use('/refItemClass', refItemClassRoute);
 app.use('/refLocation', refLocationRoute);
 app.use('/refDepartment', refDeptRoute);
+app.use('/accessRights', accessRoute);
+app.use('/colorsRoute', colorsRoute);
+app.use('/secRoutes', sectionsRoute);
+app.use('/approvalRoute', approvalRoute);
 
 // 404 Handler
 app.use((req, res) => {

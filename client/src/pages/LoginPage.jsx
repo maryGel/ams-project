@@ -1,5 +1,6 @@
 import { useState } from "react";
-
+// MUI
+import { TextField } from '@mui/material';
 import { api } from '../api/axios';
 import { useNavigate } from "react-router-dom";
 
@@ -42,7 +43,7 @@ function LoginPage({setHeaderTitle, setUsername}) {
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('Admin', res.data.Admin === 1 );
-        localStorage.setItem('user', localUsername.trim());
+        localStorage.setItem('username', localUsername.trim());
         if (setUsername) setUsername(localUsername.trim());  // Store user data in localStorage 
         navigate('/Home');
       } else {
@@ -75,41 +76,46 @@ function LoginPage({setHeaderTitle, setUsername}) {
   };
 
   return (
-    <div>
-      <div className='flex'>
-        <img 
-          src="/images/TELogo.png" 
-          alt="Company Logo" 
-          className="object-cover w-2/3 h-screen"
-        />
+    <>
+      <div className= {`flex h-screen `}>
         
-        {/* Login Panel */}
-        <section className="grid w-full h-screen place-content-center bg-slate-800">
-          <h2 className="p-4 text-2xl tracking-wider text-center text-white">
+        {/* Login */}
+        <section className={ `grid w-full h-screen place-content-center bg-[url('images/loginBg.png')] bg-cover`}>
+          <h2 
+            className={` text-gray-700
+              LG :   lg:p-4 lg:text-2xl tracking-wider text-center
+              SM/MD :   text-base p-5            
+          `}>
             Asset Management System
-          </h2>
-          
-          <div className="grid w-auto p-8 bg-white rounded shadow-md">
+          </h2>  
+
+          {/* Panel */}
+          <div className={` flex flex-col w-96 bg-white rounded shadow-md gap-3
+              LG / lg:p-8 
+              SM / py-8 px-4 m-2 bg-opacity-70
+            
+            `}>
             {errorMsg && (
               <div className="p-3 mb-4 text-sm text-red-600 border border-red-200 rounded bg-red-50">
                 {errorMsg}
               </div>
             )}
 
-            <input 
-              type="text" 
-              placeholder="Username" 
-              className="p-2 m-2 mb-4 border rounded w-72 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <TextField
+              fullWidth 
+              label="Username" 
+              variant="outlined"
+              className="rounded-md "
               value={localUsername}
               onChange={(e) => setLocalUsername(e.target.value)}
               onKeyPress={handleKeyPress}
               disabled={isLoading}
             /> 
             
-            <input 
+            <TextField
               type="password" 
-              placeholder="Password" 
-              className="p-2 m-2 mb-4 border rounded w-72 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              label="Password" 
+              className="rounded-md"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyPress={handleKeyPress}
@@ -151,7 +157,7 @@ function LoginPage({setHeaderTitle, setUsername}) {
           </button> 
         </section>       
       </div>
-    </div>
+    </>
   );
 }
 

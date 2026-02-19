@@ -1,4 +1,7 @@
-import { TextField, Checkbox, FormControlLabel, InputAdornment } from '@mui/material';
+import { useMemo } from 'react';
+import { TextField, Checkbox, FormControlLabel, InputAdornment, Autocomplete } from '@mui/material';
+import { useRefDepartment  } from '../../hooks/refDepartment';
+import { useSections } from '../../hooks/refSection';
 
 export default function UserInfo({ 
   userData,           // This comes from formData in the reducer
@@ -6,7 +9,15 @@ export default function UserInfo({
   onUserChange,       // This will be updateForm from the reducer
   isCreating,
 }) {
- 
+
+  const {refDeptData} = useRefDepartment();
+  const {refSections} = useSections();
+
+  const department = useMemo(() => refDeptData.map(item => item.Department), [refDeptData])
+  const sections = useMemo(() => refSections.map(item => item.xdesc), [refSections])
+  
+  const accessLevel = ['Administrator(full access)', 'User']
+
   const handleChange = (field, value) => {
     if (!isEditing) return;
     
@@ -29,7 +40,7 @@ export default function UserInfo({
 
   return (
     <div className='w-full gap-3 p-2'>
-      <h1 className='mb-4 text-gray-700'>
+      <h1 className='mb-8 text-gray-700'>
         User Information 
         {isEditing && !isCreating && (
           <span className='ml-2 text-sm text-blue-500'>(Editing Mode)</span>
@@ -62,9 +73,9 @@ export default function UserInfo({
             disabled={!isEditing}
             onChange={(e) => handleChange('password', e.target.value)}
             required={isCreating}
-            placeholder={!isCreating && !displayData.password ? "••••••••" : ""}
+            // placeholder={!isCreating && !displayData.password ? "••••••••" : ""}
             InputProps={{
-              startAdornment: (!isCreating && !displayData.password && !isEditing) ? (
+              startAdornment: (!isCreating && !displayData.password ) ? (
                 <InputAdornment position="start">
                   <span className='text-gray-400'>••••••••</span>
                 </InputAdornment>
@@ -118,37 +129,44 @@ export default function UserInfo({
             disabled={!isEditing}
             onChange={(e) => handleChange('xPosi', e.target.value)}
           />
-          <TextField
-            label="Department"
-            variant="outlined"
-            size="small"
-            className='w-64'
+          <Autocomplete
+            size="small"            
+            options={department}  
             value={displayData.xDept || ''}
+            onChange={(e, newValue) => handleChange('xDept', newValue)}
             disabled={!isEditing}
-            onChange={(e) => handleChange('xDept', e.target.value)}
+            renderInput={(params) => (
+              <TextField {...params} label="Department"   placeholder="Department" />
+            )}
+            sx={{ width: '15rem', marginRight: '1rem' }}
           />
         </div>
 
         {/* Access Level and Section */}
         <div className='flex gap-2'>
-          <TextField
-            label="Access Level"
-            variant="outlined"
-            size="small"
-            className='w-64'
+          <Autocomplete
+            size="small"           
+            options={accessLevel}  
             value={displayData.xlevel || ''}
+            onChange={(e, newValue) => handleChange('xlevel', newValue)}
             disabled={!isEditing}
-            onChange={(e) => handleChange('xlevel', e.target.value)}
+            renderInput={(params) => (
+              <TextField {...params} label="Access Level"   placeholder="Access Level" />
+            )}
+            sx={{ width: '20rem', marginRight: '1rem' }}
           />
-          <TextField
-            label="Section"
-            variant="outlined"
-            size="small"
-            className='w-64'
+          <Autocomplete
+            size="small"           
+            options={sections}  
             value={displayData.xSection || ''}
+            onChange={(e, newValue) => handleChange('xSection', newValue)}
             disabled={!isEditing}
-            onChange={(e) => handleChange('xSection', e.target.value)}
+            renderInput={(params) => (
+              <TextField {...params} label="Maintenance"   placeholder="Maintenance" />
+            )}
+            sx={{ width: '20rem', marginRight: '1rem' }}
           />
+
         </div>
 
         {/* Checkboxes - Add more if needed */}
@@ -163,34 +181,6 @@ export default function UserInfo({
             }
             label="Approver"
           />
-          
-          {/* Add Admin checkbox if it exists in your data */}
-          {displayData.hasOwnProperty('Admin') && (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={displayData.Admin === 1}
-                  disabled={!isEditing}
-                  onChange={(e) => handleChange('Admin', e.target.checked ? 1 : 0)}
-                />
-              }
-              label="Admin"
-            />
-          )}
-
-          {/* Add Log checkbox if it exists in your data */}
-          {displayData.hasOwnProperty('Log') && (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={displayData.Log === 1}
-                  disabled={!isEditing}
-                  onChange={(e) => handleChange('Log', e.target.checked ? 1 : 0)}
-                />
-              }
-              label="Log"
-            />
-          )}
         </div>
       </div>
     </div>

@@ -67,7 +67,7 @@ function Header({tabPaths = [], username , onLogout}) {
 
   return (
     <>
-      <header className="flex items-center p-2 pl-6 tracking-wider text-black bg-blue-100" >
+      <header className="items-center hidden p-2 pl-6 tracking-wider text-black bg-blue-100 md:flex" >
 
           <button className='transition-transform duration-150 active:translate-y-0.5 hover:scale-x-95'> 
             {isHomeTab? (

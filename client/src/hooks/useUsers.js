@@ -104,7 +104,7 @@ function usersReducer(state, action) {
                 ...state,
                 isEditing: false,
                 isCreating: false,
-                formData: null,
+                formData: {...state.selectedUser},
                 hasUnsavedChanges: false,
                 cancelDialogOpen: false
             };
@@ -136,7 +136,6 @@ function usersReducer(state, action) {
             ...state,
             isEditing: false,
             isCreating: false,
-            formData: null,
             hasUnsavedChanges: false,
             saving: false,
             cancelDialogOpen: false,

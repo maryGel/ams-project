@@ -5,7 +5,6 @@ import { Box } from '@mui/material';
 const columns = [
   { field: 'user', headerName: 'Username', width: 100 },
   { field: 'fname', headerName: 'First Name', width: 130 },
-  { field: 'lname', headerName: 'Last Name', width: 130 },
   { field: 'xlevel', headerName: 'Access Level', width: 200 },
 ];
 
@@ -19,12 +18,9 @@ export default function UseList({
   setSelectedUser,
   selectedUser,
   isEditing,
-  // Optional: Add pageSize change handler
-  onPageSizeChange
+  onPageSizeChange,
+  setOpenAccess
 }) {
-  
-  // Remove the useEffect that calls getUsers - this is now handled by the hook's own useEffect
-  // The parent hook already has: useEffect(() => { getUsers(page, search); }, [page, search]);
 
   const rows = users.map((u) => ({
     id: u.user, // Use username as unique ID
@@ -35,6 +31,7 @@ export default function UseList({
       console.log('[userList] Row clicked:', params.row); // Add this
       console.log('[userList] Username:', params.row.user); // Add this
       setSelectedUser(params.row.user); // Make sure it's params.row.user, not params.row
+      setOpenAccess(false);
   };
 
   const handlePaginationModelChange = (newModel) => {
@@ -45,7 +42,7 @@ export default function UseList({
   };
 
   return (
-    <div className='w-full h-[500px]'>
+    <div className='w-full h-[auto]'>
       <Box
         sx={{
           pointerEvents: isEditing ? 'none' : 'auto',

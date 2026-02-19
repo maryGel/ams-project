@@ -3,15 +3,8 @@ import { db } from '../server.js';
 
 const router = express.Router();
 
-// Test endpoint - verify the route is working
-router.get('/test', (req, res) => {
-  res.json({
-    message: 'refDepartment API is working',
-    timestamp: new Date().toISOString()
-  })
-})
 
-// Get all Locations
+// Get all Colors
 router.get('/', (req, res) => {
 
   db.getConnection((error, connection) => {
@@ -19,10 +12,10 @@ router.get('/', (req, res) => {
       return res.status(500).json({error: 'Database connection error'});
     }
 
-    const sqlSelect = 'SELECT * FROM refdepartment';
+    const sqlSelect = 'SELECT * FROM refcolor';
 
     connection.query(sqlSelect, (error, result) => {
-      connection.release();
+      connection.release(); 
 
       if(error){
         return res.status(500).json({error: 'Error fetching the data'})
@@ -32,7 +25,7 @@ router.get('/', (req, res) => {
   })
 })
 
-// Get single Department id 
+// Get single color id 
 router.get('/:id', (req, res) => {
   const { id } = req.params;
 
@@ -41,7 +34,7 @@ router.get('/:id', (req, res) => {
       return res.status(500).json({error: 'Database connection failed'});
     }
 
-    connection.query('SELECT * FROM refdepartment where id = ?', [id], (error, result) => {
+    connection.query('SELECT * FROM refcolor where id = ?', [id], (error, result) => {
       connection.release();
 
       if(error){
@@ -56,13 +49,13 @@ router.get('/:id', (req, res) => {
   });
 });
 
-// Create new Department
+// Post create new Unit
 
 router.post('/', (req, res) => {
-  const {Department} = req.body;
+  const {ColID} = req.body;
 
-  if(!Department){
-    return res.status(400).json({error: 'Department is required'})
+  if(!ColID){
+    return res.status(400).json({error: 'Color Id is required'})
   }
 
   db.getConnection((error, connection) => {
@@ -70,8 +63,8 @@ router.post('/', (req, res) => {
       return res.status(500).json({error: 'Database connection failed'});
     }
 
-    const sql = 'INSERT INTO refdepartment (Department) VALUES (?)';
-    const params = [Department || '']
+    const sql = 'INSERT INTO refcolor (ColID, ColName  ) VALUES (?)';
+    const params = [ColID, ColName || '']
 
     connection.query(sql, params, (error, result) => {
       connection.release();
@@ -81,22 +74,22 @@ router.post('/', (req, res) => {
       }
 
       res.json({
-        message: 'New Department has been created',
+        message: 'New color has been created',
         id: result.insertId,
-        Department: Department || ''
+        Unit: Unit || ''
       });
     });
   });
 });
 
 
-// PUT update Department
+// PUT update color
 router.put('/:id', (req, res) => {
   const { id } = req.params;
-  const {Department} = req.body;
+  const { ColID, ColName } = req.body;
 
-  if(!Department){
-    return res.status(400).json({error: 'Department is required'})
+  if(!ColID){
+    return res.status(400).json({error: 'Color ID is required'})
   }
 
   db.getConnection((error, connection) => {
@@ -105,8 +98,8 @@ router.put('/:id', (req, res) => {
       return res.status(500).json({error: ' Database connection failed'});
     }
 
-    const sql = 'UPDATE refdepartment SET Department = ? where id = ?';
-    const params = [Department || '', id];
+    const sql = 'UPDATE refcolor SET ColID = ?, ColName = ? where id = ?';
+    const params = [ColID, ColName|| '', id];
 
     connection.query(sql, params, (error, result) => {
       connection.release();
@@ -116,17 +109,17 @@ router.put('/:id', (req, res) => {
       }
   
       if(result.affectedRows === 0 ){
-        return res.status(404).json({error: 'Department not found'});
+        return res.status(404).json({error: 'Unit not found'});
       }
 
-      res.json({message : 'Department updates has been successfully'});
+      res.json({message : 'Color updates has been successfully'});
     });
   });
 });
 
 
 
-//Delete nit
+//Delete color
 
 router.delete('/:id', (req,res) => {
   const { id } = req.params;
@@ -136,7 +129,7 @@ router.delete('/:id', (req,res) => {
       return res.status(500).json({error: 'Database connection failed'});
     }
 
-    connection.query('Delete from refdepartment where id = ?', [id], (error, result) => {
+    connection.query('Delete from refcolor where id = ?', [id], (error, result) => {
       connection.release();
 
       if(error){
@@ -144,10 +137,10 @@ router.delete('/:id', (req,res) => {
       }
 
       if(result.affectedRows === 0){
-        return res.status(404).json({ error: 'Department not found'});
+        return res.status(404).json({ error: 'Unit not found'});
       }
 
-      res.json({message: 'Department has been deleted successfully'});
+      res.json({message: 'Color been deleted successfully'});
     });
   });
 });

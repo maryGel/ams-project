@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import {useState} from 'react';
 import {
   List,
   ListItemButton,
@@ -46,7 +46,8 @@ export default function RefTabs({handleOpenTab}){
             <List component="div" disablePadding>
               {[
                 'Unit of Measure', 
-                'Brand'
+                'Brand',
+                'Color'
                 ].map((item) => (
                   <ListItemButton 
                     key = {item}
@@ -81,6 +82,7 @@ export default function RefTabs({handleOpenTab}){
                 'Asset Class',
                 'Location',
                 'Department',
+                'Maintenance',
                 'Depreciation Type',
                 'Journal Entries'
               ].map((item) => (

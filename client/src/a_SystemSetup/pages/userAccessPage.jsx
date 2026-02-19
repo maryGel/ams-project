@@ -1,19 +1,18 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   TextField, 
   Snackbar, 
   Alert,
   Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
   Button
 } from '@mui/material';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 // Custom Utils
 import { CustomBtn } from '../../Utils/groupbtns';
 import { useUsers } from '../../hooks/useUsers';
+import { CustomDialog } from '../../Utils/customDialog'
 
 // Components
 import UseList from '../userProfile/userList';
@@ -79,6 +78,11 @@ export default function UserAccessPage() {
     deleteUser,
   } = useUsers();
 
+  const [ openAccess, setOpenAccess] =useState(false);
+
+
+  // ... H a n d l e r s ...  
+
   const handleEditButton = () => {
     if (selectedUser) {
       startEdit();
@@ -114,15 +118,14 @@ export default function UserAccessPage() {
           }
 
           if (result && result.success) {
-              // DON'T call cancelEdit() here if your createUser/updateUser already dispatches CANCEL_EDIT
-              // cancelEdit();  // ← Remove this line if not needed
+            
           }
       } catch (err) {
           console.error("Save failed:", err);
       }
   };
 
-  // Optional: Warn user before closing tab with unsaved changes
+  // Warn user before closing tab with unsaved changes
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (hasUnsavedChanges) {
@@ -135,18 +138,19 @@ export default function UserAccessPage() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
+
   return (
     <div className='h-auto p-5 border rounded-lg bg-gray-50 m-7 border-spacing-1'>
       {/* Header with Search and Buttons */}
       <div className='flex items-center justify-between mb-4'>
         <div className='ml-.5'>
-          <TextField
-            label="Search"
-            size="small"
-            className='w-56 bg-white rounded-md'
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+            <TextField
+              label="Search"
+              size="small"
+              className='w-56 bg-white rounded-md'
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
         </div>
 
         <div className='flex gap-2'>
@@ -186,15 +190,15 @@ export default function UserAccessPage() {
             </CustomBtn>
           )}
 
-          <CustomBtn
-            variant='createBtn'
-            iconType='add'
-            title='Create new user'
-            onClick={handleCreateButton}
-            disabled={isEditing || saving}
-          >
-            Create
-          </CustomBtn>
+            <CustomBtn
+              variant='createBtn'
+              iconType='add'
+              title='Create new user'
+              onClick={handleCreateButton}
+              disabled={isEditing || saving}
+            >
+              Create
+            </CustomBtn>
         </div>
       </div>
 
@@ -211,6 +215,7 @@ export default function UserAccessPage() {
             setSelectedUser={setSelectedUser}
             selectedUser={selectedUser}
             isEditing={isEditing}
+            setOpenAccess={setOpenAccess}
           />
         </div>
         <div className='p-2'>
@@ -221,45 +226,55 @@ export default function UserAccessPage() {
             isCreating={isCreating}
           />
         </div>
-      </div>
 
-      <div>
-        <PermissionTree />
+       
       </div>
+        <div className='flex justify-end'>
+          <Button
+            sx = {{background: '#eceff1', padding: 1.5, textTransform: 'none'}}
+            onClick = {()=> setOpenAccess(prev => !prev)}
+          > 
+            See Assigned Access  {openAccess ?  <KeyboardArrowDownIcon/> : <KeyboardArrowRightIcon/> }
+          </Button>
+        </div>
+        
+        {(openAccess) && 
+          <div className='mt-3'>
+              <PermissionTree 
+              selectedUser={selectedUser}
+              setSelectedUser={setSelectedUser}
+              isEditing={isEditing}
+              isCreating={isCreating}
+              />
+          </div>
+        }
 
       {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
         onClose={closeSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <Alert severity={snackbar.severity} sx={{ width: '100%' }}>
           {snackbar.message}
         </Alert>
       </Snackbar>
 
-      {/* Cancel Dialog - Now using hasUnsavedChanges from reducer */}
+      {/* Cancel Dialog - Now using hasUnsavedChanges from reducer */}      
       <Dialog
         open={cancelDialogOpen}
         onClose={closeCancelDialog}
         aria-labelledby="cancel-dialog-title"
       >
-        <DialogTitle id="cancel-dialog-title">
-          Discard Changes?
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            You have unsaved changes. Are you sure you want to cancel?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeCancelDialog} color="primary">
-            No, Continue Editing
-          </Button>
-          <Button onClick={confirmCancel} color="error" autoFocus>
-            Yes, Discard Changes
-          </Button>
-        </DialogActions>
+      <CustomDialog
+        title = {'Discard Changes?'}
+        text = {'You have unsaved changes, are you sure you want to cancel?'}
+        cancel = {closeCancelDialog}
+        cancelText = {'Continue Editing'}
+        confirm = {confirmCancel}    
+        confirmText = {'Proceed'} 
+      />
       </Dialog>
 
       {/* Save Dialog */}
@@ -268,25 +283,17 @@ export default function UserAccessPage() {
         onClose={closeSaveDialog}
         aria-labelledby="save-dialog-title"
       >
-        <DialogTitle id="save-dialog-title">
-          {isCreating ? 'Create New User?' : 'Save Changes?'}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {isCreating 
-              ? 'Are you sure you want to create this new user?'
-              : 'Are you sure you want to save these changes?'
-            }
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeSaveDialog} color="primary">
-            No, Go Back
-          </Button>
-          <Button onClick={handleConfirmSave} color="success" autoFocus>
-            Yes, Save
-          </Button>
-        </DialogActions>
+      <CustomDialog 
+        title = {isCreating ? 'Create New User?' : 'Save Changes?'}
+        text = {isCreating 
+            ? 'Are you sure you want to create this new user?'
+            : 'Are you sure you want to save these changes?'
+        }
+        cancel = {closeSaveDialog}
+        cancelText = {'Back'}
+        confirm = {handleConfirmSave}    
+        confirmText = {'Yes, Save'} 
+      />
       </Dialog>
 
       {/* Optional: Visual indicator for unsaved changes */}

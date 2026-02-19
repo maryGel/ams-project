@@ -11,7 +11,9 @@ function HomePage({
 }) {
 
   return (
-    <div>
+    <div
+      className='hidden md:flex'
+    >
 
       <TabPanel 
         headerTitle={headerTitle}

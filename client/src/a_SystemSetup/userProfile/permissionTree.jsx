@@ -1,8 +1,7 @@
-import React from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Button,
-  Checkbox,
   TextField,
   Typography,
   Stack,
@@ -11,65 +10,14 @@ import {
 import { TreeView, TreeItem } from "@mui/lab";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import CheckIcon from '@mui/icons-material/Check';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 
-const sampleData = [
-  {
-    id: "job_order_eval",
-    label: "JOB ORDER - EVALUATION",
-    children: [
-      { id: "job_add", label: "Add" },
-      { id: "job_delete", label: "Delete" },
-      { id: "job_eval_done", label: "JO_EVAL_DONE" },
-      { id: "job_edit", label: "Edit" },
-      { id: "job_post", label: "Post" },
-      { id: "job_print", label: "Print" },
-      { id: "job_eval_update", label: "JO_EVAL_UPDATE" },
-      { id: "job_view", label: "View" },
-    ],
-  },
-  { id: "asset_list", label: "ASSET LIST" },
-  { id: "acquisition", label: "ACQUISITION" },
-  { id: "asset_disposal", label: "ASSET DISPOSAL" },
-  { id: "maintenance", label: "MAINTENANCE" },
-  { id: "asset_transfer", label: "ASSET TRANSFER" },
-];
+//Custom hooks
+import { useAccess } from '../../hooks/useAccess';
+import DeptAccess from '../userProfile/deptAccess';
+import ApprovalRouting from './approvalRouting';
 
-function findNode(nodes, id) {
-  for (const n of nodes) {
-    if (n.id === id) return n;
-    const child = n.children ? findNode(n.children, id) : undefined;
-    if (child) return child;
-  }
-  return undefined;
-}
-
-function collectDescendants(node) {
-  const ids = [];
-  if (node.children && node.children.length) {
-    for (const c of node.children) {
-      ids.push(c.id);
-      ids.push(...collectDescendants(c));
-    }
-  }
-  return ids;
-}
-
-function computeParentState(node, checked) {
-  const children = node.children || [];
-  if (!children.length)
-    return { checked: checked.has(node.id), indeterminate: false };
-
-  let all = true;
-  let any = false;
-
-  for (const c of children) {
-    const cState = computeParentState(c, checked);
-    if (cState.checked || cState.indeterminate) any = true;
-    if (!cState.checked) all = false;
-  }
-
-  return { checked: all, indeterminate: any && !all };
-}
 
 function filterTree(nodes, q) {
   if (!q) return nodes;
@@ -77,258 +25,205 @@ function filterTree(nodes, q) {
   const res = [];
 
   for (const n of nodes) {
-    const matches = n.label.toLowerCase().includes(query);
-    const filteredChildren = n.children ? filterTree(n.children, q) : [];
-    if (matches || filteredChildren.length) {
-      res.push({ ...n, children: filteredChildren });
+    const matches = n.label?.toLowerCase().includes(query) || false;
+    const filteredParent = n.parent ? filterTree(n.parent, q) : [];
+    if (matches || filteredParent.length) {
+      res.push({ ...n, parent: filteredParent });
     }
   }
   return res;
 }
 
-function collectExpandedIds(nodes) {
+function collectAllIds(nodes) {
   const ids = [];
-  for (const n of nodes) {
-    if (n.children && n.children.length) {
+  const walk = (nodes) => {
+    nodes.forEach((n) => {
       ids.push(n.id);
-      ids.push(...collectExpandedIds(n.children));
-    }
-  }
+      if (n.children) walk(n.children);
+    });
+  };
+  walk(nodes);
   return ids;
 }
 
-function getLabelById(nodes, id) {
-  const n = findNode(nodes, id);
-  return n ? n.label : undefined;
-}
 
-{/* ---------------------------------------------------
-  P E R M I S S I O N   T R E E   C O M P O N E N T
-  ---------------------------------------------------*/}
+{/*--------------------------------------------------
+       P E R M I S S I O N    C O M P O N E N T
+  --------------------------------------------------*/}
 
-export default function PermissionsTree() {
-  const [checked, setChecked] = React.useState(new Set());
-  const [query, setQuery] = React.useState("");
-  const [expanded, setExpanded] = React.useState([]);
+export default function PermissionsTree({ isEditing, selectedUser, setSelectedUser, isCreating }) {
+  const [checked, setChecked] = useState(new Set());
+  const [query, setQuery] = useState("");
+  const [expanded, setExpanded] = useState([]);
+  
+  // Use the hook with selected user
+  const { accessData, loading, error } = useAccess(selectedUser?.user);
 
-  const visibleData = React.useMemo(() => filterTree(sampleData, query), [query]);
+  // Tree data is already transformed from the hook
+  const treeData = useMemo(() => {
+    console.log('Tree data from hook:', accessData);
+    return accessData || [];
+  }, [accessData]);
 
-    React.useEffect(() => {
-      if (query) {
-        setExpanded(collectExpandedIds(visibleData));
-      }
-    }, [query, visibleData]);
+  // Get all IDs for select/deselect all functionality
+  const allIds = useMemo(() => {
+    return collectAllIds(treeData);
+  }, [treeData]);
 
-    const handleToggle = (id) => {
-      const next = new Set(checked);
-      const node = findNode(sampleData, id);
-      if (!node) return;
+  // Set default selected state based on isEditing
+  useEffect(() => {
+    if (!isEditing && allIds.length > 0) {
+      // When not editing, select all permissions by default
+      setChecked(new Set(allIds));
+    } else if (isEditing) {
+      // When editing, start with empty selection
+      setChecked(new Set());
+    }
+  }, [isEditing, allIds]);
 
-      const descendants = collectDescendants(node);
-      const isChecked = next.has(id);
+  // Filter tree data based on search query
+  const visibleData = useMemo(() => filterTree(treeData, query), [treeData, query]);
 
-      if (isChecked) {
-        next.delete(id);
-        descendants.forEach((d) => next.delete(d));
-      } else {
-        next.add(id);
-        descendants.forEach((d) => next.add(d));
-      }
+  const allSelected = allIds.length > 0 && allIds.every((id) => checked.has(id));
 
-      setChecked(next);
-    };
-
-    const allIds = React.useMemo(() => {
-    const ids = [];
-    const walk = (nodes) => {
-      nodes.forEach((n) => {
-        ids.push(n.id);
-        if (n.children) walk(n.children);
-        });
-      };
-      walk(sampleData);
-      return ids;
-    }, []);
-
-    const allSelected = allIds.every((id) => checked.has(id));
-
-    const handleSelectToggle = () => {
-      if (allSelected) {
-        setChecked(new Set());
-      } else {
-        setChecked(new Set(allIds));
-      }
-    };
+  const handleSelectToggle = () => {
+    if (!isEditing) return; // Don't allow when not editing
+    
+    if (allSelected) {
+      setChecked(new Set());
+    } else {
+      setChecked(new Set(allIds));
+    }
+  };
 
 
-      const handleUncheck = () => setChecked(new Set());
+  const handleSearchChange = (event) => {
+    setQuery(event.target.value);
+  };
 
-      const handleCopy = async () => {
-        const labels = Array.from(checked)
-          .map((id) => getLabelById(sampleData, id))
-          .filter(Boolean)
-          .sort();
-        await navigator.clipboard.writeText(labels.join("\n"));
-      };
-
-    const renderNode = (node) => {
-      const state = computeParentState(node, checked);
-
+  const renderNode = (node) => {
     return (
       <TreeItem
-            key={node.id}
-            nodeId={node.id}
-            label={
-              <Box display="flex" alignItems="center" gap={1}>
-                <Checkbox
-                  size="small"
-                  checked={state.checked}
-                  indeterminate={state.indeterminate}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleToggle(node.id);
-                  }}
-                />
-                <Typography variant="body2">{node.label}</Typography>
-              </Box>
-            }
-          >
-            {node.children && node.children.map(renderNode)}
-        </TreeItem>
-      );
-    };
+        key={node.id}
+        nodeId={node.id}
+        label={
+          <Box display="flex" alignItems="center" gap={3} sx={{padding: .3}}>
+            <CheckIcon sx={{ fontSize: 'small'}}/>
+            <Typography 
+              variant="body2" 
+              sx={{ color: !isEditing ? 'gray' : 'text.primary', fontSize: 'medium' }}
+            >
+              {node.label}
+            </Typography>
+          </Box>
+        }
+      >
+        {node.children && node.children.map(renderNode)}
+      </TreeItem>
+    );
+  };
 
+  // Loading state
+  if (loading) {
     return (
       <div className='flex justify-between gap-3 flex-3'>
         <Paper variant="outlined" sx={{ p: 2, width: "100%" }}>
-          <Typography variant="subtitle1"  mb={1}>
-            User Access Rights
-          </Typography>
-
-          <Box
-            sx={{
-              border: "1px solid #ccc",
-              borderRadius: 1,
-              p: 1,
-              mb: 1,
-              height: 260,
-              overflow: "auto",
-            }}
-          >
-            <TreeView
-              expanded={expanded}
-              onNodeToggle={(_, ids) => setExpanded(ids)}
-              defaultCollapseIcon={<ExpandMoreIcon fontSize="small" />}
-              defaultExpandIcon={<ChevronRightIcon fontSize="small" />}
-            >
-              {visibleData.map(renderNode)}
-            </TreeView>
-          </Box>
-
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Button size="small" variant="outlined" onClick={handleSelectToggle}>
-              {allSelected ? "Deselect All" : "Select All"}
-            </Button>
-
-            <Button size="small" variant="outlined" onClick={handleCopy}>
-              Copy
-            </Button>
-            <TextField
-              size="small"
-              placeholder="get"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              sx={{ ml: "auto", width: 120 }}
-            />
-          </Stack>
+          <Typography>Loading access data...</Typography>
         </Paper>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className='flex justify-between gap-3 flex-3'>
         <Paper variant="outlined" sx={{ p: 2, width: "100%" }}>
-          <Typography variant="subtitle1" mb={1}>
-            Approval Routing
-          </Typography>
+          <Typography color="error">Error: {error}</Typography>
+        </Paper>
+      </div>
+    );
+  }
 
-          <Box
-            sx={{
-              border: "1px solid #ccc",
-              borderRadius: 1,
-              p: 1,
-              mb: 1,
-              height: 260,
-              overflow: "auto",
-            }}
-          >
+  return (
+    <div className='flex justify-between h-auto gap-3 flex-3'>
+      <Paper variant="outlined" sx={{ p: 2, width: "100%" }}>
+        <Typography variant="subtitle1"  fontWeight="bold" mb={1}>
+          User Access Rights
+        </Typography>
+
+        <div className='flex justify-between pb-3 ' >          
+          <TextField
+            label="Search"
+            variant="outlined"
+            size="small"
+            value={query}
+            onChange={handleSearchChange}
+            sx={{width: 300}}
+          />
+          {isEditing && (
+            <Button 
+              size="small" 
+              variant="body2" 
+              // onClick={handleSelectToggle}
+              disabled={!isEditing && !isCreating }
+              sx={{boxShadow: '0px 4px 8px rgba(0,0,0,0.2)', backgroundColor: '#eceff1', textTransform: 'none'  }}
+            >
+               <AssignmentTurnedInIcon/> Assign Access
+            </Button>
+          )}
+        </div>
+
+        <Box
+          sx={{
+            border: "1px solid #ccc",
+            borderRadius: 1,
+            p: 1,
+            height: 'auto',
+            overflow: "auto",
+            backgroundColor: !isEditing ? 'grey.50' : 'transparent',
+          }}
+        >
+          {visibleData.length > 0 ? (
             <TreeView
               expanded={expanded}
-              onNodeToggle={(_, ids) => setExpanded(ids)}
+              onNodeToggle={(_, ids) => {
+                setExpanded(ids);
+              }}
               defaultCollapseIcon={<ExpandMoreIcon fontSize="small" />}
               defaultExpandIcon={<ChevronRightIcon fontSize="small" />}
             >
               {visibleData.map(renderNode)}
             </TreeView>
-          </Box>
-
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Button size="small" variant="outlined" onClick={handleSelectToggle}>
-              {allSelected ? "Deselect All" : "Select All"}
-            </Button>
-
-            <Button size="small" variant="outlined" onClick={handleCopy}>
-              Copy
-            </Button>
-            <TextField
-              size="small"
-              placeholder="get"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              sx={{ ml: "auto", width: 120 }}
-            />
-          </Stack>
-        </Paper>
-
-        <Paper variant="outlined" sx={{ p: 2, width: "100%" }}>
-          <Typography variant="subtitle1" mb={1}>
-            Departmental Access Control
+          ) : (
+            <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 2 }}>
+              No permissions available 
+            </Typography>
+          )}
+        </Box>
+        
+        {visibleData.length > 0 && (
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+            Total permissions: {allIds.length} 
           </Typography>
+        )}
+      </Paper>
 
-          <Box
-            sx={{
-              border: "1px solid #ccc",
-              borderRadius: 1,
-              p: 1,
-              mb: 1,
-              height: 260,
-              overflow: "auto",
-              width: "100%",
-            }}
-          >
-            <TreeView
-              expanded={expanded}
-              onNodeToggle={(_, ids) => setExpanded(ids)}
-              defaultCollapseIcon={<ExpandMoreIcon fontSize="small" />}
-              defaultExpandIcon={<ChevronRightIcon fontSize="small" />}
-            >
-              {visibleData.map(renderNode)}
-            </TreeView>
-          </Box>
+      {/* Second Paper - Approval Routing */}
+      <ApprovalRouting 
+        selectedUser ={selectedUser}
+        isEditing = {isEditing}
+        setSelectedUser = { selectedUser }
+        isCreating={isCreating}
+      />
 
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Button size="small" variant="outlined" onClick={handleSelectToggle}>
-              {allSelected ? "Deselect All" : "Select All"}
-            </Button>
-
-            <Button size="small" variant="outlined" onClick={handleCopy}>
-              Copy
-            </Button>
-            <TextField
-              size="small"
-              placeholder="get"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              sx={{ ml: "auto", width: 120 }}
-            />
-          </Stack>
-        </Paper>
-    
+      {/* Third Paper - Departmental Access Control */}
+      <DeptAccess
+        selectedUser ={selectedUser}
+        isEditing = {isEditing}
+        setSelectedUser = { selectedUser }
+        isCreating={isCreating}
+      />
     </div>
   );
 }

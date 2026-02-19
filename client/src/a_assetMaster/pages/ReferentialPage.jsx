@@ -5,7 +5,9 @@ import RefBrand from '../referentials/refBrand';
 import RefCategory from '../referentials/refCategory';
 import RefItemClass from '../referentials/refItemClass';
 import RefLocation from '../referentials/refLocation';
-import RefDepartment from '../referentials/refDepartment'
+import RefDepartment from '../referentials/refDepartment';
+import RefColor from '../referentials/refColor';
+import RefSection from '../referentials/refSection';
 
 function ReferentialPage() {
 
@@ -28,6 +30,9 @@ function ReferentialPage() {
           <RefBrand 
             openTab = {openTab}
           />
+          <RefColor 
+            openTab={openTab}
+          />
           <RefCategory
             openTab = {openTab}
           />
@@ -40,6 +45,10 @@ function ReferentialPage() {
           <RefDepartment
             openTab = {openTab}      
           />
+          <RefSection
+            openTab = {openTab}
+          />
+
         </div>
       </div>
   );
