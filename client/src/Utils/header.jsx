@@ -1,12 +1,11 @@
 import {useState, useEffect} from 'react';
 import {headerTitleMap} from './headerTitleMap'
+import { NavLink, useLocation } from 'react-router-dom';
+
+// MUI Icons
 import HomeIcon from '@mui/icons-material/Home';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { Box, InputBase, Menu, MenuItem } from '@mui/material';
-
-
-// MUI Icons
-import { NavLink, useLocation } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
 import HistoryIcon from '@mui/icons-material/History';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -70,19 +69,17 @@ function Header({tabPaths = [], username , onLogout}) {
       <header className="items-center hidden p-2 pl-6 tracking-wider text-black bg-blue-100 md:flex" >
 
           <button className='transition-transform duration-150 active:translate-y-0.5 hover:scale-x-95'> 
-            {isHomeTab? (
-              <NavLink to= "/Home">
-                <HomeIcon 
-                  sx ={{ fontSize: 30, marginRight: 2 }}
-                />
-              </NavLink>
-            ) : (
-              <NavLink to={backPath}>
-                <ChevronLeftIcon 
-                  sx ={{ fontSize: 30, marginRight: 2 }}
-                />
-              </NavLink>
-            )}
+            {isHomeTab
+              ? (<NavLink to= "/Home">
+                  <HomeIcon 
+                    sx ={{ fontSize: 30, marginRight: 2 }}
+                  />
+                </NavLink>) 
+              : (<NavLink to={backPath}>
+                  <ChevronLeftIcon 
+                    sx ={{ fontSize: 30, marginRight: 2 }}
+                  />
+                </NavLink>)}
           </button>
 
         <h1>{headerTitle}</h1>
@@ -150,6 +147,7 @@ function Header({tabPaths = [], username , onLogout}) {
           </div>
         </div>
       </header>
+
     </>    
   );
 }

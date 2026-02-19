@@ -3,14 +3,6 @@ import { db } from '../server.js';
 
 const router = express.Router();
 
-// Test endpoint - verify the route is working
-router.get('/test', (req, res) => {
-  res.json({
-    message: 'refUnit API is working',
-    timestamp: new Date().toISOString()
-  })
-})
-
 // Get all Units
 router.get('/', (req, res) => {
 

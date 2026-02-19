@@ -4,13 +4,6 @@ import { db } from '../server.js';
 
 const router = express.Router();
 
-// Test endpoint - verify the route is working
-router.get('/test', (req, res) => {
-  res.json({ 
-    message: 'refItemClass API is working!',
-    timestamp: new Date().toISOString()
-  });
-});
 
 // GET all categories
 router.get('/', (req, res) => {
