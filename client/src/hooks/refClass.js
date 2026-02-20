@@ -9,16 +9,7 @@ export const useRefItemClass = () => {
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  // Test API connection
-  const testAPI = async () => {
-    try {
-      const response = await api.get('/refItemClass/test');
-      return response.data;
-    } catch (error) {
-      console.error('API Test Failed:', error);
-      throw error;
-    }
-  };
+ 
 
   // GET all AssetClasses
   useEffect(() => {
@@ -26,9 +17,6 @@ export const useRefItemClass = () => {
       try {
         setLoading(true);
         setError(null);
-        
-        // Test API first
-        await testAPI();
         
         const response = await api.get('/refItemClass');       
         const data = response.data;
@@ -160,7 +148,6 @@ export const useRefItemClass = () => {
     updateRefItemClass,
     deleteRefItemClass,
     refreshItemClasses,
-    testAPI
   };
 };
 

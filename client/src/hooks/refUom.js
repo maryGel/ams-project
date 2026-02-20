@@ -8,25 +8,14 @@ export const useRefUom = () => {
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  //  Test API connection
-    const testAPI = async () => {
-      try {
-        const response = await api.get('/api/refUnit/test');
-        return response.data;
-      } catch (error) {
-        throw error;
-      }
-    };
-  
+ 
     // GET all UOMS
     useEffect(() => {
       const getrefUnit = async () => {
         try {
           setLoading(true);
           setError(null);
-          
-          await testAPI();
-          
+         
           const response = await api.get('/api/refUnit');         
           const data = response.data;
           
@@ -154,6 +143,5 @@ export const useRefUom = () => {
     updateRefUnit,
     deleteRefUnit,
     refreshRefUnit,
-    testAPI
   }
 }

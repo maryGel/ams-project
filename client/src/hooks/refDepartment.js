@@ -9,16 +9,6 @@ export const useRefDepartment = () => {
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  //  Test API connection
-    const testAPI = async () => {
-      try {
-        const response = await api.get('/refDepartment/test');
-        return response.data;
-
-      } catch (error) {
-        throw error;
-      }
-    };
   
     // GET all locations
     useEffect(() => {
@@ -26,9 +16,7 @@ export const useRefDepartment = () => {
         try {
           setLoading(true);
           setError(null);
-          
-          // Test API first
-          await testAPI();
+
           
           const response = await api.get('/refDepartment');          
           const data = response.data;
@@ -155,6 +143,5 @@ export const useRefDepartment = () => {
     updateRefDepartment,
     deleteRefDepartment,
     refreshRefDepartment,
-    testAPI
   }
 }

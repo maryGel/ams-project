@@ -60,7 +60,7 @@ router.get('/:facNo', (req, res) => {
   });
 });
 
-router.post('/t', (req, res) => {
+router.post('/', (req, res) => {
 
   const {
     FacNO,
@@ -157,10 +157,10 @@ router.post('/t', (req, res) => {
     Remarks || null,
   ];
 
-  // console.log('SQL Insert:', sqlInsert);
-  // console.log('Number of columns in SQL:', sqlInsert.match(/\(([^)]+)\)/)[1].split(',').length);
-  // console.log('Number of values:', values.length);
-  // console.log('Values:', values);
+  console.log('SQL Insert:', sqlInsert);
+  console.log('Number of columns in SQL:', sqlInsert.match(/\(([^)]+)\)/)[1].split(',').length);
+  console.log('Number of values:', values.length);
+  console.log('Values:', values);
 
   db.getConnection((err, connection) => {
     if (err) {
@@ -185,6 +185,7 @@ router.post('/t', (req, res) => {
         message: 'Asset created successfully',
         assetId: results.insertId
       });
+      console.log(`DB result: ${results}`)
     });
   });
 });

@@ -123,7 +123,6 @@ export const useAssetMasterData = () => {
   }, [state.page, state.pageSize]); 
 
   useEffect(() => {
-    console.log('useEffect running - fetchAssets triggered');
     fetchAssets();
   },[fetchAssets])
 

@@ -27,7 +27,6 @@ function LoginPage({setHeaderTitle, setUsername}) {
 
     setIsLoading(true);
     setErrorMsg("");
- 
 
     try {
       const res = await api.post("/login", {
@@ -35,9 +34,9 @@ function LoginPage({setHeaderTitle, setUsername}) {
         password: password.trim(),
       });
 
-      console.log('Full response:', res);
-      console.log('Response data:', res.data);
-      console.log('Token from response:', res.data.token);
+      // console.log('Full response:', res);
+      // console.log('Response data:', res.data);
+      // console.log('Token from response:', res.data.token);
       if (res.data.success) {
 
         localStorage.setItem('isLoggedIn', 'true');

@@ -11,17 +11,6 @@ export const useRefCategory = (useProps, deps = []) => {
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  // Test API connection
-  const testAPI = async () => {
-    try {
-      const response = await api.get('/api/refCat/test');
-      return response.data;
-    } catch (error) {
-      console.error('API Test Failed:', error);
-      throw error;
-    }
-  };
-
 // Get all categories
   useEffect(() => {
     const getRefCategory = async () => {
@@ -29,8 +18,7 @@ export const useRefCategory = (useProps, deps = []) => {
         setLoading(true);
         setError(null);
         
-        await testAPI();
-        
+       
         const response = await api.get('/api/refCat');       
         const data = response.data;
         
@@ -155,6 +143,5 @@ export const useRefCategory = (useProps, deps = []) => {
     updateRefCategory,
     deleteRefCategory,
     refreshRefCategories,
-    testAPI
   };
 };

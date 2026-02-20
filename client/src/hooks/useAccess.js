@@ -59,7 +59,6 @@ function transformAccessData(apiData, userId) {
     };
   });
   
-  console.log('Transformed data:', transformed);
   return transformed;
 }
 
@@ -73,14 +72,10 @@ export const useAccess = (userId) => {
             try {
                 setLoading(true);
                 setError(null);
-
-                console.log('Fetching access rights for user:', userId);
                 
                 const response = await api.get('/accessRights');
-                console.log('API Response:', response);
                 
                 const data = response.data;
-                console.log('Response data:', data);
 
                 if (!Array.isArray(data)) {
                     console.log('Data is not an array:', data);

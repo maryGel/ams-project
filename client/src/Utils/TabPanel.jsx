@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useTheme } from '@mui/material/styles';
@@ -50,42 +50,38 @@ function a11yProps(index) {
   };
 }
 
+
+
 /* --------------------------------------------
 -          H O M E  * P A G E *  M E N U
 -----------------------------------------------*/
 
 export default function FullWidthTabs({
-  headerTitle,
-  setHeaderTitle,
   tabPaths
 }) {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Sync the tab highlight with the current URL on load/refresh
-  const currentTabIndex = tabPaths.indexOf(location.pathname);
-  const [value, setValue] = useState(currentTabIndex !== -1 ? currentTabIndex : 0);
+  const [value, setValue] = useState(() => {
+    const currentPath = location.pathname;
+    const foundTab = tabPaths.find(tab => tab.link === currentPath);
+    return foundTab ? foundTab.id : 0; 
+  });
 
-  // 3. EFFECT: Redirect to Dashboard if path is just '/Home'
-  useEffect(() => {
-    if (location.pathname === '/Home') {
-      // replace: true prevents the user from getting stuck when clicking "Back"
-      navigate(tabPaths[0], { replace: true });
-    }
-  }, [location.pathname, navigate, tabPaths]);
-
-  // 4. EFFECT: Keep the tab highlighted if the URL changes (e.g., via back button)
-  useEffect(() => {
-    if (currentTabIndex !== -1) {
-      setValue(currentTabIndex);
-    }
-  }, [currentTabIndex]);
-
-  const handleChange = (event, newValue) => {
+  const handleChange = (e, newValue) => {
     setValue(newValue);
-    navigate(tabPaths[newValue]);
+    navigate(tabPaths[newValue].link);
   };
+
+  // Optional: Handle browser back/forward buttons
+  useEffect(() => {
+    const currentPath = location.pathname;
+    const foundTab = tabPaths.find(tab => tab.link === currentPath);
+    if (foundTab && foundTab.id !== value) {
+      setValue(foundTab.id);
+    }
+  }, [location.pathname, value]);
 
   return (
     <Box  
@@ -93,8 +89,8 @@ export default function FullWidthTabs({
       <AppBar position="static">
         <Tabs
           value={value}
-          sx={{ bgcolor: 'white', color: '#263238', fontFamily: 'Roboto' }}
           onChange={handleChange}
+          sx={{ bgcolor: 'white', color: '#263238', fontFamily: 'Roboto' }}
           indicatorColor="secondary"
           textColor="inherit"
           variant="fullWidth"
@@ -114,8 +110,7 @@ export default function FullWidthTabs({
       </TabPanel>
       <TabPanel value={value} index={1} dir={theme.direction}>
         <AssetMasterTile 
-          headerTitle={headerTitle}
-          setHeaderTitle={setHeaderTitle}          
+          // setHeaderTitle={setHeaderTitle}          
         />
       </TabPanel>
       <TabPanel value={value} index={2} dir={theme.direction}>

@@ -8,24 +8,12 @@ export const useRefBrand = () => {
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  // Test API connection
-  const testAPI = async () => {
-    try {
-      const response = await api.get('/refBrand/test');
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  };
-
   // GET all brands
   useEffect(() => {
     const getRefBrand = async () => {
       try {
         setLoading(true);
         setError(null);
-        
-        await testAPI();
         
         const response = await api.get('/refBrand');       
         const data = response.data;
@@ -152,7 +140,6 @@ export const useRefBrand = () => {
     updaterefBrand,
     deleterefBrand,
     refreshRefBrand,
-    testAPI
   };
 };
 

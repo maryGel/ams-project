@@ -7,18 +7,6 @@ export const useRefLocation = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
-
-  //  Test API connection
-    const testAPI = async () => {
-      try {
-        const response = await api.get('/refLocation/test');
-        // console.log('API Test Response:', response.data);
-        return response.data;
-      } catch (error) {
-        console.error('API Test Failed:', error);
-        throw error;
-      }
-    };
   
     // GET all locations
     useEffect(() => {
@@ -27,8 +15,7 @@ export const useRefLocation = () => {
           setLoading(true);
           setError(null);
           
-          // Test API first
-          await testAPI();          
+
 
           const response = await api.get('/refLocation');          
           const data = response.data;
@@ -154,6 +141,6 @@ export const useRefLocation = () => {
     updateRefLocation,
     deleteRefLocation,
     refreshRefLocation,
-    testAPI
+
   }
 }
