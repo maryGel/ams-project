@@ -1,8 +1,17 @@
+/**************************************************
+ * AMS PROJECT — Hybrid Server
+ * - Vite React (same-origin)
+ * - API-only (future use)
+ * - LAN-friendly
+ **************************************************/
+
 import express from 'express';
 import mysql from 'mysql2';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url'
 
 // Load environment variables
 dotenv.config();
@@ -23,8 +32,13 @@ import colorsRoute from './routes/refColorRoute.js';
 import sectionsRoute from './routes/refSecRoute.js';
 import approvalRoute from './routes/refApprovalRoute.js';
 
+// _DIRNAME FIX
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
+// APP init
 const app = express();
+
 
 // --- CORS CONFIGURATION ---
 // Focused strictly on local development to avoid "split-brain" issues
@@ -35,45 +49,58 @@ const allowedOrigins = [
   'http://127.0.0.1:3000'
 ];
 
+
+// Cors Hybrid safe
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.log('CORS blocked for origin:', origin);
-      callback(new Error('Not allowed by CORS'));
+    // Allow Postman / curl / server-to-server
+    if (!origin) return callback(null, true)
+
+    // Allow localhost
+    if (
+      origin.startsWith('http://localhost:5173') ||
+      origin.startsWith('http://localhost') ||
+      origin.startsWith('http://127.0.0.1')
+    ) {
+      return callback(null, true)
     }
+
+    // Allow LAN (192.168.x.x)
+    if (origin.startsWith('http://192.168.')) {
+      return callback(null, true)
+    }
+
+    // Allow future HTTPS domains
+    if (origin.startsWith('https://')) {
+      return callback(null, true)
+    }
+
+    console.log('❌ CORS blocked:', origin)
+    callback(new Error('Not allowed by CORS'))
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   credentials: true,
-  allowedHeaders: [
-    'Content-Type', 
-    'Authorization', 
-    'X-Requested-With',
-    'Cache-Control',
-    'Pragma',
-    'Expires'
-  ]
-};
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}
 
-app.use(cors(corsOptions));
+app.use(cors(corsOptions))
 
+// --- MIDDLEWARE ---
+app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // --- DATABASE CONFIGURATION ---
 // Hardcoded to ensure Node always talks to the same DB as SQLyog
 const dbConfig = {
-  host: '192.168.64.5',
-  user: 'myuser101',
-  password: 'MmFjbV69',
-  database: 'ams1',
+  host: process.env.DB_HOST || '192.168.64.5',
+  user: process.env.DB_USER || 'myuser101',
+  password: process.env.DB_PASSWORD || 'MmFjbV69',
+  database: process.env.DB_NAME || 'ams1',
   port: 3306,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  connectTimeout: 30000,
+  connectTimeout: 30000
 };
 
 export const db = mysql.createPool(dbConfig);
@@ -90,9 +117,7 @@ db.getConnection((err, connection) => {
   }
 });
 
-// --- MIDDLEWARE ---
-app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+
 
 // Attach database pool to every request
 app.use((req, res, next) => {
@@ -126,6 +151,16 @@ app.use('/colorsRoute', colorsRoute);
 app.use('/secRoutes', sectionsRoute);
 app.use('/approvalRoute', approvalRoute);
 
+
+// React (Vite Dist)
+app.use(express.static(path.join(__dirname, '../client/dist')))
+
+// SPA fallback — MUST BE LAST
+app.get(/.*/, (req, res) => {
+  res.sendFile(
+    path.join(__dirname, '../client/dist/index.html')
+  )
+})
 // 404 Handler
 app.use((req, res) => {
   res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
@@ -133,7 +168,7 @@ app.use((req, res) => {
 
 // --- SERVER START ---
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log('='.repeat(50));
   console.log(`🚀 Local Server running on http://localhost:${PORT}`);
   console.log(`📡 Target DB Host: 192.168.64.5`);

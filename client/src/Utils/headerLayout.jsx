@@ -1,17 +1,22 @@
 import { Outlet } from 'react-router-dom';
 import Header from './header';
 
-function Layout({ headerTitle, setHeaderTitle, username, navLink, setNavLink }) {
+function Layout({ headerTitle, setHeaderTitle, username, navLink, setNavLink, isMobile }) {
+
+  console.log( `isMobile: ${isMobile}`)
   return (
     <>
-      <Header 
-        headerTitle={headerTitle}
-        setHeaderTitle={setHeaderTitle}
-        navLink={navLink}
-        setNavLink={setNavLink}
-        username={username}
-      />
-      <Outlet /> {/* Page content goes here */}
+      {!isMobile && 
+        <Header 
+          headerTitle={headerTitle}
+          setHeaderTitle={setHeaderTitle}
+          navLink={navLink}
+          setNavLink={setNavLink}
+          username={username}
+          isMobile={isMobile}
+        />        
+      }
+      <Outlet /> 
     </>
   );
 };

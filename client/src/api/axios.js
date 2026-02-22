@@ -1,7 +1,13 @@
 import axios from 'axios';
 
-// For local development - point to local backend
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// In development with proxy, just use relative URLs
+// In production, use the full URL with hostname
+const API_URL = import.meta.env.PROD 
+  ? (typeof window !== 'undefined' ? `http://${window.location.hostname}:3000` : 'http://localhost:3000')
+  : '';
+
+console.log(`🔧 Environment: ${import.meta.env.MODE}, API URL: ${API_URL || 'relative (proxy)'}`);
+
 
 export const api = axios.create({
   baseURL: API_URL,

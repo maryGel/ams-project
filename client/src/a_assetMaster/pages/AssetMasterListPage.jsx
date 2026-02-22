@@ -150,12 +150,10 @@ function AssetMasterListPage({ useProps, setHeaderTitle, setNavLink }) {
             size="small"  
             options={assets}
             filterOptions={filterOptions}
-            // Selected items 
               value={draftSelectedAssets}
-              onChange={(event, newValue) => setDraftSelectedAssets(newValue)}
-            //  free text search
+              onChange={(e, newValue) => setDraftSelectedAssets(newValue)}
               inputValue= {draftSearchQuery}
-              onInputChange = {(event, newInputValue) => setDraftSearchQuery(newInputValue)}
+              onInputChange = {(e, newInputValue) => setDraftSearchQuery(newInputValue)}
 
             getOptionLabel={(option) =>
               `${option.FacNO} - ${option.FacName}`
@@ -183,11 +181,9 @@ function AssetMasterListPage({ useProps, setHeaderTitle, setNavLink }) {
             id="size-small-filled-multi"
             size="small"              
             options={assetCat}
-            // Use draft state for asset group
               value={draftSelectedAssetCategories}
               onChange={(event, newValue) => setDraftSelectedAssetCategories(newValue)} 
               getOptionLabel={(option) => option}
-            // defaultValue={[]}
               renderInput={(params) => (
                 <TextField {...params} label="Category" placeholder="Category" />
               )}
@@ -202,12 +198,9 @@ function AssetMasterListPage({ useProps, setHeaderTitle, setNavLink }) {
             id="size-small-filled-multi"
             size="small"              
             options={assetClass}  
-            // Use draft state for asset group
             value={draftSelectedAssetClass}
             onChange={(event, newValue) => setDraftSelectedAssetClass(newValue)}
-
             getOptionLabel={(option) => option}
-            // defaultValue={[]}
             renderInput={(params) => (
               <TextField {...params} label="Asset Class"  placeholder="Asset Class" />
             )}
@@ -222,12 +215,9 @@ function AssetMasterListPage({ useProps, setHeaderTitle, setNavLink }) {
             id="size-small-filled-multi"
             size="small"              
             options={location}  
-            // Use draft state for asset group
             value={draftSelectedLocation}
             onChange={(event, newValue) => setDraftSelectedLocation(newValue)}
-
             getOptionLabel={(option) => option}
-            // defaultValue={[]}
             renderInput={(params) => (
               <TextField {...params} label="Location"  placeholder="Location" />
             )}
@@ -241,12 +231,9 @@ function AssetMasterListPage({ useProps, setHeaderTitle, setNavLink }) {
             id="size-small-filled-multi"
             size="small"              
             options={department}  
-            // Use draft state for asset group
             value={draftSelectedDepartment}
             onChange={(event, newValue) => setDraftSelectedDepartment(newValue)}
-
             getOptionLabel={(option) => option}
-            // defaultValue={[]}
             renderInput={(params) => (
               <TextField {...params} label="Department"   placeholder="Department" />
             )}

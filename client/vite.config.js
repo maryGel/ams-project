@@ -10,6 +10,24 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    host: true, // Expose to network
+    proxy: {
+      // Proxy all API requests to your Express server
+      '/login': 'http://localhost:3000',
+      '/users': 'http://localhost:3000',
+      '/itemlist': 'http://localhost:3000',
+      '/referentials': 'http://localhost:3000',
+      '/api': 'http://localhost:3000',
+      '/refBrand': 'http://localhost:3000',
+      '/refItemClass': 'http://localhost:3000',
+      '/refLocation': 'http://localhost:3000',
+      '/refDepartment': 'http://localhost:3000',
+      '/accessRights': 'http://localhost:3000',
+      '/colorsRoute': 'http://localhost:3000',
+      '/secRoutes': 'http://localhost:3000',
+      '/approvalRoute': 'http://localhost:3000',
+      '/health': 'http://localhost:3000'
+    }
   },
   // Add base URL for Vercel
   base: './'

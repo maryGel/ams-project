@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { headerTitleMap } from './headerTitleMap';
 import { useNavigate } from 'react-router-dom';
-import { NavLink, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 // MUI Icons
 import { Box, InputBase, Menu, MenuItem, CircularProgress, Backdrop, Button } from '@mui/material';
@@ -13,18 +13,16 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 function Header({ username, headerTitle, setHeaderTitle, navLink, setNavLink }) {
+  const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
-  const [isHovered, setIsHovered] = useState(false);
-
-  
   const isHomeTab = currentPath.includes('/Home');
-
   const [anchorEl, setAnchorEl] = useState(null);
-  const isMenuOpen = Boolean(anchorEl);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const navigate = useNavigate();
-
+  const [isHovered, setIsHovered] = useState(false);
+  
+  const isMenuOpen = Boolean(anchorEl);
+  
   // derive title from URL
   const title = headerTitleMap[currentPath] || '';
   console.log( `isHomeTab: ${isHomeTab}`)

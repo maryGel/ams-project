@@ -222,12 +222,12 @@ export default function AssetMasterTable({
   }) {
 
   // Add debug at top of component
-  console.log('=== TABLE DEBUG ===');
-  console.log('displayedAssets prop:', displayedAssets);
-  console.log('displayedAssets isArray?', Array.isArray(displayedAssets));
-  console.log('displayedAssets length:', displayedAssets?.length);
-  console.log('total:', total);
-  console.log('isTableActive:', isTableActive);
+  // console.log('=== TABLE DEBUG ===');
+  // console.log('displayedAssets prop:', displayedAssets);
+  // console.log('displayedAssets isArray?', Array.isArray(displayedAssets));
+  // console.log('displayedAssets length:', displayedAssets?.length);
+  // console.log('total:', total);
+  // console.log('isTableActive:', isTableActive);
 
   // MUI States
   const [order, setOrder] = useState('asc');

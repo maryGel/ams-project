@@ -179,7 +179,6 @@ export const useUsers = () => {
             });
 
             const data = res.data;
-            console.log('[getUsers] response data:', data);
             if (!data) throw new Error('Failed to fetch users');
 
             dispatch({ type: 'FETCH_USERS_SUCCESS', payload: data });

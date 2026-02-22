@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './api/ProtectedRoute.jsx';
 
@@ -48,6 +48,14 @@ function App() {
     setNavLink(newLink);
   };
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   return (
     <div className="App">
       <Routes>
@@ -56,6 +64,7 @@ function App() {
           <LoginPage 
             setHeaderTitle={saveTitleUpdate}
             setUsername={setUsername}
+            
           />
         } />
 
@@ -68,6 +77,7 @@ function App() {
               navLink={navLink}
               setNavLink={setNavLink}
               username={username}
+              isMobile={isMobile}
             />
           </ProtectedRoute>
         }>
@@ -79,6 +89,7 @@ function App() {
               username={username}
               navLink={navLink}
               setNavLink={saveNavLinkUpdate}
+              isMobile={isMobile}
             />
           } />
           
