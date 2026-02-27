@@ -137,7 +137,7 @@ function LoginPage({setHeaderTitle, setUsername}) {
                   : 'bg-black hover:bg-blue-700'
               }`}
               onClick={handleLogin}
-              onKeyDown={handleLogin}
+              onKeypress={handleLogin}
               disabled={isLoading}
             >
               {isLoading ? 'Logging in...' : 'Login'}

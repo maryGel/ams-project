@@ -1,52 +1,8 @@
 // Custom Hooks
 import {useUsers} from '../hooks/useUsers';
+import {dashItems} from './components/dashItems';
 
 
-
-const dashItems =  [
-    { id: 1,
-        title: 'Total Requests',
-        link: '/systemSetup/user/userProfile',
-        imgSrc: '/dashIcons/totalRequests.png',
-        num: 14,
-    },
-    { id: 2,
-        title: 'Job Orders',
-        link: '/systemSetup/user/userProfile',
-        imgSrc: '/dashIcons/jo.png',
-        num: 5,
-    },
-    { id: 3,
-        title: 'Maintenance',
-        link: '/systemSetup/user/userProfile',
-        imgSrc: '/dashIcons/mechanic.png',
-        num: 9,
-    },
-    { id: 4,
-        title: 'Transfers',
-        link: '/systemSetup/user/userProfile',
-        imgSrc: '/dashIcons/transfer.png',
-        num: 15,
-    },
-    { id: 5,
-        title: 'Issuance',
-        link: '/systemSetup/user/userProfile',
-        imgSrc: '/dashIcons/issuance.png',
-        num: 21,
-    },
-    { id: 6,
-        title: 'Disposals',
-        link: '/systemSetup/user/userProfile',
-        imgSrc: '/dashIcons/garbage.png',
-        num: 10,
-    },
-    { id: 7,
-        title: 'Lost Assets',
-        link: '/systemSetup/user/userProfile',
-        imgSrc: '/dashIcons/lost.png',
-        num: 0,
-    },
-]
 
 
 function MvDashBoard(){
@@ -73,10 +29,10 @@ function MvDashBoard(){
           <span className='font-sans tracking-wider text-black '>Asset Mangement</span>
         </div>
 
-        <div className='flex items-center justify-between px-5 pt-3 pb-3 m-4 text-2xl font-semibold tracking-wide bg-blue-100 rounded-md shadow-md'>
-          <h1 className='pl-2 font-sans'>Dashboard</h1>
+        <div className='flex items-center justify-between px-5 pt-3 pb-3 m-4 font-semibold tracking-wide bg-blue-100 rounded-md shadow-md text-md'>
+          <h1 className='pl-1 font-sans'>Dashboard</h1>
           <img
-              className='w-10'
+              className='w-8'
               src='/icons/menu_icons/dashboard.png'
           />
         </div>  

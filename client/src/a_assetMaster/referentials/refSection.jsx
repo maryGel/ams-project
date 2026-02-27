@@ -33,8 +33,6 @@ export default function RefSection({ openTab, useProps }) {
     error,
   } = useSections(useProps);
 
-  console.log(`refSections: ${refSections}`);
-
   const { handleResizeMouseDown, theaderStyle, tbodyStyle } = useColumnWidths();
 
   const [searchQuery, setSearchQuery] = useState('');

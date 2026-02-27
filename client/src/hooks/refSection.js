@@ -25,7 +25,7 @@ export const useSections= () => {
         
         const dataWithID = data.map((item, index) => ({
           ...item,
-          id: item.id || `temp-${index}`,
+          id: item.id   || `temp-${index}`,
           xcode: item.xcode,
           xdesc: item.xdesc
         }));

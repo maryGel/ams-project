@@ -26,7 +26,9 @@ export default defineConfig({
       '/colorsRoute': 'http://localhost:3000',
       '/secRoutes': 'http://localhost:3000',
       '/approvalRoute': 'http://localhost:3000',
-      '/health': 'http://localhost:3000'
+      '/health': 'http://localhost:3000',
+      '/jo_hRoute': 'http://localhost:3000',
+      '/jo_dRoute': 'http://localhost:3000',
     }
   },
   // Add base URL for Vercel

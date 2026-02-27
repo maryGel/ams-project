@@ -31,6 +31,9 @@ import accessRoute from './routes/accessRoute.js';
 import colorsRoute from './routes/refColorRoute.js';
 import sectionsRoute from './routes/refSecRoute.js';
 import approvalRoute from './routes/refApprovalRoute.js';
+import jo_hRoute from './routes/jo_hRoute.js';
+import jo_dRoute from './routes/jo_dRoute.js';
+
 
 // _DIRNAME FIX
 const __filename = fileURLToPath(import.meta.url)
@@ -150,7 +153,8 @@ app.use('/accessRights', accessRoute);
 app.use('/colorsRoute', colorsRoute);
 app.use('/secRoutes', sectionsRoute);
 app.use('/approvalRoute', approvalRoute);
-
+app.use('/jo_hRoute', jo_hRoute);
+app.use('/jo_dRoute', jo_dRoute);
 
 // React (Vite Dist)
 app.use(express.static(path.join(__dirname, '../client/dist')))

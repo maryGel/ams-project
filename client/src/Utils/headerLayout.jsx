@@ -3,7 +3,7 @@ import Header from './header';
 
 function Layout({ headerTitle, setHeaderTitle, username, navLink, setNavLink, isMobile }) {
 
-  console.log( `isMobile: ${isMobile}`)
+
   return (
     <>
       {!isMobile && 
