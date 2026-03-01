@@ -9,9 +9,7 @@ import MvAccountPage from './mvAccountPage';
 
 
 
-function MobileHomePage({ 
-    username
-}){
+function MobileHomePage(){
     const navigate = useNavigate();
 
     // Method 1: useMatch (most reliable for route-based highlighting)
@@ -56,9 +54,7 @@ function MobileHomePage({
         <>
           {pathname === '/Home' &&
             <div className='flex flex-col min-h-screen bg-gray-100 md:hidden'>
-              <MvDashBoard
-                  username={username}
-              />
+              <MvDashBoard/>
             </div>          
           }
           {pathname === '/Home/TransactionPage' &&

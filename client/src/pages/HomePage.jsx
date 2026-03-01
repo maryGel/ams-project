@@ -34,7 +34,6 @@ function HomePage({
       }           
       <div>
         <MobileHomePage
-          username ={username}
         />
       </div>    
     </>

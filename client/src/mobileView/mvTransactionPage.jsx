@@ -1,13 +1,14 @@
 import {useState, useEffect, useMemo} from 'react';
 
 // MUI
-import { Box, Button, Stack, Badge, useTheme, useMediaQuery, Autocomplete, TextField, Chip} from '@mui/material';
+import { Box, Button, Stack, useTheme, useMediaQuery} from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import TuneIcon from '@mui/icons-material/Tune';
 import CloseIcon from '@mui/icons-material/Close';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 // Components
-import {dashItems} from './components/dashItems';
-import MvJOForm from './components/mvJOForm';
+// import {dashItems} from './components/dashItems';
+
 // Hooks
 import { useJO_h } from '../hooks/useJO_h';
 import { useJO_d } from '../hooks/useJO_d';
@@ -83,7 +84,7 @@ function MvTansactionPage(useProps){
 
     return (
       <>
-        <Box 
+        {/* <Box 
           sx={{ 
             width: '100%', 
             overflow: 'auto', 
@@ -135,9 +136,9 @@ function MvTansactionPage(useProps){
                 </Button>
               )}
           </Stack>
-        </Box>
+        </Box> */}
 
-        <div className='flex flex-col w-full gap-4 p-4'>
+        <div className='flex flex-col w-full h-screen gap-4 p-4'>
           
           <div className='flex justify-end gap-2'>
             <button onClick={()=> handleFilterOpen(true)}><TuneIcon/></button>
@@ -168,9 +169,9 @@ function MvTansactionPage(useProps){
                       label="Department"
                     />  
                     <div className='flex justify-end'>
-                      <button className='flex items-center w-20 px-2 text-sm font-semibold tracking-wider border rounded-xl border-spacing-1'>
-                        <img src='/icons/actions/submitsearch.png' className='w-5'/>
-                        <span className='my-1'>Apply</span>
+                      <button className='flex items-center gap-1 px-2 py-1 text-xs tracking-wider border ont-semibold w-50 rounded-2xl border-spacing-1'>
+                        <CheckCircleIcon fontSize='small'/>
+                        <span className=''>Apply Filter</span>
                       </button>                     
                     </div>  
          
@@ -179,14 +180,7 @@ function MvTansactionPage(useProps){
              
             )}
 
-          <div className='flex flex-col gap-4 pb-2'>
-            <MvJOForm 
-              joHeaders={joHeaders}
-              isLoading={isLoading}
-              error={error}
-              joDetails={joDetails}
-            />
-          </div>
+
 
         </div>
       

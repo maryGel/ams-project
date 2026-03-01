@@ -24,7 +24,7 @@
   });
 
 
-  // Get single section
+  // Get single jo_d
   router.get(':JO_No', (req, res) => {
     const {JO_No} = req.params;
 

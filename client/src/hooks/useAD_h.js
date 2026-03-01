@@ -1,22 +1,22 @@
 import {useState, useEffect} from 'react';
 import {api} from '../api/axios';
 
-export const useJO_d = () => {
-    const [joDetails, setJoDetails] = useState([]);
+export const useAD_h = () => {
+    const [adHeaders, setAdHeaders] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Get All Jo Details
+    // Get All AD Headers
     useEffect(()=> {
-        const getJODetails = async() => {
+        const getADHeaders = async() => {
             try {
               setIsLoading(true);
               setError(null)
 
-              const response = await api.get('/jo_dRoute');
+              const response = await api.get('/ad_hRoute');
               const data = response.data;
               
-              setJoDetails(data);
+              setAdHeaders(data);
 
 
             } catch (error) {
@@ -35,12 +35,12 @@ export const useJO_d = () => {
               setIsLoading(false);
             }
         };
-        getJODetails()
+        getADHeaders()
 
     }, []);
 
     return {
-      joDetails,
+      adHeaders,
       isLoading,
       error
     }

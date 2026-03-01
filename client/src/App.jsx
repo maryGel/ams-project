@@ -63,8 +63,7 @@ function App() {
         <Route path="/" element={
           <LoginPage 
             setHeaderTitle={saveTitleUpdate}
-            setUsername={setUsername}
-            
+            setUsername={setUsername}            
           />
         } />
 

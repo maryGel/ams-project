@@ -1,22 +1,21 @@
 import {useState, useEffect} from 'react';
 import {api} from '../api/axios';
 
-export const useJO_d = () => {
-    const [joDetails, setJoDetails] = useState([]);
+export const useApprovalLogs = () => {
+    const [approvalLogs, setApprovalLogs] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Get All Jo Details
     useEffect(()=> {
-        const getJODetails = async() => {
+        const getApprovalLogs = async() => {
             try {
               setIsLoading(true);
               setError(null)
 
-              const response = await api.get('/jo_dRoute');
+              const response = await api.get('/appLogsRoute');
               const data = response.data;
               
-              setJoDetails(data);
+              setApprovalLogs(data);
 
 
             } catch (error) {
@@ -35,12 +34,12 @@ export const useJO_d = () => {
               setIsLoading(false);
             }
         };
-        getJODetails()
+        getApprovalLogs()
 
     }, []);
 
     return {
-      joDetails,
+      approvalLogs,
       isLoading,
       error
     }

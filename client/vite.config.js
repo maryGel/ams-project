@@ -29,6 +29,7 @@ export default defineConfig({
       '/health': 'http://localhost:3000',
       '/jo_hRoute': 'http://localhost:3000',
       '/jo_dRoute': 'http://localhost:3000',
+      '/appLogsRoute': 'http://localhost:3000',
     }
   },
   // Add base URL for Vercel

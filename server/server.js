@@ -33,6 +33,13 @@ import sectionsRoute from './routes/refSecRoute.js';
 import approvalRoute from './routes/refApprovalRoute.js';
 import jo_hRoute from './routes/jo_hRoute.js';
 import jo_dRoute from './routes/jo_dRoute.js';
+import approvalLogsRoute from './routes/approvalLogsRoute.js';
+import ad_hRoute from './routes/ad_hRoute.js';
+import ad_dRoute from './routes/ad_dRoute.js';
+import tr_hRoute from './routes/tr_hRoute.js';
+import tr_dRoute from './routes/tr_dRoute.js';
+
+
 
 
 // _DIRNAME FIX
@@ -155,6 +162,11 @@ app.use('/secRoutes', sectionsRoute);
 app.use('/approvalRoute', approvalRoute);
 app.use('/jo_hRoute', jo_hRoute);
 app.use('/jo_dRoute', jo_dRoute);
+app.use('/appLogsRoute', approvalLogsRoute);
+app.use('/ad_hRoute', ad_hRoute);
+app.use('/ad_dRoute', ad_dRoute);
+app.use('/tr_hRoute', tr_hRoute);
+app.use('/tr_dRoute', tr_dRoute);
 
 // React (Vite Dist)
 app.use(express.static(path.join(__dirname, '../client/dist')))

@@ -1,22 +1,22 @@
 import {useState, useEffect} from 'react';
 import {api} from '../api/axios';
 
-export const useJO_d = () => {
-    const [joDetails, setJoDetails] = useState([]);
+export const useTR_d = () => {
+    const [trDetails, setTrDetails] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Get All Jo Details
+    // Get All TR Details
     useEffect(()=> {
-        const getJODetails = async() => {
+        const getTRDetails = async() => {
             try {
               setIsLoading(true);
               setError(null)
 
-              const response = await api.get('/jo_dRoute');
+              const response = await api.get('/tr_dRoute');
               const data = response.data;
               
-              setJoDetails(data);
+              setTrDetails(data);
 
 
             } catch (error) {
@@ -35,12 +35,12 @@ export const useJO_d = () => {
               setIsLoading(false);
             }
         };
-        getJODetails()
+        getTRDetails()
 
     }, []);
 
     return {
-      joDetails,
+      trDetails,
       isLoading,
       error
     }
