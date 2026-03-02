@@ -84,61 +84,7 @@ function MvTansactionPage(useProps){
 
     return (
       <>
-        {/* <Box 
-          sx={{ 
-            width: '100%', 
-            overflow: 'auto', 
-            pt: 3, 
-            pb: 1.5, 
-            borderBottom: 1, 
-            borderColor: 'grey.300', 
-            position: 'sticky', 
-            top: 0, 
-            bgcolor: 'white',
-            transition: 'transform 0.3s ease',
-            transform: show ? 'translateY(0)' : 'translateY(-100%)',            
-          }}
-        >
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{
-              minWidth: isMobile ? 'max-content' : 'auto',
-              justifyContent: 'flex-start',
-              px: 2
-            }}
-          >
-            <Button
-              variant="outlined"
-              sx={{ 
-                px: 1,
-                textTransform: 'none',
-                whiteSpace: 'nowrap',
-                borderColor: 'divider',
-                color: 'text.primary',
-                '&:hover': { borderColor: 'primary.main', bgcolor: 'action.hover' }
-              }}
-            >
-              <SearchIcon sx={{}}/>
-            </Button>
-              {dashItems.map(item => 
-                <Button
-                  variant="outlined"
-                  sx={{ 
-                    textTransform: 'none',
-                    whiteSpace: 'nowrap',
-                    borderColor: 'divider',
-                    color: 'text.primary',
-                    '&:hover': { borderColor: 'primary.main', bgcolor: 'action.hover' }
-                  }}
-                >
-                  {item.title} {`(${item.num})`}
-                </Button>
-              )}
-          </Stack>
-        </Box> */}
-
-        <div className='flex flex-col w-full h-screen gap-4 p-4'>
+      <div className='flex flex-col w-full h-screen gap-4 p-4'>
           
           <div className='flex justify-end gap-2'>
             <button onClick={()=> handleFilterOpen(true)}><TuneIcon/></button>

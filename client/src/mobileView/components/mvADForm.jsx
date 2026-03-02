@@ -15,38 +15,36 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import {useApprovalLogs} from '../../hooks/useApprovalLogs';
 
 
-function MvJOForm({
+function MvADForm({
     useProps,
-    filteredJo,
-    joDetails,
-    isLoading,
-    error,  
-  
+    filteredAD,
+    adDetails,
+
   }) {
     const {approvalLogs} = useApprovalLogs(useProps);
     const [viewItems, setViewItems] = useState({});
     const [viewApprovers, setViewApprovers] = useState({});
     const [selectedDetails, setSelectedDetails] = useState(null);
 
-    const handleViewItemsOpen = (JO_No) => {
+    const handleViewItemsOpen = (AD_No) => {
         setViewItems(prev => ({
             ...prev,
-            [JO_No]: !prev[JO_No]
+            [AD_No]: !prev[AD_No]
         }));
         setViewApprovers(prev => ({
             ...prev,
-            [JO_No]: false
+            [AD_No]: false
         }));
     };
 
-    const handleViewApprovers = (JO_No) => {
+    const handleViewApprovers = (AD_No) => {
         setViewApprovers(prev => ({
             ...prev,
-            [JO_No]: !prev[JO_No]
+            [AD_No]: !prev[AD_No]
         }));
         setViewItems(prev => ({
             ...prev,
-            [JO_No]: false
+            [AD_No]: false
         }));
     };
 
@@ -94,30 +92,30 @@ function MvJOForm({
         document.body.style.overflow = 'unset';
     };
 
-    // Filter joDetails by JO_No & Approval logs by JO_No
-    const getItemsByJONo = (JO_No) => {
-        return joDetails?.filter(detail => detail.JO_No === JO_No) || [];
+    // Filter joDetails by AD_No & Approval logs by AD_No
+    const getItemsByADNo = (AD_No) => {
+        return adDetails?.filter(detail => detail.AD_No === AD_No) || [];
     };
-    const getAppLogByJONo = (JO_No) => {
-        return approvalLogs?.filter(log => log.TRNO === JO_No) || [];
+    const getAppLogByADNo = (AD_No) => {
+        return approvalLogs?.filter(log => (log.TRNO === AD_No) && log.Module === 'Disposal') || [];
     }
 
-    if (isLoading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error}</div>;
+    // if (isLoading) return <div>Loading...</div>;
+    // if (error) return <div>Error: {error}</div>;
 
     return (
         <>
-            {filteredJo?.map((header) => {
-                const items = getItemsByJONo(header.JO_No);
-                const logs = getAppLogByJONo(header.JO_No);
+            {filteredAD?.map((header) => {
+                const items = getItemsByADNo(header.AD_No);
+                const logs = getAppLogByADNo(header.AD_No);
                 
 
                 return (
                     <div key={header.ID} className='flex flex-col w-full gap-1 p-2 border shadow-md border-spacing-2 border-slate-400 rounded-xl'>
                         <div className='flex justify-between px-2'>
                             <div className='flex flex-col'>
-                                <span className='text-xs font-semibold'>Job Order</span>
-                                <span className='font-sans text-sm font-semibold text-blue-900'>{header.JO_No}</span>
+                                <span className='text-xs font-semibold'>Disposal</span>
+                                <span className='font-sans text-sm font-semibold text-blue-900'>{header.AD_No}</span>
                             </div>
                             <div className='flex items-center'>
                                 <span className='border rounded-full border-spacing-1'>
@@ -134,16 +132,16 @@ function MvJOForm({
                             </div>
                             <div className='flex flex-col'>
                                 <div className='flex items-start justify-between text-xs text-slate-500 center'>
-                                  <span>{header.Department_Code}</span>
+                                  <span>{header.Deparment_Name}</span>
                                 </div>
                                 <div className='flex justify-start gap-2'>
                                     <span className='text-xs text-slate-500'>Remarks:</span>
                                     <span className='text-sm'>{header.Remarks}</span>
                                 </div>
-                                <span className='font-sans text-xs tracking-wide text-slate-500'>
-                                    Requestor: {header.requested_by}
-                                </span>
-                                <span className='mt-1 text-xs tracking-wide text-slate-500'>For inspection by: {header.Sector_name}</span>
+                                {/* <span className='font-sans text-xs tracking-wide text-slate-500'>
+                                    Holder: {header.Holder}
+                                </span> */}
+                                <span className='mt-1 text-xs tracking-wide text-slate-500'>Evaluated By: {header.Evaluated_By}</span>
                             </div>
                         </div>
 
@@ -152,9 +150,9 @@ function MvJOForm({
                                 <button 
                                     className={clsx(
                                         'flex gap-1 text-xs items-center mt-1 px-2 py-1 border rounded-xl',
-                                          !viewItems[header.JO_No] ? 'border-slate-400' : 'border-blue-500 text-blue-700'
+                                          !viewItems[header.AD_No] ? 'border-slate-400' : 'border-blue-500 text-blue-700'
                                         )}
-                                    onClick={() => handleViewItemsOpen(header.JO_No)}
+                                    onClick={() => handleViewItemsOpen(header.AD_No)}
                                 >
                                   <img className='w-4' src='/icons/actions/boxes.png'/>
                                   <span className='font-semibold tracking-wide'>Items</span>
@@ -162,9 +160,9 @@ function MvJOForm({
                                 {header.approved_by && <button 
                                   className={clsx(
                                     'flex gap-1 text-xs items-center mt-1 px-2 border rounded-xl',
-                                      !viewApprovers[header.JO_No] ? 'border-slate-400' : 'border-blue-500 text-blue-700'
+                                      !viewApprovers[header.AD_No] ? 'border-slate-400' : 'border-blue-500 text-blue-700'
                                     )}
-                                    onClick={() => handleViewApprovers(header.JO_No)}
+                                    onClick={() => handleViewApprovers(header.AD_No)}
                                   >
                                     <img className='w-4' src='/icons/actions/approve.png'/>
                                     <span className='font-semibold tracking-wide'>Approvers</span>
@@ -175,8 +173,8 @@ function MvJOForm({
                         </div>
 
                         {/* Items section - dynamically mapped from joDetails */}
-                        {viewItems[header.JO_No] && items.length > 0 && (
-                            <div className='flex flex-col w-full mt-1 text-sm'>
+                        {viewItems[header.AD_No] && items.length > 0 && (
+                            <div className='flex flex-col w-full mt-3 text-sm'>
                                 {items.map((item, index) => (
                                     <div key={item.ID || index} className='flex flex-col justify-start mb-3'>
                                         
@@ -193,29 +191,30 @@ function MvJOForm({
                                                 {item.workDet}
                                             </span>
                                         )}
-                                        <div className='flex items-center gap-2 mt-1 text-xs pl-7 text-slate-500'>
-                                            <span>Target Date:</span>
-                                            <span className='pr-2'>{item.TargetDate}</span>               
-                                        </div>                                      
+                                        {/* <div className='flex items-center gap-2 mt-1 text-xs pl-7 text-slate-500'>
+                                            <span className='pr-2'>{item.FAC_NO}</span>               
+                                        </div>                                       */}
                                     </div>
                                 ))}
                             </div>
                         )}
 
                         {/* Show message if no items */}
-                        {viewItems[header.JO_No] && items.length === 0 && (
+                        {viewItems[header.AD_No] && items.length === 0 && (
                             <div className='py-2 text-sm italic text-gray-500'>
                                 No items found for this job order.
                             </div>
                         )}
                         {/* Show approval logs */}
-                        {viewApprovers[header.JO_No] && logs.length > 0 &&
+                        {viewApprovers[header.AD_No] && logs.length > 0 &&
                             <div className='flex flex-col px-3 mt-2 text-sm'>
                                 <div className='flex justify-between tracking-wide text-gray-500'>
                                     <span>Approvers</span>
                                     <span className='mr-3'>Date</span>
                                 </div>
-                            {logs.map((log) => (<>                             
+                                
+                                {logs.map((log) => (<>
+
                                 <div className='flex items-center justify-between mt-2'>
                                     <div className='flex items-center gap-1'>
                                         <span className='w-5 text-green-500'>
@@ -225,8 +224,8 @@ function MvJOForm({
                                     </div>
                                     <div className='flex gap-2'>
                                         <span>{log.STAT === 'Disapproved' ? "" : log.STAT}</span>
-                                        <span><DateDisplay value={log.DT} format="short" /></span>       
-                                    </div>                             
+                                        <span><DateDisplay value={log.DT} format="short" /></span>    
+                                    </div>                                    
                                 </div>
                                 <span className='pt-1 pl-6 text-slate-500'>{log.REMARKS}</span>
                                 </>))}
@@ -293,8 +292,8 @@ function MvJOForm({
                                 <div className="grid grid-cols-2 gap-2 text-sm">
                                     
                                      <div>
-                                        <div className="text-gray-400">JO NO:</div>
-                                        <div >{selectedDetails.JO_No}</div>
+                                        <div className="text-gray-400">TR NO:</div>
+                                        <div >{selectedDetails.AD_No}</div>
                                     </div>
                                     <div>
                                         <div className="text-gray-400 ">Quantity</div>
@@ -305,42 +304,10 @@ function MvJOForm({
                                         <div >{selectedDetails.UOM}</div>
                                     </div>
                                     <div>
-                                        <div className="text-sm text-gray-400">Target Date</div>
-                                        <div >{selectedDetails.TargetDate}</div>
+                                        <div className="text-gray-400 ">Disposal Type</div>
+                                        <div >{selectedDetails.Disposal_Type}</div>
                                     </div>
-                                    {selectedDetails.eval_remarks &&
-                                    <>
-                                        <div>
-                                            <div className="text-sm text-gray-400">Evaluation:</div>
-                                            <div >{selectedDetails.eval_status}</div>
-                                        </div>
-                                        <div>
-                                            <div className="text-sm text-gray-400">Eval. Remarks:</div>
-                                            <div >{selectedDetails.eval_remarks}</div>
-                                        </div>
-                                    </>                                    
-                                    }
-                                    {selectedDetails.Main_Status &&
-                                        <>
-                                        <div>
-                                            <div className="text-sm text-gray-400">Maintenance Status:</div>
-                                            <div >{selectedDetails.Main_Status}</div>
-                                        </div>       
-                                        </>                                                                       
-                                    }
-                                    {selectedDetails.Main_Remarks &&
-                                        <div>
-                                            <div className="text-sm text-gray-400">Maintenance Note:</div>
-                                            <div >{selectedDetails.Main_Remarks}</div>
-                                        </div>
-                                    }
-                                    
-                                    {selectedDetails.disposal_reason &&
-                                        <div>
-                                            <div className="text-sm text-gray-400">Disposal Reason:</div>
-                                            <div >{selectedDetails.disposal_reason}</div>
-                                        </div>
-                                    }
+
                                     {selectedDetails.brand &&
                                         <div>
                                             <div className="text-sm text-gray-400">Brand:</div>
@@ -355,6 +322,7 @@ function MvJOForm({
                                         </div>
                                     </>
                                     }
+                                   
                                 </div>
                             </div>
                         </div>,
@@ -370,4 +338,4 @@ function MvJOForm({
     );
 }
 
-export default MvJOForm;
+export default MvADForm;

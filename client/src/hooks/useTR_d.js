@@ -17,8 +17,6 @@ export const useTR_d = () => {
               const data = response.data;
               
               setTrDetails(data);
-
-
             } catch (error) {
               console.error('Error details:', {
                     message: error.message,

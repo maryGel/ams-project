@@ -1,20 +1,19 @@
 import { useState, useMemo } from 'react';
 // MUI
-import { Box, Button, Stack, Menu, MenuItem} from '@mui/material';
+import { Box, Stack, } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import SearchIcon from '@mui/icons-material/Search';
 import TuneIcon from '@mui/icons-material/Tune';
 // Custom Utils
 import HistoryDatePicker from '../Utils/datePicker';
 // Components
-import MvJOForm from './components/mvJOForm';
+import MvADForm from './components/mvADForm';
 
-function MvJobOrderPage({
-    setIsOpenJOs, 
-    joHeaders,
-    joDetails,
-    isLoading,
-    error,
+
+function MvDisposalPage({
+    setIsOpenDisposal,
+    adHeaders,
+    adDetails,
 
 }){
     const [isClosing, setIsClosing] = useState(false);
@@ -27,7 +26,7 @@ function MvJobOrderPage({
     const handleAnimationEnd = (e) => {
         // Only trigger if the animation that ended belongs to THIS div
         if (isClosing && e.target === e.currentTarget) { 
-            setIsOpenJOs(false);  
+            setIsOpenDisposal(false);  
         } 
     };
 
@@ -40,45 +39,45 @@ function MvJobOrderPage({
     };
 
     // First, apply the status filter
-    const statusFilteredJO = useMemo(() => {
-      return joHeaders.filter((jo) => {
+    const statusFilteredAD = useMemo(() => {
+      return adHeaders.filter((ad) => {
         if(filter === 'All') return true;
         
         if(filter === 'Waiting'){
-          return jo.xpost === 3 && jo.DISAPPROVED === 0; 
+          return (ad.xpost === 3 || ad.xpost === 2) && ad.DISAPPROVED === 0; 
         }
         if(filter === 'Fully Approved'){
-          return jo.xpost === 1 && jo.DISAPPROVED === 0;
+          return ad.xpost === 1 && ad.DISAPPROVED === 0;
         }
         if(filter === 'Rejected'){
-          return (jo.xpost === 3 || jo.post ===2) && jo.DISAPPROVED === 1;
+          return (ad.xpost === 3 || ad.post ===2) && ad.DISAPPROVED === 1;
         }
 
         return false;
       });
-    }, [joHeaders, filter]);
+    }, [adHeaders, filter]);
 
     // Then, apply the date filter on top of the status-filtered data
-    const filteredJO = useMemo(() => {
+    const filteredAD= useMemo(() => {
       // If no date range is selected, return all status-filtered data
       if (!dateRange || !dateRange.startDate || !dateRange.endDate) {
-        return statusFilteredJO;
+        return statusFilteredAD;
       }
 
       const start = new Date(dateRange.startDate).setHours(0, 0, 0, 0);
       const end = new Date(dateRange.endDate).setHours(23, 59, 59, 999);
 
-      return statusFilteredJO.filter((jo) => {
+      return statusFilteredAD.filter((ad) => {
         // Check multiple possible date fields
-        const joDate = jo.xDate;
+        const adDate = ad.xDate;
         
-        // If no date field exists, include it (or exclude based on your needs)
-        if (!joDate) return true;
+        // If no date field exists
+        if (!adDate) return true;
         
-        const joDateTime = new Date(joDate).getTime();
-        return joDateTime >= start && joDateTime <= end;
+        const adDateTime = new Date(adDate).getTime();
+        return adDateTime >= start && adDateTime <= end;
       });
-    }, [statusFilteredJO, dateRange]);
+    }, [statusFilteredAD, dateRange]);
 
     return (
       <>
@@ -170,19 +169,17 @@ function MvJobOrderPage({
                     </>
                   )}
                   <span>|</span>
-                  <span>Results: <strong>{filteredJO.length}</strong></span>
+                  <span>Results: <strong>{filteredAD.length}</strong></span>
                 </div>
               </div>
             )}
             
             <div className='flex flex-col gap-4 p-4'>
-              <MvJOForm 
-                joHeaders={joHeaders}
-                filteredJo={filteredJO}
-                isLoading={isLoading}
-                error={error}
-                joDetails={joDetails}
-              />  
+              <MvADForm
+                adHeaders = {adHeaders}
+                adDetails = {adDetails}
+                filteredAD = {filteredAD}
+              />
             </div>               
           </div>            
         </div>        
@@ -190,4 +187,4 @@ function MvJobOrderPage({
     )
 }
 
-export default MvJobOrderPage;
+export default MvDisposalPage;

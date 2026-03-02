@@ -30,6 +30,10 @@ export default defineConfig({
       '/jo_hRoute': 'http://localhost:3000',
       '/jo_dRoute': 'http://localhost:3000',
       '/appLogsRoute': 'http://localhost:3000',
+      '/tr_hRoute': 'http://localhost:3000',
+      '/tr_dRoute': 'http://localhost:3000',
+      '/ad_hRoute': 'http://localhost:3000',
+      '/ad_dRoute': 'http://localhost:3000',
     }
   },
   // Add base URL for Vercel

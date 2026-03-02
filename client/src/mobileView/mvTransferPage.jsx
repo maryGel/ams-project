@@ -7,14 +7,13 @@ import TuneIcon from '@mui/icons-material/Tune';
 // Custom Utils
 import HistoryDatePicker from '../Utils/datePicker';
 // Components
-import MvJOForm from './components/mvJOForm';
+import MvTRForm from './components/mvTRForm';
 
-function MvJobOrderPage({
-    setIsOpenJOs, 
-    joHeaders,
-    joDetails,
-    isLoading,
-    error,
+
+function MvTransferPage({
+    setIsOpenTransfer,
+    trHeaders,
+    trDetails,
 
 }){
     const [isClosing, setIsClosing] = useState(false);
@@ -27,7 +26,7 @@ function MvJobOrderPage({
     const handleAnimationEnd = (e) => {
         // Only trigger if the animation that ended belongs to THIS div
         if (isClosing && e.target === e.currentTarget) { 
-            setIsOpenJOs(false);  
+            setIsOpenTransfer(false);  
         } 
     };
 
@@ -40,45 +39,45 @@ function MvJobOrderPage({
     };
 
     // First, apply the status filter
-    const statusFilteredJO = useMemo(() => {
-      return joHeaders.filter((jo) => {
+    const statusFilteredTR = useMemo(() => {
+      return trHeaders.filter((tr) => {
         if(filter === 'All') return true;
         
         if(filter === 'Waiting'){
-          return jo.xpost === 3 && jo.DISAPPROVED === 0; 
+          return (tr.xpost === 3 || tr.xpost === 2) && tr.DISAPPROVED === 0; 
         }
         if(filter === 'Fully Approved'){
-          return jo.xpost === 1 && jo.DISAPPROVED === 0;
+          return tr.xpost === 1 && tr.DISAPPROVED === 0;
         }
         if(filter === 'Rejected'){
-          return (jo.xpost === 3 || jo.post ===2) && jo.DISAPPROVED === 1;
+          return (tr.xpost === 3 || tr.post ===2) && tr.DISAPPROVED === 1;
         }
 
         return false;
       });
-    }, [joHeaders, filter]);
+    }, [trHeaders, filter]);
 
     // Then, apply the date filter on top of the status-filtered data
-    const filteredJO = useMemo(() => {
+    const filteredTR= useMemo(() => {
       // If no date range is selected, return all status-filtered data
       if (!dateRange || !dateRange.startDate || !dateRange.endDate) {
-        return statusFilteredJO;
+        return statusFilteredTR;
       }
 
       const start = new Date(dateRange.startDate).setHours(0, 0, 0, 0);
       const end = new Date(dateRange.endDate).setHours(23, 59, 59, 999);
 
-      return statusFilteredJO.filter((jo) => {
+      return statusFilteredTR.filter((tr) => {
         // Check multiple possible date fields
-        const joDate = jo.xDate;
+        const trDate = tr.xDate;
         
-        // If no date field exists, include it (or exclude based on your needs)
-        if (!joDate) return true;
+        // If no date field exists
+        if (!trDate) return true;
         
-        const joDateTime = new Date(joDate).getTime();
-        return joDateTime >= start && joDateTime <= end;
+        const trDateTime = new Date(trDate).getTime();
+        return trDateTime >= start && trDateTime <= end;
       });
-    }, [statusFilteredJO, dateRange]);
+    }, [statusFilteredTR, dateRange]);
 
     return (
       <>
@@ -170,19 +169,17 @@ function MvJobOrderPage({
                     </>
                   )}
                   <span>|</span>
-                  <span>Results: <strong>{filteredJO.length}</strong></span>
+                  <span>Results: <strong>{filteredTR.length}</strong></span>
                 </div>
               </div>
             )}
             
             <div className='flex flex-col gap-4 p-4'>
-              <MvJOForm 
-                joHeaders={joHeaders}
-                filteredJo={filteredJO}
-                isLoading={isLoading}
-                error={error}
-                joDetails={joDetails}
-              />  
+              <MvTRForm
+                trHeaders = {trHeaders}
+                trDetails = {trDetails}
+                filteredTR = {filteredTR}
+              />
             </div>               
           </div>            
         </div>        
@@ -190,4 +187,4 @@ function MvJobOrderPage({
     )
 }
 
-export default MvJobOrderPage;
+export default MvTransferPage;
