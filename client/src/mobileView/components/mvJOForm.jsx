@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import DateDisplay from '../../Utils/formatDateForInput';
 import clsx from 'clsx';
@@ -11,13 +11,14 @@ import DoneIcon from '@mui/icons-material/Done';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import CancelIcon from '@mui/icons-material/Cancel';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import {TextareaAutosize} from '@mui/material';
 // Hooks
 import {useApprovalLogs} from '../../hooks/useApprovalLogs';
 
 
 function MvJOForm({
     useProps,
-    filteredJo,
+    filteredJO,
     joDetails,
     isLoading,
     error,  
@@ -27,6 +28,7 @@ function MvJOForm({
     const [viewItems, setViewItems] = useState({});
     const [viewApprovers, setViewApprovers] = useState({});
     const [selectedDetails, setSelectedDetails] = useState(null);
+    const [openAppOptions, setOpenAppOptions] = useState({});
 
     const handleViewItemsOpen = (JO_No) => {
         setViewItems(prev => ({
@@ -49,6 +51,15 @@ function MvJOForm({
             [JO_No]: false
         }));
     };
+
+    const handleOpenAppOptions = (JO_No) => {
+        setOpenAppOptions(prev => ({
+            ...prev,
+            [JO_No]: !prev[JO_No]
+        }));
+        document.body.style.overflow = 'hidden';
+    };
+
 
     const handleAppStatus = (xpost, disapproved) => {
     
@@ -79,14 +90,13 @@ function MvJOForm({
           <span className='text-xs font-semibold tracking-wide text-red-600'>Rejected</span>          
         </div>
       );
-    }
+    }    
 
     const handleShowItems = (item) => {
         setSelectedDetails(item)
         // Prevent background scrolling
         document.body.style.overflow = 'hidden';
     };
-
 
     const handleCloseDetails = () => {
         setSelectedDetails(null);
@@ -102,12 +112,23 @@ function MvJOForm({
         return approvalLogs?.filter(log => log.TRNO === JO_No) || [];
     }
 
+    // Sort the filteredJO array by date (latest first)
+    const sortedFilteredJo = useMemo(() => {
+        if (!filteredJO) return [];
+        
+        return [...filteredJO].sort((a, b) => {
+            // Sort by JO number in descending order
+            // This assumes JO numbers like DB-JO-0000007 (higher number = newer)
+            return b.JO_No.localeCompare(a.JO_No);
+        });
+    }, [filteredJO]);
+
     if (isLoading) return <div>Loading...</div>;
     if (error) return <div>Error: {error}</div>;
 
     return (
         <>
-            {filteredJo?.map((header) => {
+            {sortedFilteredJo?.map((header) => {
                 const items = getItemsByJONo(header.JO_No);
                 const logs = getAppLogByJONo(header.JO_No);
                 
@@ -126,6 +147,7 @@ function MvJOForm({
                             </div>
                         </div>
 
+                        {/* Form content */}
                         <div className='flex flex-col px-2'>
                             <div className='flex flex-col text-xs text-slate-500'>
                                 <span className='flex justify-end'>
@@ -147,6 +169,7 @@ function MvJOForm({
                             </div>
                         </div>
 
+                        {/* Button to View Items and Approvers */}
                         <div className='flex flex-row justify-between px-2 border-t-2'>
                             <div className='flex gap-3'>
                                 <button 
@@ -171,7 +194,7 @@ function MvJOForm({
 
                                 </button>}
                             </div>
-                            {((header.xpost === 3 || header.xpost === 2) && !header.DISAPPROVED) && <button><MoreHorizIcon /></button>}
+                            {((header.xpost === 3 || header.xpost === 2) && !header.DISAPPROVED) && <button onClick={() => handleOpenAppOptions(header.JO_No)}><MoreHorizIcon /></button>}
                         </div>
 
                         {/* Items section - dynamically mapped from joDetails */}
@@ -232,7 +255,36 @@ function MvJOForm({
                                 </>))}
                             </div>
                         }
-
+                    {openAppOptions[header.JO_No] && ReactDOM.createPortal(
+                        <div className='fixed flex top-0 bottom-0 left-0 right-0 bg-[hsla(0,0%,20%,0.3)] items-end z-[9999999]'>                            
+                            <div className='h-auto animate-slide-up bg-white px-6 py-3 z-[999999] shadow-md relative w-full rounded-md'
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div className='flex justify-between py-2 text-sm font-semibold bg-white'>
+                                    <span>{header.JO_No}</span>
+                                    <button onClick={() => handleOpenAppOptions(header.JO_No)}> <KeyboardArrowDownIcon /> </button>
+                                </div>
+                                <div className='w-full text-sm'>
+                                    <span className='text-slate-600'>Remarks</span>
+                                    <TextareaAutosize
+                                        minRows={2}
+                                        label = {'Remarks'}
+                                        style={{ 
+                                            width: '100%',
+                                            resize: 'both',
+                                            color: 'black',
+                                            padding: '.5rem',
+                                            border: '1px solid #ccc',
+                                            marginTop: '.5rem'
+                                        }}        
+                                    />
+                                    <button className='w-full py-2 mt-2 tracking-wide text-white bg-green-600 shadow-md rounded-2xl hover:bg-green-800'>A p p r o v e</button>
+                                    <button className='w-full py-2 my-2 font-sans tracking-wide text-red-500 border border-red-600 rounded-2xl hover:bg-red-600 hover:text-white'>R e j e c t</button>
+                                </div>
+                            </div>
+                        </div>,
+                        document.body
+                    )}
 
                     {/* Display the Asset information and its status */}
                     {selectedDetails && ReactDOM.createPortal(
@@ -243,17 +295,11 @@ function MvJOForm({
                                 left: 0,
                                 right: 0,
                                 bottom: 0,
-                                // Use RGBA with high specificity
-                                // color: 'white',
                                 backgroundColor: "hsla(0, 0%, 20%, 0.3)",
-                                // Fallback using a semi-transparent PNG data URI (most aggressive approach)
-                                // backgroundImage: 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=) !important',
-                                // backgroundRepeat: 'repeat !important',
                                 display: 'flex',
                                 alignItems: 'flex-end',
                                 justifyContent: 'center',
                                 zIndex: 9999999,
-                                // opacity: 0.5
                             }}
                             onClick={handleCloseDetails}
                         >

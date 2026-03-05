@@ -7,7 +7,7 @@ import TuneIcon from '@mui/icons-material/Tune';
 // Custom Utils
 import HistoryDatePicker from '../Utils/datePicker';
 // Components
-import MvADForm from './components/mvADForm';
+import MvAAForm from './components/mvAAForm';
 
 
 const getDefaultLast30Days = () => {
@@ -22,12 +22,12 @@ const getDefaultLast30Days = () => {
   return { startDate: start, endDate: end };
 };
 
-function MvDisposalPage({
+function MvAssetAccPage({
     onClose,
     isClosing,
     onAnimationEnd,
-    adHeaders = [],
-    adDetails = [],
+    assetAccHeaders = [],
+    assetAccDetails =[],
     isLoading = false,
     error = null,
 
@@ -38,7 +38,13 @@ function MvDisposalPage({
     const [isOptionsOpen, setIsOptionsOpen] = useState(false);
     const [dateRange, setDateRange] = useState(getDefaultLast30Days); //state for date range
 
-    const handleClosePage = () => {if (onClose) onClose()}; 
+    const handleClosePage = () => {if(onClose) onClose()}; 
+    const handleAnimationEnd = (e) => {
+        // Only trigger if the animation that ended belongs to THIS div
+        if (isClosing && e.target === e.currentTarget) { 
+            setIsOpenAssetAcct(false);  
+        } 
+    };
 
     const handleOptionsOpen = () => {
       setIsOptionsOpen(prev => !prev)
@@ -49,37 +55,37 @@ function MvDisposalPage({
     };
 
     // First, apply the status filter
-    const statusFilteredAD = useMemo(() => {
-      return adHeaders.filter((ad) => {
+    const statusFilteredAA = useMemo(() => {
+      return assetAccHeaders.filter((aa) => {
         if(filter === 'All') return true;
         
         if(filter === 'Waiting'){
-          return (ad.xpost === 3 || ad.xpost === 2) && ad.DISAPPROVED === 0; 
+          return (aa.xPosted === 3 || aa.xPosted === 2) && aa.DISAPPROVED === 0; 
         }
         if(filter === 'Fully Approved'){
-          return ad.xpost === 1 && ad.DISAPPROVED === 0;
+          return aa.xPosted === 1 && aa.DISAPPROVED === 0;
         }
         if(filter === 'Rejected'){
-          return (ad.xpost === 3 || ad.xpost ===2) && ad.DISAPPROVED === 1;
+          return (aa.xPosted === 3 || aa.xPosted ===2) && aa.DISAPPROVED === 1;
         }
 
         return false;
       });
-    }, [adHeaders, filter]);
+    }, [assetAccHeaders, filter]);
 
     // Then, apply the date filter on top of the status-filtered data
-    const filteredAD= useMemo(() => {
+    const filteredAA= useMemo(() => {
       // If no date range is selected, return all status-filtered data
       if (!dateRange || !dateRange.startDate || !dateRange.endDate) {
-        return statusFilteredAD;
+        return statusFilteredAA;
       }
 
       const start = new Date(dateRange.startDate).setHours(0, 0, 0, 0);
       const end = new Date(dateRange.endDate).setHours(23, 59, 59, 999);
 
-      return statusFilteredAD.filter((ad) => {
+      return statusFilteredAA.filter((aa) => {
         // Check multiple possible date fields
-        const adDate = ad.xDate;
+        const adDate = aa.xDate;
         
         // If no date field exists
         if (!adDate) return true;
@@ -87,7 +93,7 @@ function MvDisposalPage({
         const adDateTime = new Date(adDate).getTime();
         return adDateTime >= start && adDateTime <= end;
       });
-    }, [statusFilteredAD, dateRange]);
+    }, [statusFilteredAA, dateRange]);
 
     return (
       <>
@@ -97,15 +103,17 @@ function MvDisposalPage({
           <div className="flex flex-col ">
             <Box 
               sx={{ 
-                p: 2,
-                pt: 3,
-                overflow: 'auto', 
-                borderBottom: 1, 
-                borderColor: 'grey.300', 
-                position: 'sticky', 
-                top: 0, 
-                bgcolor: '#fafafa',
-                zIndex: 10   
+                  p: 2,
+                  pt: 3,
+                  overflow: 'auto', 
+                  borderBottom: 1, 
+                  borderColor: 'grey.300', 
+                  position: 'sticky', 
+                  top: 0, 
+                  bgcolor: 'white',
+                  transition: 'transform 0.3s ease',
+                  transform: show ? 'translateY(0)' : 'translateY(-100%)',  
+                  backgroundColor: '#fafafa',        
               }}
             >
               <Stack
@@ -143,7 +151,7 @@ function MvDisposalPage({
             
             <div className='flex flex-col py-2'>
               <div className='flex items-center justify-between px-4 text-sm font-semibold tracking-wide'>
-                <span>Disposals</span>
+                <span>Asset Accountability</span>
                 <button 
                   onClick={handleOptionsOpen}
                   className={`flex items-center gap-1 px-3 py-1 rounded-md transition-colors ${
@@ -178,27 +186,29 @@ function MvDisposalPage({
                     </>
                   )}
                   <span>|</span>
-                  <span>Results: <strong>{filteredAD.length}</strong></span>
+                  <span>Results: <strong>{filteredAA.length}</strong></span>
                 </div>
               </div>
             )}
             
-            {filteredAD.length > 0 
+            {isLoading 
+              ? (<div className='flex justify-center p-8'>Loading...</div>) 
+              : error ? (<div className='p-4 m-4 text-red-500 bg-red-100 rounded'>{error}</div>) 
+              : filteredAA.length > 0
               ? <div className='flex flex-col gap-4 p-4'>
-                  <MvADForm
-                    adHeaders = {adHeaders}
-                    adDetails = {adDetails}
-                    filteredAD = {filteredAD}
+                  <MvAAForm
+                    filteredAA = {filteredAA}
+                    assetAccDetails = {assetAccDetails}
                   />
-                </div>   
+                </div>
               : <span className='flex justify-center p-5 text-sm italic item-center text-slate-500'>
-                  No record found within the selected date. 
+                    No record found within the selected date. 
                 </span>
-            }            
+            }               
           </div>            
         </div>        
       </>
     )
 }
 
-export default MvDisposalPage;
+export default MvAssetAccPage;

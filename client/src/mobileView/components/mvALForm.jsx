@@ -16,10 +16,10 @@ import {TextareaAutosize} from '@mui/material';
 import {useApprovalLogs} from '../../hooks/useApprovalLogs';
 
 
-function MvADForm({
+function MvALForm({
     useProps,
-    filteredAD,
-    adDetails,
+    filteredAL,
+    assetLostDetails,
 
   }) {
     const {approvalLogs} = useApprovalLogs(useProps);
@@ -28,61 +28,60 @@ function MvADForm({
     const [selectedDetails, setSelectedDetails] = useState(null);
     const [openAppOptions, setOpenAppOptions] = useState({});
 
-    const handleViewItemsOpen = (AD_No) => {
+    const handleViewItemsOpen = (AAFNo) => {
         setViewItems(prev => ({
             ...prev,
-            [AD_No]: !prev[AD_No]
+            [AAFNo]: !prev[AAFNo]
         }));
         setViewApprovers(prev => ({
             ...prev,
-            [AD_No]: false
+            [AAFNo]: false
         }));
     };
 
-    const handleViewApprovers = (AD_No) => {
+    const handleViewApprovers = (AAFNo) => {
         setViewApprovers(prev => ({
             ...prev,
-            [AD_No]: !prev[AD_No]
+            [AAFNo]: !prev[AAFNo]
         }));
         setViewItems(prev => ({
             ...prev,
-            [AD_No]: false
+            [AAFNo]: false
         }));
     };
 
-    const handleOpenAppOptions = (AD_No) => {
+    const handleOpenAppOptions = (AAFNo) => {
         setOpenAppOptions(prev => ({
             ...prev,
-            [AD_No]: !prev[AD_No]
+            [AAFNo]: !prev[AAFNo]
         }));
         document.body.style.overflow = 'hidden';
     };
 
-
-    const handleAppStatus = (xpost, disapproved) => {
+    const handleAppStatus = (xPosted, disapproved) => {
     
-      if(xpost === 1 && !disapproved) return (
+      if(xPosted === 1 && !disapproved) return (
         <div className='flex items-center px-1 mx-1'>  
           <DoneAllIcon fontSize='small'className='text-green-500'/>
           <span className='text-xs font-semibold tracking-wide'>Fully Approved</span>          
         </div>
       );
 
-      if(xpost === 2 && !disapproved) return (
+      if(xPosted === 2 && !disapproved) return (
         <div className='flex items-center mx-1'> 
           <DoneIcon fontSize='small' className='text-green-500'/>
           <span className='text-xs font-semibold tracking-wide'>Partially Approved</span>          
         </div>
       );
 
-      if(xpost === 3  && !disapproved) return (
+      if(xPosted === 3  && !disapproved) return (
         <div className='flex items-center mx-1'>     
           <DoneIcon fontSize='small' className='text-slate-400' />
           <span className='text-xs font-semibold tracking-wide text-yellow-600'>Pending</span>          
         </div>
       );
     
-      if((xpost === 3 || xpost === 2) && disapproved === 1) return (
+      if(xPosted === 3 && disapproved === 1) return (
         <div className='flex items-center mx-1'>     
           <CloseIcon fontSize='small' className='text-slate-400' />
           <span className='text-xs font-semibold tracking-wide text-red-600'>Rejected</span>          
@@ -103,40 +102,42 @@ function MvADForm({
         document.body.style.overflow = 'unset';
     };
 
-    // Filter joDetails by AD_No & Approval logs by AD_No
-    const getItemsByADNo = (AD_No) => {
-        return adDetails?.filter(detail => detail.AD_No === AD_No) || [];
+    // Filter joDetails by AAFNo & Approval logs by AAFNo
+    const getItemsByAANo = (AAFNo) => {
+        return assetLostDetails?.filter(detail => detail.AAFNo === AAFNo) || [];
     };
-    const getAppLogByADNo = (AD_No) => {
-        return approvalLogs?.filter(log => (log.TRNO === AD_No) && log.Module === 'Disposal') || [];
+    const getAppLogByAANo = (AAFNo) => {
+        return approvalLogs?.filter(log => (log.TRNO === AAFNo) && log.Module === 'Lost Asset') || [];
     }
 
-    // Sort the filteredAD array by date (latest first)
-    const sortedFilteredJo = useMemo(() => {
-        if (!filteredAD) return [];
+    // Sort the filteredJo array by date (latest first)
+    const sortedFilteredAL= useMemo(() => {
+        if (!filteredAL) return [];
         
-        return [...filteredAD].sort((a, b) => {
-            // Sort by doc number in descending order
-            return b.AD_No.localeCompare(a.AD_No);
+        return [...filteredAL].sort((a, b) => {
+            // Sort by JO number in descending order
+            // This assumes JO numbers like DB-JO-0000007 (higher number = newer)
+            return b.AAFNo.localeCompare(a.AAFNo);
         });
-    }, [filteredAD]);
+    }, [filteredAL]);
 
     return (
         <>
-            {sortedFilteredJo?.map((header) => {
-                const items = getItemsByADNo(header.AD_No);
-                const logs = getAppLogByADNo(header.AD_No);                
+            {sortedFilteredAL?.map((header) => {
+                const items = getItemsByAANo(header.AAFNo);
+                const logs = getAppLogByAANo(header.AAFNo);
+                
 
                 return (
                     <div key={header.ID} className='flex flex-col w-full gap-1 p-2 border shadow-md border-spacing-2 border-slate-400 rounded-xl'>
                         <div className='flex justify-between px-2'>
                             <div className='flex flex-col'>
-                                <span className='text-xs font-semibold'>Disposal</span>
-                                <span className='font-sans text-sm font-semibold text-blue-900'>{header.AD_No}</span>
+                                <span className='text-xs font-semibold'>Lost Asset Form</span>
+                                <span className='font-sans text-sm font-semibold text-blue-900'>{header.AAFNo}</span>
                             </div>
                             <div className='flex items-center'>
                                 <span className='border rounded-full border-spacing-1'>
-                                    {handleAppStatus(header.xpost, header.DISAPPROVED)}
+                                    {handleAppStatus(header.xPosted, header.DISAPPROVED)}
                                 </span>
                             </div>
                         </div>
@@ -149,16 +150,16 @@ function MvADForm({
                             </div>
                             <div className='flex flex-col'>
                                 <div className='flex items-start justify-between text-xs text-slate-500 center'>
-                                  <span>{header.Deparment_Name}</span>
+                                  <span>{header.Dep}</span>
                                 </div>
                                 <div className='flex justify-start gap-2'>
-                                    <span className='text-xs text-slate-500'>Remarks:</span>
-                                    <span className='text-sm'>{header.Remarks}</span>
+                                    <span className='text-xs text-slate-500'>Custodian:</span>
+                                    <span className='text-sm'>{header.Custodian}</span>
                                 </div>
                                 {/* <span className='font-sans text-xs tracking-wide text-slate-500'>
                                     Holder: {header.Holder}
                                 </span> */}
-                                <span className='mt-1 text-xs tracking-wide text-slate-500'>Evaluated By: {header.Evaluated_By}</span>
+                                <span className='mt-1 text-xs tracking-wide text-slate-500'>Assigned to: {header.EmpName}</span>
                             </div>
                         </div>
 
@@ -167,9 +168,9 @@ function MvADForm({
                                 <button 
                                     className={clsx(
                                         'flex gap-1 text-xs items-center mt-1 px-2 py-1 border rounded-xl',
-                                          !viewItems[header.AD_No] ? 'border-slate-400' : 'border-blue-500 text-blue-700'
+                                          !viewItems[header.AAFNo] ? 'border-slate-400' : 'border-blue-500 text-blue-700'
                                         )}
-                                    onClick={() => handleViewItemsOpen(header.AD_No)}
+                                    onClick={() => handleViewItemsOpen(header.AAFNo)}
                                 >
                                   <img className='w-4' src='/icons/actions/boxes.png'/>
                                   <span className='font-semibold tracking-wide'>Items</span>
@@ -177,70 +178,42 @@ function MvADForm({
                                 {header.appStat && <button 
                                   className={clsx(
                                     'flex gap-1 text-xs items-center mt-1 px-2 border rounded-xl',
-                                      !viewApprovers[header.AD_No] ? 'border-slate-400' : 'border-blue-500 text-blue-700'
+                                      !viewApprovers[header.AAFNo] ? 'border-slate-400' : 'border-blue-500 text-blue-700'
                                     )}
-                                    onClick={() => handleViewApprovers(header.AD_No)}
+                                    onClick={() => handleViewApprovers(header.AAFNo)}
                                   >
                                     <img className='w-4' src='/icons/actions/approve.png'/>
                                     <span className='font-semibold tracking-wide'>Approvers</span>
 
                                 </button>}
                             </div>
-                            {((header.xpost === 3 || header.xpost === 2) && !header.DISAPPROVED) && <button onClick={() => handleOpenAppOptions(header.AD_No)}><MoreHorizIcon /></button>}
+                            {((header.xPosted === 3 || header.xPosted === 2) && !header.DISAPPROVED) && <button onClick={() => handleOpenAppOptions(header.AAFNo)}><MoreHorizIcon /></button>}
                         </div>
 
-                    {openAppOptions[header.AD_No] && ReactDOM.createPortal(
-                         <div className='fixed flex top-0 bottom-0 left-0 right-0 bg-[hsla(0,0%,20%,0.3)] items-end z-[9999999]'>                            
-                            <div className='h-auto animate-slide-up bg-white px-6 py-3 z-[999999] shadow-md relative w-full rounded-md'
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <div className='flex justify-between py-2 text-sm font-semibold bg-white'>
-                                    <span>{header.AD_No}</span>
-                                    <button onClick={() => handleOpenAppOptions(header.AD_No)}> <KeyboardArrowDownIcon /> </button>
-                                </div>
-                                <div className='w-full text-sm'>
-                                    <span className='text-slate-600'>Remarks</span>
-                                    <TextareaAutosize
-                                        minRows={2}
-                                        label = {'Remarks'}
-                                        style={{ 
-                                            width: '100%',
-                                            resize: 'both',
-                                            color: 'black',
-                                            padding: '.5rem',
-                                            border: '1px solid #ccc',
-                                            marginTop: '.5rem'
-                                        }}        
-                                    />
-                                    <button className='w-full py-2 mt-2 tracking-wide text-white bg-green-600 shadow-md rounded-2xl hover:bg-green-800'>A p p r o v e</button>
-                                    <button className='w-full py-2 my-2 font-sans tracking-wide text-red-500 border border-red-600 rounded-2xl hover:bg-red-600 hover:text-white'>R e j e c t</button>
-                                </div>
-                            </div>
-                        </div>,
-                        document.body
-                    )}
-
                         {/* Items section - dynamically mapped from joDetails */}
-                        {viewItems[header.AD_No] && items.length > 0 && (
+                        {viewItems[header.AAFNo] && items.length > 0 && (
                             <div className='flex flex-col w-full mt-3 text-sm'>
                                 {items.map((item, index) => (
                                     <div key={item.ID || index} className='flex flex-col justify-start mb-3'>
                                         
                                         <div className='flex justify-start w-full gap-3 text-xs '>
 
-                                            <span className='pl-2'>{item.qty}</span>
+                                            <span className='pl-2'>{item.Qty}</span>
                                             <button onClick={() => handleShowItems(item)} className='font-semibold text-blue-600'>
-                                                {item.FAC_name}
+                                                {item.ItemName}
                                             </button>                
                                             
                                         </div>  
-                                        {item.workDet && (
-                                            <span className='text-xs text-gray-900 pl-7'>
-                                                {item.workDet}
-                                            </span>
+                                        {item.xStat && (
+                                            <div className='flex items-center gap-2 p-1 ml-6 text-xs'>
+                                                <span >Status:</span>
+                                                <span className='text-xs text-gray-900'>
+                                                    {item.xStat}
+                                                </span>
+                                            </div>
                                         )}
                                         {/* <div className='flex items-center gap-2 mt-1 text-xs pl-7 text-slate-500'>
-                                            <span className='pr-2'>{item.FAC_NO}</span>               
+                                            <span className='pr-2'>{item.ItemNo}</span>               
                                         </div>                                       */}
                                     </div>
                                 ))}
@@ -248,13 +221,13 @@ function MvADForm({
                         )}
 
                         {/* Show message if no items */}
-                        {viewItems[header.AD_No] && items.length === 0 && (
+                        {viewItems[header.AAFNo] && items.length === 0 && (
                             <div className='py-2 text-sm italic text-gray-500'>
                                 No items found for this job order.
                             </div>
                         )}
                         {/* Show approval logs */}
-                        {viewApprovers[header.AD_No] && logs.length > 0 &&
+                        {viewApprovers[header.AAFNo] && logs.length > 0 &&
                             <div className='flex flex-col px-3 mt-2 text-sm'>
                                 <div className='flex justify-between tracking-wide text-gray-500'>
                                     <span>Approvers</span>
@@ -279,6 +252,37 @@ function MvADForm({
                                 </>))}
                             </div>
                         }
+                    
+                    {openAppOptions[header.AAFNo] && ReactDOM.createPortal(
+                         <div className='fixed flex top-0 bottom-0 left-0 right-0 bg-[hsla(0,0%,20%,0.3)] items-end z-[9999999]'>                            
+                            <div className='h-auto animate-slide-up bg-white px-6 py-3 z-[999999] shadow-md relative w-full rounded-md'
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div className='flex justify-between py-2 text-sm font-semibold bg-white'>
+                                    <span>{header.AAFNo}</span>
+                                    <button onClick={() => handleOpenAppOptions(header.AAFNo)}> <KeyboardArrowDownIcon /> </button>
+                                </div>
+                                <div className='w-full text-sm'>
+                                    <span className='text-slate-600'>Remarks</span>
+                                    <TextareaAutosize
+                                        minRows={2}
+                                        label = {'Remarks'}
+                                        style={{ 
+                                            width: '100%',
+                                            resize: 'both',
+                                            color: 'black',
+                                            padding: '.5rem',
+                                            border: '1px solid #ccc',
+                                            marginTop: '.5rem'
+                                        }}        
+                                    />
+                                    <button className='w-full py-2 mt-2 tracking-wide text-white bg-green-600 shadow-md rounded-2xl hover:bg-green-800'>A p p r o v e</button>
+                                    <button className='w-full py-2 my-2 font-sans tracking-wide text-red-500 border border-red-600 rounded-2xl hover:bg-red-600 hover:text-white'>R e j e c t</button>
+                                </div>
+                            </div>
+                        </div>,
+                        document.body
+                    )}
 
 
                     {/* Display the Asset information and its status */}
@@ -322,7 +326,7 @@ function MvADForm({
                             >
                                 <div className="flex items-center justify-between mb-1">
                                     <h2 className="text-sm font-semibold ">
-                                        Asset : {selectedDetails.FAC_name}
+                                        Asset : {selectedDetails.ItemName}
                                     </h2>
                                     <button 
                                         onClick={handleCloseDetails}
@@ -333,7 +337,7 @@ function MvADForm({
                                 </div>
                                 <div className='flex gap-2 py-1 mb-3 text-sm border-b '>
                                     <div className="text-gray-500">Asset No:</div>
-                                    <div >{selectedDetails.FAC_NO}</div>
+                                    <div >{selectedDetails.ItemNo}</div>
                                 </div>
                                 
                                 {/* Quantity and Target Date */}
@@ -341,36 +345,16 @@ function MvADForm({
                                     
                                      <div>
                                         <div className="text-gray-400">TR NO:</div>
-                                        <div >{selectedDetails.AD_No}</div>
+                                        <div >{selectedDetails.AAFNo}</div>
                                     </div>
                                     <div>
                                         <div className="text-gray-400 ">Quantity</div>
-                                        <div >{selectedDetails.qty}</div>
+                                        <div >{selectedDetails.Qty}</div>
                                     </div>
                                     <div>
                                         <div className="text-gray-400 ">UOM</div>
-                                        <div >{selectedDetails.UOM}</div>
-                                    </div>
-                                    <div>
-                                        <div className="text-gray-400 ">Disposal Type</div>
-                                        <div >{selectedDetails.Disposal_Type}</div>
-                                    </div>
-
-                                    {selectedDetails.brand &&
-                                        <div>
-                                            <div className="text-sm text-gray-400">Brand:</div>
-                                            <div >{selectedDetails.brand}</div>
-                                        </div>
-                                    }
-                                    {selectedDetails.serialno &&
-                                    <>
-                                        <div>
-                                            <div className="text-sm text-gray-400">Serial No:</div>
-                                            <div >{selectedDetails.serialno}</div>
-                                        </div>
-                                    </>
-                                    }
-                                   
+                                        <div >{selectedDetails.Units}</div>
+                                    </div>                                   
                                 </div>
                             </div>
                         </div>,
@@ -386,4 +370,4 @@ function MvADForm({
     );
 }
 
-export default MvADForm;
+export default MvALForm;

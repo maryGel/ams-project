@@ -34,6 +34,10 @@ export default defineConfig({
       '/tr_dRoute': 'http://localhost:3000',
       '/ad_hRoute': 'http://localhost:3000',
       '/ad_dRoute': 'http://localhost:3000',
+      '/assetacchRoute': 'http://localhost:3000',
+      '/assetaccdRoute': 'http://localhost:3000',
+      '/assetLostHRoute': 'http://localhost:3000',
+      '/assetLostDRoute': 'http://localhost:3000',
     }
   },
   // Add base URL for Vercel

@@ -1,4 +1,7 @@
+// mvDBoardPage.jsx
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 // Custom Hooks
 import {useUsers} from '../hooks/useUsers';
 import {dashItems} from './components/dashItems';
@@ -8,19 +11,24 @@ import { useTR_h } from '../hooks/useTR_h';
 import { useTR_d } from '../hooks/useTR_d';
 import { useAD_h } from '../hooks/useAD_h';
 import { useAD_d } from '../hooks/useAD_d';
-//Components
+import { useAssetAccH } from '../hooks/useAssetAccH';
+import { useAssetAccD } from '../hooks/useAssetAccD';
+import { useAssetLostH } from '../hooks/useAssetLostH';
+import { useAssetLostD } from '../hooks/useAssetLostD';
+
+// Import the page components
 import MvJobOrderPage from './mvJobOrdersPage';
 import MvTransferPage from './mvTransferPage';
 import MvDisposalPage from './mvDisposalPage';
-
+import MvAssetAccPage from './mvAssetAccPage';
+import MvAssetLostPage from './mvAssetLostPage';
+import MvMaintenancePage from './mvMaintenancePage';
 
 function MvDashBoard({useProps}){
-    
+    const [activePage, setActivePage] = useState(null); // Track which page is open
+    const [isClosing, setIsClosing] = useState(false);
     const { users } = useUsers();    
     const userName = localStorage.getItem('username') || 'User';
-    const [isOpenJOs, setIsOpenJOs] = useState(false)
-    const [isOpenTransfer, setIsOpenTransfer] = useState(false)
-    const [isOpenDisposal, setIsOpenDisposal] = useState(false)
 
     // Job Orders Data
     const {joHeaders, isLoading, error} = useJO_h(useProps);
@@ -31,101 +39,137 @@ function MvDashBoard({useProps}){
     // Disposal Data
     const {adHeaders} = useAD_h(useProps);
     const {adDetails} = useAD_d(useProps);
-
-
-
-
-  
+    // Asset Accountability Data
+    const {assetAccHeaders} = useAssetAccH(useProps);
+    const {assetAccDetails} = useAssetAccD(useProps);
+    // Asset Lost Data
+    const {assetLostHeaders} = useAssetLostH(useProps);
+    const {assetLostDetails} = useAssetLostD(useProps);
 
     // Find the user object
     const loginUser = users?.find(item => item.user === userName);
-
-    // Get first name
     const firstName = loginUser?.fname || userName;
 
     // Count the pending docs
     const joCount = (joHeaders || []).filter(jo => (jo.xpost === 3 || jo.xpost === 2) && jo.DISAPPROVED === 0).length;
     const trCount = (trHeaders || []).filter(tr => (tr.xpost === 3 || tr.xpost === 2) && tr.DISAPPROVED === 0).length;
     const adCount = (adHeaders || []).filter(ad => (ad.xpost === 3 || ad.xpost === 2) && ad.DISAPPROVED === 0).length;
-
+    const aAcctCount = (assetAccHeaders || []).filter(aa => (aa.xPosted === 3 || aa.xPosted === 2) && aa.DISAPPROVED === 0).length;
+    const aLostCount = (assetLostHeaders || []).filter(al => (al.xPosted === 3 || al.xPosted === 2) && al.DISAPPROVED === 0).length;
 
     // Count of Documents template
     const items = dashItems({
-      joCount: joCount, 
-      trCount: trCount,
-      adCount: adCount
+      joCount, trCount, adCount, aAcctCount, aLostCount
     });
 
-    const numStyles = 'pb-2  mr-2 text-xl font-semibold  cursor-pointer hover:underline hover:drop-shadow-[0_0_0.5rem_gray] transition-transform duration-150 active:translate-y-0.5 hover:scale-x-95';
+    const numStyles = 'pb-2 mr-2 text-xl font-semibold cursor-pointer hover:underline hover:drop-shadow-[0_0_0.5rem_gray] transition-transform duration-150 active:translate-y-0.5 hover:scale-x-95';
     const boxStyles = 'p-1 flex justify-between h-auto shadow-md shadow-gray rounded-lg border';
 
-    // .. handlers ..
-    const handleOpenDash = (dashId) => {
-      if(dashId === 1 ){setIsOpenJOs(prev => !prev)}
-      if(dashId === 3){setIsOpenTransfer(prev => !prev)}
-      if(dashId === 5){setIsOpenDisposal(prev => !prev)}
-      
-    }
+    // Handle opening a page
+    const handleOpenPage = (pageId) => {
+        setActivePage(pageId);
+        setIsClosing(false);
+    };
+
+    // Handle closing a page
+    const handleClosePage = () => {
+        setIsClosing(true);
+    };
+
+    // Handle animation end
+    const handleAnimationEnd = () => {
+        if (isClosing) {
+            setActivePage(null);
+            setIsClosing(false);
+        }
+    };
+
+    // Render the active page
+    const renderActivePage = () => {
+        const pageProps = {
+            onClose: handleClosePage,
+            isClosing: isClosing,
+            onAnimationEnd: handleAnimationEnd,
+            joHeaders, joDetails, isLoading, error,
+            trHeaders, trDetails,
+            adHeaders, adDetails,
+            assetAccHeaders, assetAccDetails,
+            assetLostHeaders, assetLostDetails,
+            useProps
+        };
+
+        switch(activePage) {
+            case 1:
+                return <MvJobOrderPage {...pageProps} />;
+            case 2:
+                return <MvMaintenancePage {...pageProps} />;
+            case 3:
+                return <MvTransferPage {...pageProps} />;
+            case 4:
+                return <MvAssetAccPage {...pageProps} />;
+            case 5:
+                return <MvDisposalPage {...pageProps} />;
+            case 6:
+                return <MvAssetLostPage {...pageProps} />;
+            default:
+                return null;
+        }
+    };
+
+    
 
     return (
-      <div className='flex flex-col md:hidden'>
-        <div className='flex items-center w-auto h-auto p-1 pt-5 bg-white border-b '>
-          <img
-              className='w-12 h-10 pl-2 ml-2'
-              src='/tripleeyelogo.png'
-          />
-          <span className='font-sans tracking-wider text-black '>Asset Management</span>
-        </div>
+      <div className='relative flex flex-col min-h-screen overflow-hidden bg-white md:hidden'>
+        {/* Dashboard Content - Dimmed when a page is open */}
+        <div className={`flex flex-col flex-1 transition-all duration-300 ${
+          activePage ? 'opacity-30 scale-95' : 'opacity-100 scale-100'
+        }`}>
+          <div className='flex items-center w-auto h-auto p-1 pt-5 bg-white border-b'>
+            <img
+                className='w-12 h-10 pl-2 ml-2'
+                src='/tripleeyelogo.png'
+                alt="Logo"
+            />
+            <span className='font-sans tracking-wider text-black'>Asset Management</span>
+          </div>
 
-        <div className='flex items-center justify-between px-5 pt-3 pb-3 m-4 font-semibold tracking-wide bg-blue-100 rounded-md shadow-md text-md'>
-          <h1 className='pl-1 font-sans'>Dashboard</h1>
-          <img
-              className='w-8'
-              src='/icons/menu_icons/dashboard.png'
-          />
-        </div>  
+          <div className='flex items-center justify-between px-5 pt-3 pb-3 m-4 font-semibold tracking-wide bg-blue-100 rounded-md shadow-md text-md'>
+            <h1 className='pl-1 font-sans'>Dashboard</h1>
+            <img
+                className='w-8'
+                src='/icons/menu_icons/dashboard.png'
+                alt="Dashboard"
+            />
+          </div>  
+          
           <h1 className='mt-5 ml-5'>Hi, {firstName}!</h1>
 
           <div className='grid w-full grid-cols-2 gap-3 px-4 mt-7'>                
-            {items.map(item => 
-              <button onClick= {()=> handleOpenDash(item.id)} className={`flex items-end bg-white ${boxStyles}`}>
-                <div className='flex flex-col justify-start gap-2 p-2 '>
+            {items.map(item => (
+              <button 
+                key={item.id}
+                onClick={() => handleOpenPage(item.id)}
+                className={`flex items-end bg-white ${boxStyles} ${
+                  activePage ? 'pointer-events-none' : ''
+                }`}
+                disabled={!!activePage}
+              >
+                <div className='flex flex-col justify-start gap-2 p-2'>
                     <img
                         className='w-8 h-8 bg-white'
                         src={item.imgSrc}
-                        />
+                        alt={item.title}
+                    />
                     <span className='text-sm'>{item.title}</span>
                 </div>
                 <span className={numStyles}>{item.num}</span> 
-              </button>)}
-          </div>  
+              </button>
+            ))}
+          </div>
+        </div>
 
-          <div className='flex flex-col justify-center'>
-          {isOpenJOs &&
-            <MvJobOrderPage
-
-              setIsOpenJOs = {setIsOpenJOs}
-              joHeaders={joHeaders}
-              isLoading={isLoading}
-              error={error}
-              joDetails={joDetails}
-              />
-          }
-          {isOpenTransfer &&
-            <MvTransferPage
-              setIsOpenTransfer = {setIsOpenTransfer}
-              trHeaders = {trHeaders}
-              trDetails = {trDetails}
-            />
-          }  
-          {isOpenDisposal &&
-            <MvDisposalPage 
-              setIsOpenDisposal ={setIsOpenDisposal}
-              adHeaders = {adHeaders}
-              adDetails = {adDetails}
-            />
-          }
-          </div>        
+        {/* Sliding Page */}
+        {activePage && renderActivePage()}
       </div>
     )
 }

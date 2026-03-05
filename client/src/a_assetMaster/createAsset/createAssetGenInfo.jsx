@@ -18,7 +18,6 @@ import { useRefBrand } from '../../hooks/refBrand';
 export default function CreateAssetGenInfo({
   asset,
   updateAssetData,
-  originalAsset,
   loading,
   error
   }) {

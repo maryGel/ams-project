@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo} from 'react';
 import ReactDOM from 'react-dom';
 import DateDisplay from '../../Utils/formatDateForInput';
 import clsx from 'clsx';
@@ -11,6 +11,7 @@ import DoneIcon from '@mui/icons-material/Done';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import CancelIcon from '@mui/icons-material/Cancel';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import {TextareaAutosize} from '@mui/material';
 // Hooks
 import {useApprovalLogs} from '../../hooks/useApprovalLogs';
 
@@ -25,6 +26,7 @@ function MvTRForm({
     const [viewItems, setViewItems] = useState({});
     const [viewApprovers, setViewApprovers] = useState({});
     const [selectedDetails, setSelectedDetails] = useState(null);
+    const [openAppOptions, setOpenAppOptions] = useState({});
 
     const handleViewItemsOpen = (TR_No) => {
         setViewItems(prev => ({
@@ -46,6 +48,15 @@ function MvTRForm({
             ...prev,
             [TR_No]: false
         }));
+    };
+
+
+    const handleOpenAppOptions = (TR_No) => {
+        setOpenAppOptions(prev => ({
+            ...prev,
+            [TR_No]: !prev[TR_No]
+        }));
+        document.body.style.overflow = 'hidden';
     };
 
     const handleAppStatus = (xpost, disapproved) => {
@@ -100,12 +111,22 @@ function MvTRForm({
         return approvalLogs?.filter(log => (log.TRNO === TR_No) && log.Module === 'Transfer (Internal)') || [];
     }
 
-    // if (isLoading) return <div>Loading...</div>;
-    // if (error) return <div>Error: {error}</div>;
+
+    // Sort the filteredTR array by date (latest first)
+    const sortedFilteredTR = useMemo(() => {
+        if (!filteredTR) return [];
+        
+        return [...filteredTR].sort((a, b) => {
+            // Sort by JO number in descending order
+            // This assumes JO numbers like DB-JO-0000007 (higher number = newer)
+            return b.TR_No.localeCompare(a.TR_No);
+        });
+    }, [filteredTR]);
+
 
     return (
         <>
-            {filteredTR?.map((header) => {
+            {sortedFilteredTR?.map((header) => {
                 const items = getItemsByTRNo(header.TR_No);
                 const logs = getAppLogByTRNo(header.TR_No);
                 
@@ -157,7 +178,7 @@ function MvTRForm({
                                   <img className='w-4' src='/icons/actions/boxes.png'/>
                                   <span className='font-semibold tracking-wide'>Items</span>
                                 </button>
-                                {header.approved && <button 
+                                {header.appStat && <button 
                                   className={clsx(
                                     'flex gap-1 text-xs items-center mt-1 px-2 border rounded-xl',
                                       !viewApprovers[header.TR_No] ? 'border-slate-400' : 'border-blue-500 text-blue-700'
@@ -169,7 +190,7 @@ function MvTRForm({
 
                                 </button>}
                             </div>
-                            {((header.xpost === 3 || header.xpost === 2) && !header.DISAPPROVED) && <button><MoreHorizIcon /></button>}
+                            {((header.xpost === 3 || header.xpost === 2) && !header.DISAPPROVED) && <button  onClick={() => handleOpenAppOptions(header.TR_No)} ><MoreHorizIcon /></button>}
                         </div>
 
                         {/* Items section - dynamically mapped from joDetails */}
@@ -231,6 +252,39 @@ function MvTRForm({
                                 </>))}
                             </div>
                         }
+
+                    
+                    
+                    {openAppOptions[header.TR_No] && ReactDOM.createPortal(
+                         <div className='fixed flex top-0 bottom-0 left-0 right-0 bg-[hsla(0,0%,20%,0.3)] items-end z-[9999999]'>                            
+                            <div className='h-auto animate-slide-up bg-white px-6 py-3 z-[999999] shadow-md relative w-full rounded-md'
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div className='flex justify-between py-2 text-sm font-semibold bg-white'>
+                                    <span>{header.TR_No}</span>
+                                    <button onClick={() => handleOpenAppOptions(header.TR_No)}> <KeyboardArrowDownIcon /> </button>
+                                </div>
+                                <div className='w-full text-sm'>
+                                    <span className='text-slate-600'>Remarks</span>
+                                    <TextareaAutosize
+                                        minRows={2}
+                                        label = {'Remarks'}
+                                        style={{ 
+                                            width: '100%',
+                                            resize: 'both',
+                                            color: 'black',
+                                            padding: '.5rem',
+                                            border: '1px solid #ccc',
+                                            marginTop: '.5rem'
+                                        }}        
+                                    />
+                                    <button className='w-full py-2 mt-2 tracking-wide text-white bg-green-600 shadow-md rounded-2xl hover:bg-green-800'>A p p r o v e</button>
+                                    <button className='w-full py-2 my-2 font-sans tracking-wide text-red-500 border border-red-600 rounded-2xl hover:bg-red-600 hover:text-white'>R e j e c t</button>
+                                </div>
+                            </div>
+                        </div>,
+                        document.body
+                    )}
 
 
                     {/* Display the Asset information and its status */}

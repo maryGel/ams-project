@@ -122,15 +122,9 @@ function MvTansactionPage(useProps){
                     </div>  
          
                 </div> 
-            </div>
-             
+            </div>             
             )}
-
-
-
-        </div>
-      
-              
+        </div>    
       </>
     )
 };

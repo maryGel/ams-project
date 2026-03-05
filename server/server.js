@@ -38,6 +38,10 @@ import ad_hRoute from './routes/ad_hRoute.js';
 import ad_dRoute from './routes/ad_dRoute.js';
 import tr_hRoute from './routes/tr_hRoute.js';
 import tr_dRoute from './routes/tr_dRoute.js';
+import assetacchRoute from './routes/assetacchRoute.js';
+import assetaccdRoute from './routes/assetaccdRoute.js';
+import assetLostHRoute from './routes/assetLostHRoute.js';
+import assetLostDRoute from './routes/assetLostDRoute.js';
 
 
 
@@ -167,6 +171,11 @@ app.use('/ad_hRoute', ad_hRoute);
 app.use('/ad_dRoute', ad_dRoute);
 app.use('/tr_hRoute', tr_hRoute);
 app.use('/tr_dRoute', tr_dRoute);
+app.use('/assetacchRoute', assetacchRoute);
+app.use('/assetaccdRoute', assetaccdRoute);
+app.use('/assetLostHRoute', assetLostHRoute);
+app.use('/assetLostDRoute', assetLostDRoute);
+
 
 // React (Vite Dist)
 app.use(express.static(path.join(__dirname, '../client/dist')))

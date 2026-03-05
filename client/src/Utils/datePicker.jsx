@@ -5,14 +5,58 @@ import 'react-datepicker/dist/react-datepicker.css';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
+const getPresetDates = (presetId) => {
+  const today = new Date();
+  const endOfToday = new Date(today);
+  endOfToday.setHours(23, 59, 59, 999);
+  
+  switch(presetId) {
+    case 'today':
+      const startOfToday = new Date(today);
+      startOfToday.setHours(0, 0, 0, 0);
+      return [startOfToday, endOfToday];
+    
+    case 'this-month':
+      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+      const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      lastDay.setHours(23, 59, 59, 999);
+      return [firstDay, lastDay];
+    
+    case 'last-30':
+      const last30Start = new Date(today);
+      last30Start.setDate(last30Start.getDate() - 30);
+      last30Start.setHours(0, 0, 0, 0);
+      return [last30Start, endOfToday];
+    
+    case 'last-60':
+      const last60Start = new Date(today);
+      last60Start.setDate(last60Start.getDate() - 60);
+      last60Start.setHours(0, 0, 0, 0);
+      return [last60Start, endOfToday];
+    
+    default:
+      return [null, null];
+  }
+};
+
 const HistoryDatePicker = ({ onDateRangeChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState('last-30');
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [startDate, setStartDate] = useState(() => {
+    const [start] = getPresetDates('last-30');
+    return start;
+  });
+  const [endDate, setEndDate] = useState(() => {
+    const [, end] = getPresetDates('last-30');
+    return end;
+  });
   const [displayText, setDisplayText] = useState('Last 30 Days');
   
   const dropdownRef = useRef(null);
+
+    useEffect(() => {
+    safeOnDateRangeChange({ startDate, endDate });
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -24,6 +68,17 @@ const HistoryDatePicker = ({ onDateRangeChange }) => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+    useEffect(() => {
+      // Set default to Last 30 Days on mount
+      const [start, end] = getPresetDates('last-30');
+      setStartDate(start);
+      setEndDate(end);
+
+      safeOnDateRangeChange({ startDate: start, endDate: end });
+    }, []);
+
+
 
   const safeOnDateRangeChange = (range) => {
     if (onDateRangeChange && typeof onDateRangeChange === 'function') {
@@ -39,39 +94,7 @@ const HistoryDatePicker = ({ onDateRangeChange }) => {
     { id: 'custom', label: 'Custom Range' }
   ];
 
-  const getPresetDates = (presetId) => {
-    const today = new Date();
-    const endOfToday = new Date(today);
-    endOfToday.setHours(23, 59, 59, 999);
-    
-    switch(presetId) {
-      case 'today':
-        const startOfToday = new Date(today);
-        startOfToday.setHours(0, 0, 0, 0);
-        return [startOfToday, endOfToday];
-      
-      case 'this-month':
-        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        lastDay.setHours(23, 59, 59, 999);
-        return [firstDay, lastDay];
-      
-      case 'last-30':
-        const last30Start = new Date(today);
-        last30Start.setDate(last30Start.getDate() - 30);
-        last30Start.setHours(0, 0, 0, 0);
-        return [last30Start, endOfToday];
-      
-      case 'last-60':
-        const last60Start = new Date(today);
-        last60Start.setDate(last60Start.getDate() - 60);
-        last60Start.setHours(0, 0, 0, 0);
-        return [last60Start, endOfToday];
-      
-      default:
-        return [null, null];
-    }
-  };
+ 
 
   const handleOptionSelect = (option) => {
     setSelectedOption(option.id);
@@ -111,6 +134,8 @@ const HistoryDatePicker = ({ onDateRangeChange }) => {
       year: 'numeric' 
     });
   };
+
+
 
   return (
     <div className='flex items-center gap-2 px-4 py-2 font-sans'>

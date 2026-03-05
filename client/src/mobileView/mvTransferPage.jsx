@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 // MUI
-import { Box, Button, Stack, Menu, MenuItem} from '@mui/material';
+import { Box, Stack} from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import SearchIcon from '@mui/icons-material/Search';
 import TuneIcon from '@mui/icons-material/Tune';
@@ -10,25 +10,35 @@ import HistoryDatePicker from '../Utils/datePicker';
 import MvTRForm from './components/mvTRForm';
 
 
+const getDefaultLast30Days = () => {
+  const today = new Date();
+  const end = new Date(today);
+  end.setHours(23, 59, 59, 999);
+
+  const start = new Date(today);
+  start.setDate(start.getDate() - 29); // 30 days total
+  start.setHours(0, 0, 0, 0);
+
+  return { startDate: start, endDate: end };
+};
+
 function MvTransferPage({
-    setIsOpenTransfer,
-    trHeaders,
-    trDetails,
+    onClose,
+    isClosing,
+    onAnimationEnd,
+    trHeaders = [],
+    trDetails = [],
+    isLoading = false,
+    error = null,
 
 }){
-    const [isClosing, setIsClosing] = useState(false);
+    // const [isClosing, setIsClosing] = useState(false);
     const [show, setShow] = useState(true); 
     const [filter, setFilter] = useState('Waiting');
     const [isOptionsOpen, setIsOptionsOpen] = useState(false);
-    const [dateRange, setDateRange] = useState(null); //state for date range
+    const [dateRange, setDateRange] = useState(getDefaultLast30Days); //state for date range
 
-    const handleClosePage = () => setIsClosing(true); 
-    const handleAnimationEnd = (e) => {
-        // Only trigger if the animation that ended belongs to THIS div
-        if (isClosing && e.target === e.currentTarget) { 
-            setIsOpenTransfer(false);  
-        } 
-    };
+    const handleClosePage = () => {if (onClose) onClose()}; 
 
     const handleOptionsOpen = () => {
       setIsOptionsOpen(prev => !prev)
@@ -81,23 +91,21 @@ function MvTransferPage({
 
     return (
       <>
-        <div onAnimationEnd={handleAnimationEnd} className={`          
+        <div onAnimationEnd={onAnimationEnd} className={`          
           fixed inset-0 z-50 items-start w-full max-h-screen overflow-y-auto 
           bg-white  ${isClosing ? 'animate-slide-out-left' : 'animate-slide-left '}`}>
           <div className="flex flex-col ">
             <Box 
               sx={{ 
-                  p: 2,
-                  pt: 3,
-                  overflow: 'auto', 
-                  borderBottom: 1, 
-                  borderColor: 'grey.300', 
-                  position: 'sticky', 
-                  top: 0, 
-                  bgcolor: 'white',
-                  transition: 'transform 0.3s ease',
-                  transform: show ? 'translateY(0)' : 'translateY(-100%)',  
-                  backgroundColor: '#fafafa',        
+                p: 2,
+                pt: 3,
+                overflow: 'auto', 
+                borderBottom: 1, 
+                borderColor: 'grey.300', 
+                position: 'sticky', 
+                top: 0, 
+                bgcolor: '#fafafa',
+                zIndex: 10       
               }}
             >
               <Stack
@@ -133,8 +141,10 @@ function MvTransferPage({
               </Stack>
             </Box>
             
-            <div className='flex flex-col py-2'>
-              <div className='flex justify-end px-4'>
+            {/* Date Range filter */}
+            <div className='grid-cols-1 py-2'>
+              <div className='flex items-center justify-between px-4 text-sm font-semibold tracking-wide'>
+                <span>Transfers</span>
                 <button 
                   onClick={handleOptionsOpen}
                   className={`flex items-center gap-1 px-3 py-1 rounded-md transition-colors ${
@@ -147,7 +157,7 @@ function MvTransferPage({
               </div>
               
               {isOptionsOpen && (
-                <div className='m-1 border-t border-b bg-gray-50'>
+                <div className='flex m-1 border-y bg-gray-50'>
                   <HistoryDatePicker onDateRangeChange={handleDateRangeChange} />
                 </div>
               )}
@@ -174,13 +184,19 @@ function MvTransferPage({
               </div>
             )}
             
-            <div className='flex flex-col gap-4 p-4'>
-              <MvTRForm
-                trHeaders = {trHeaders}
-                trDetails = {trDetails}
-                filteredTR = {filteredTR}
-              />
-            </div>               
+            {filteredTR.length > 0 
+            ?  <div className='flex flex-col gap-4 p-4'>
+                <MvTRForm
+                  trHeaders = {trHeaders}
+                  trDetails = {trDetails}
+                  filteredTR = {filteredTR}
+                />
+              </div>   
+            : <span className='flex justify-center p-5 text-sm italic item-center text-slate-500'>
+                No record found within the selected date. 
+              </span>          
+            }
+                        
           </div>            
         </div>        
       </>
