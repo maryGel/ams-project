@@ -6,21 +6,12 @@ import SearchIcon from '@mui/icons-material/Search';
 import TuneIcon from '@mui/icons-material/Tune';
 // Custom Utils
 import HistoryDatePicker from '../Utils/datePicker';
+import {getDefaultLast30Days} from '../Utils/datePicker';
+import {statusFilter} from './customUtils/filters';
 // Components
 import MvAAForm from './components/mvAAForm';
 
 
-const getDefaultLast30Days = () => {
-  const today = new Date();
-  const end = new Date(today);
-  end.setHours(23, 59, 59, 999);
-
-  const start = new Date(today);
-  start.setDate(start.getDate() - 29); // 30 days total
-  start.setHours(0, 0, 0, 0);
-
-  return { startDate: start, endDate: end };
-};
 
 function MvAssetAccPage({
     onClose,
@@ -30,8 +21,6 @@ function MvAssetAccPage({
     assetAccDetails =[],
     isLoading = false,
     error = null,
-
-
 }){
     const [show, setShow] = useState(true); 
     const [filter, setFilter] = useState('Waiting');
@@ -133,17 +122,18 @@ function MvAssetAccPage({
                 <button className='w-5'>
                   <SearchIcon />
                 </button>
-                {['Waiting', 'Fully Approved', 'Rejected', 'All'].map((status)=> (
+                {statusFilter.map((item)=> (
                   <button
-                    key={status}
-                    onClick={() => setFilter(status)}
+                    key={item.id}
+                    onClick={() => setFilter(item.status)}
                     className={`px-4 text-sm border rounded-2xl transition-colors whitespace-nowrap ${
-                        filter === status 
-                        ? 'text-blue-600 font-semibold border-blue-800' 
+                        filter === item.status 
+                        ? 'text-slate-900 font-semibold border-slate-900' 
                         : 'bg-white text-slate-600 border-slate-400'
                     }`}
                   >
-                  {status}
+                  <span>{item.icon}</span>
+                  <span className='pl-1 text-xs'>{item.status}</span>
                   </button>
                 ))}
               </Stack>

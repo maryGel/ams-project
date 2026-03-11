@@ -6,13 +6,13 @@ import DateDisplay from '../../Utils/formatDateForInput';
 
 function MvEvalJO({
     setOpenJoNo,
-    openJoNo,
-    items,
-    header
+    header,
+    joDetails
 
 }){
 
     const [isClosing, setIsClosing] = useState(false);
+
 
     // ... Handlers  
     const handleClosePage = () => setIsClosing(true);
@@ -22,8 +22,16 @@ function MvEvalJO({
             setOpenJoNo(false);  
         } 
     };
+
+    // Filter joDetails by JO_No & Approval logs by JO_No
+    const getItemsByJONo = (JO_No) => {
+        return joDetails?.filter(detail => detail.JO_No === JO_No) || [];
+    };
+
+    const items = getItemsByJONo(header.JO_No);
+
+
       
-    console.log(`items: ${items}`)
     return(
       <>
         <div onAnimationEnd={handleAnimationEnd} className={`          
@@ -39,27 +47,25 @@ function MvEvalJO({
             <span className='font-semibold'>{header.JO_No}</span>
             <span><DateDisplay value={header.xDate} format="short" /></span>
           </div>
-          <div className='flex flex-col gap-3 p-5 text-sm border-b text-slate-500'>
+          <div className='flex flex-col gap-3 p-5 text-sm border-b'>
             <span>{header.Department_Code}</span>
-            <span className='text-base text-black'>Remarks: {header.Remarks}</span>
-            <span>For inpection by: {header.Sector_name}</span>
-            <span>Requestor: {header.requested_by}</span>
+            <span className='text-base'>Remarks: {header.Remarks}</span>
+            <div className='flex flex-col gap-1 mt-1'>
+              <span>For inpection by: {header.Sector_name}</span>
+              <span>Requestor: {header.requested_by}</span>
+            </div>
           </div>
-
-
-          {items.length > 0 &&   (
-            <>
-              {items.map((item, index) => (
-                  <div key = {item.ID || index} className='p-5'>
-                  <div>{items.qty}</div>
-                  <div>{items.FAC_name}</div>
-                </div>
-
-                ))}
-            </>
-          )}
-          
-          
+         
+        <div className='p-5 '><span className='tracking-wide text-slate-400'>Select the item to evaluate</span></div>
+        {items.map((item, index) => (
+            <div key={index} className='flex flex-col p-5 text-slate-700'>
+              <div className='flex gap-3'>
+                <span>{item.qty}</span>
+                <span className='font-semibold text-blue-600'>{item.FAC_name}</span>
+              </div>
+              <span className='py-2 pl-5 italic'>{item.workDet}</span>
+            </div>
+        ))}
         </div>
       </>
     )

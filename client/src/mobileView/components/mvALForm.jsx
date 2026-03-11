@@ -5,15 +5,14 @@ import clsx from 'clsx';
 
 // MUI
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CloseIcon from '@mui/icons-material/Close';
-import DoneAllIcon from '@mui/icons-material/DoneAll';
-import DoneIcon from '@mui/icons-material/Done';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import CancelIcon from '@mui/icons-material/Cancel';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import {TextareaAutosize} from '@mui/material';
 // Hooks
 import {useApprovalLogs} from '../../hooks/useApprovalLogs';
+// Custom Utils
+import {borderColor} from '../customUtils/filters';
 
 
 function MvALForm({
@@ -58,36 +57,6 @@ function MvALForm({
         document.body.style.overflow = 'hidden';
     };
 
-    const handleAppStatus = (xPosted, disapproved) => {
-    
-      if(xPosted === 1 && !disapproved) return (
-        <div className='flex items-center px-1 mx-1'>  
-          <DoneAllIcon fontSize='small'className='text-green-500'/>
-          <span className='text-xs font-semibold tracking-wide'>Fully Approved</span>          
-        </div>
-      );
-
-      if(xPosted === 2 && !disapproved) return (
-        <div className='flex items-center mx-1'> 
-          <DoneIcon fontSize='small' className='text-green-500'/>
-          <span className='text-xs font-semibold tracking-wide'>Partially Approved</span>          
-        </div>
-      );
-
-      if(xPosted === 3  && !disapproved) return (
-        <div className='flex items-center mx-1'>     
-          <DoneIcon fontSize='small' className='text-slate-400' />
-          <span className='text-xs font-semibold tracking-wide text-yellow-600'>Pending</span>          
-        </div>
-      );
-    
-      if(xPosted === 3 && disapproved === 1) return (
-        <div className='flex items-center mx-1'>     
-          <CloseIcon fontSize='small' className='text-slate-400' />
-          <span className='text-xs font-semibold tracking-wide text-red-600'>Rejected</span>          
-        </div>
-      );
-    }
 
     const handleShowItems = (item) => {
         setSelectedDetails(item)
@@ -129,25 +98,16 @@ function MvALForm({
                 
 
                 return (
-                    <div key={header.ID} className='flex flex-col w-full gap-1 p-2 border shadow-md border-spacing-2 border-slate-400 rounded-xl'>
+                    <div key={header?.ID} 
+                        className={`flex flex-col w-full gap-1 p-2 border shadow-md rounded-xl ${borderColor(header.xPosted, header.DISAPPROVED)}`}
+                    >
+                      
                         <div className='flex justify-between px-2'>
-                            <div className='flex flex-col'>
-                                <span className='text-xs font-semibold'>Lost Asset Form</span>
-                                <span className='font-sans text-sm font-semibold text-blue-900'>{header.AAFNo}</span>
-                            </div>
-                            <div className='flex items-center'>
-                                <span className='border rounded-full border-spacing-1'>
-                                    {handleAppStatus(header.xPosted, header.DISAPPROVED)}
-                                </span>
-                            </div>
+                            <span className='font-sans text-sm font-semibold text-blue-900'>{header.AAFNo}</span>
+                            <span className='text-sm text-slate-400'><DateDisplay value={header.xDate} format="short" /></span>
                         </div>
 
                         <div className='flex flex-col px-2'>
-                            <div className='flex flex-col text-xs text-slate-500'>
-                                <span className='flex justify-end'>
-                                    <DateDisplay value={header.xDate} format="short" />
-                                </span>
-                            </div>
                             <div className='flex flex-col'>
                                 <div className='flex items-start justify-between text-xs text-slate-500 center'>
                                   <span>{header.Dep}</span>
@@ -156,9 +116,6 @@ function MvALForm({
                                     <span className='text-xs text-slate-500'>Custodian:</span>
                                     <span className='text-sm'>{header.Custodian}</span>
                                 </div>
-                                {/* <span className='font-sans text-xs tracking-wide text-slate-500'>
-                                    Holder: {header.Holder}
-                                </span> */}
                                 <span className='mt-1 text-xs tracking-wide text-slate-500'>Assigned to: {header.EmpName}</span>
                             </div>
                         </div>
@@ -184,7 +141,6 @@ function MvALForm({
                                   >
                                     <img className='w-4' src='/icons/actions/approve.png'/>
                                     <span className='font-semibold tracking-wide'>Approvers</span>
-
                                 </button>}
                             </div>
                             {((header.xPosted === 3 || header.xPosted === 2) && !header.DISAPPROVED) && <button onClick={() => handleOpenAppOptions(header.AAFNo)}><MoreHorizIcon /></button>}
@@ -212,9 +168,6 @@ function MvALForm({
                                                 </span>
                                             </div>
                                         )}
-                                        {/* <div className='flex items-center gap-2 mt-1 text-xs pl-7 text-slate-500'>
-                                            <span className='pr-2'>{item.ItemNo}</span>               
-                                        </div>                                       */}
                                     </div>
                                 ))}
                             </div>
@@ -228,12 +181,7 @@ function MvALForm({
                         )}
                         {/* Show approval logs */}
                         {viewApprovers[header.AAFNo] && logs.length > 0 &&
-                            <div className='flex flex-col px-3 mt-2 text-sm'>
-                                <div className='flex justify-between tracking-wide text-gray-500'>
-                                    <span>Approvers</span>
-                                    <span className='mr-3'>Date</span>
-                                </div>
-                                
+                            <div className='flex flex-col px-3 mt-2 text-sm'>                                
                                 {logs.map((log) => (<>
 
                                 <div className='flex items-center justify-between mt-2'>

@@ -19,15 +19,6 @@ import JOFormPage from './a_Movement/pages/jobOrderPage.jsx';
 // System Setup Pages
 import UserAccessPage from './a_SystemSetup/pages/userAccessPage.jsx';
 
-// Mobile Pages
-import MvDashBoard from './mobileView/mvDBoardPage.jsx';
-import MvJobOrderPage from './mobileView/mvJobOrdersPage.jsx';
-import MvTransferPage from './mobileView/mvTransferPage';
-import MvDisposalPage from './mobileView/mvDisposalPage';
-import MvAssetAccPage from './mobileView/mvAssetAccPage';
-import MVAssetLostPage from './mobileView/mvAssetLostPage';
-import MvMaintenancePage from './mobileView/mvMaintenancePage';
-
 // To initialize the header title based on the current page
 const getInitialTitle = () => {
   const savedTitle = localStorage.getItem('currentHeaderTitle');
@@ -90,27 +81,17 @@ function App() {
           </ProtectedRoute>
         }>
           {/* These routes will render INSIDE the Layout component's Outlet */}
-           <Route path="/Home" element={
-            isMobile ? <MvDashBoard useProps={{}} /> : <HomePage
-              headerTitle={headerTitle}
-              setHeaderTitle={saveTitleUpdate}
-              username={username}
-              navLink={navLink}
-              setNavLink={saveNavLinkUpdate}
-              isMobile={isMobile}
-            />
+           <Route path="/Home/*" element={
+            <HomePage
+                headerTitle={headerTitle}
+                setHeaderTitle={saveTitleUpdate}
+                username={username}
+                navLink={navLink}
+                setNavLink={saveNavLinkUpdate}
+                isMobile={isMobile}
+              />
           } />
-          {/* <Route path="/Home/dashboard" element={<MvDashBoard />} /> */}
-           {isMobile && (
-            <>
-              <Route path="/Home/jobOrderPage" element={<MvJobOrderPage />} />
-              <Route path="/Home/transfers" element={<MvTransferPage />} />
-              <Route path="/Home/disposals" element={<MvDisposalPage />} />
-              <Route path="/Home/borrowAndIssue" element={<MvAssetAccPage />} />
-              <Route path="/Home/lostAssets" element={<MVAssetLostPage />} />
-              <Route path="/Home/maintenance" element={<MvMaintenancePage />} />
-            </>
-          )}
+
           
           {/* Asset Master Pages */}
           <Route path="/assetFolder/pages/assetMasterList" element={

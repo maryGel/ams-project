@@ -14,6 +14,8 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import {TextareaAutosize} from '@mui/material';
 // Hooks
 import {useApprovalLogs} from '../../hooks/useApprovalLogs';
+// Custom Utils
+import {borderColor} from '../customUtils/filters';
 
 
 function MvADForm({
@@ -59,37 +61,6 @@ function MvADForm({
     };
 
 
-    const handleAppStatus = (xpost, disapproved) => {
-    
-      if(xpost === 1 && !disapproved) return (
-        <div className='flex items-center px-1 mx-1'>  
-          <DoneAllIcon fontSize='small'className='text-green-500'/>
-          <span className='text-xs font-semibold tracking-wide'>Fully Approved</span>          
-        </div>
-      );
-
-      if(xpost === 2 && !disapproved) return (
-        <div className='flex items-center mx-1'> 
-          <DoneIcon fontSize='small' className='text-green-500'/>
-          <span className='text-xs font-semibold tracking-wide'>Partially Approved</span>          
-        </div>
-      );
-
-      if(xpost === 3  && !disapproved) return (
-        <div className='flex items-center mx-1'>     
-          <DoneIcon fontSize='small' className='text-slate-400' />
-          <span className='text-xs font-semibold tracking-wide text-yellow-600'>Pending</span>          
-        </div>
-      );
-    
-      if((xpost === 3 || xpost === 2) && disapproved === 1) return (
-        <div className='flex items-center mx-1'>     
-          <CloseIcon fontSize='small' className='text-slate-400' />
-          <span className='text-xs font-semibold tracking-wide text-red-600'>Rejected</span>          
-        </div>
-      );
-    }
-
     const handleShowItems = (item) => {
         setSelectedDetails(item)
         // Prevent background scrolling
@@ -128,25 +99,16 @@ function MvADForm({
                 const logs = getAppLogByADNo(header.AD_No);                
 
                 return (
-                    <div key={header.ID} className='flex flex-col w-full gap-1 p-2 border shadow-md border-spacing-2 border-slate-400 rounded-xl'>
+                    <div key={header?.ID} 
+                        className={`flex flex-col w-full gap-1 p-2 border shadow-md rounded-xl ${borderColor(header.xpost, header.DISAPPROVED)}`}
+                    >
+                      
                         <div className='flex justify-between px-2'>
-                            <div className='flex flex-col'>
-                                <span className='text-xs font-semibold'>Disposal</span>
-                                <span className='font-sans text-sm font-semibold text-blue-900'>{header.AD_No}</span>
-                            </div>
-                            <div className='flex items-center'>
-                                <span className='border rounded-full border-spacing-1'>
-                                    {handleAppStatus(header.xpost, header.DISAPPROVED)}
-                                </span>
-                            </div>
+                            <span className='font-sans text-sm font-semibold text-blue-900'>{header.AD_No}</span>
+                            <span className='text-sm text-slate-400'><DateDisplay value={header.xDate} format="short" /></span>
                         </div>
 
                         <div className='flex flex-col px-2'>
-                            <div className='flex flex-col text-xs text-slate-500'>
-                                <span className='flex justify-end'>
-                                    <DateDisplay value={header.xDate} format="short" />
-                                </span>
-                            </div>
                             <div className='flex flex-col'>
                                 <div className='flex items-start justify-between text-xs text-slate-500 center'>
                                   <span>{header.Deparment_Name}</span>
@@ -255,12 +217,7 @@ function MvADForm({
                         )}
                         {/* Show approval logs */}
                         {viewApprovers[header.AD_No] && logs.length > 0 &&
-                            <div className='flex flex-col px-3 mt-2 text-sm'>
-                                <div className='flex justify-between tracking-wide text-gray-500'>
-                                    <span>Approvers</span>
-                                    <span className='mr-3'>Date</span>
-                                </div>
-                                
+                            <div className='flex flex-col px-3 mt-2 text-sm'>                                
                                 {logs.map((log) => (<>
 
                                 <div className='flex items-center justify-between mt-2'>
@@ -290,17 +247,11 @@ function MvADForm({
                                 left: 0,
                                 right: 0,
                                 bottom: 0,
-                                // Use RGBA with high specificity
-                                // color: 'white',
                                 backgroundColor: "hsla(0, 0%, 20%, 0.3)",
-                                // Fallback using a semi-transparent PNG data URI (most aggressive approach)
-                                // backgroundImage: 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=) !important',
-                                // backgroundRepeat: 'repeat !important',
                                 display: 'flex',
                                 alignItems: 'flex-end',
                                 justifyContent: 'center',
                                 zIndex: 9999999,
-                                // opacity: 0.5
                             }}
                             onClick={handleCloseDetails}
                         >

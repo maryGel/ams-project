@@ -21,6 +21,7 @@ const getDefaultLast30Days = () => {
 };
 
 function MvEvalJOForm({
+  
     joHeaders,
     joDetails,
 }){
@@ -28,6 +29,7 @@ function MvEvalJOForm({
     const [dateRange, setDateRange] = useState(getDefaultLast30Days); 
     const [isOptionsOpen, setIsOptionsOpen] = useState(false);
     const [openJoNo, setOpenJoNo] = useState(null);
+    const [selectedJO, setSelectedJO] = useState(null);
 
      // First, apply the status filter
     const statusFilteredJO = useMemo(() => {
@@ -70,6 +72,17 @@ function MvEvalJOForm({
       });
     }, [statusFilteredJO, dateRange]);
 
+        // Sort the filteredJO array by date (latest first)
+    const sortedFilteredJo = useMemo(() => {
+        if (!filteredJO) return [];
+        
+        return [...filteredJO].sort((a, b) => {
+            // Sort by JO number in descending order
+            // This assumes JO numbers like DB-JO-0000007 (higher number = newer)
+            return b.JO_No.localeCompare(a.JO_No);
+        });
+    }, [filteredJO]);
+
     const handleOptionsOpen = () => {
       setIsOptionsOpen(prev => !prev)
     };
@@ -78,13 +91,8 @@ function MvEvalJOForm({
       setDateRange(range);
     };
 
-    const handleOpenJo = (JO_No) => {
-      setOpenJoNo(prev => prev === JO_No ? null : JO_No);
-    };
-
-        // Filter joDetails by JO_No & Approval logs by JO_No
-    const getItemsByJONo = (JO_No) => {
-        return joDetails?.find(detail => detail.JO_No === JO_No) || [];
+    const handleOpenJo = (header) => {
+      setSelectedJO(header);
     };
 
     
@@ -153,12 +161,13 @@ function MvEvalJOForm({
           {/* Job orders List  */}
 
           <div className='mt-3 border-t'>
-            {filteredJO?.map((header ) => {
-              const items = getItemsByJONo(header.JO_No);
-              
-
+            {sortedFilteredJo?.map((header ) => {
+             
               return (
-                <div key={header.ID} className='grid grid-cols-[20rem_1fr] justify-between h-auto text-xs px-3 py-1 border-b'>
+                <div 
+                  key={header.ID} 
+                  className='grid grid-cols-[20rem_1fr] justify-between h-auto text-xs px-3 py-1 border-b'
+                  onClick={()=> {handleOpenJo(header)}}>
                   <div className='flex flex-col h-auto '>
                     <div className='flex justify-between'>
                       <span className='font-semibold'>{header.JO_No}</span>
@@ -167,23 +176,20 @@ function MvEvalJOForm({
                     <span className='pl-2'>{header.Remarks}</span>
                     <span className='text-[10px] pl-2 text-slate-500'>{header.Department_Code}</span>
                   </div>
-                  <button className='p-2' onClick={()=> {handleOpenJo(header.JO_No)}}>
+                  <button className='p-2' >
                     <ArrowForwardIosIcon className='p-1 text-blue-800' fontSize='small'/>
                   </button>
-
-                  {openJoNo === header.JO_No &&
-                    (<MvEvalJO 
-                      filteredJO = {filteredJO}
-                      header = {header}
-                      items = {items}
-                      openJoNo = {openJoNo}
-                      setOpenJoNo = {setOpenJoNo}
-
-                    />)
-                  }
                 </div>
               )
             })}
+              {selectedJO &&
+                  (<MvEvalJO 
+                    header = {selectedJO}
+                    openJoNo = {openJoNo}
+                    setOpenJoNo = {setOpenJoNo}
+                    joDetails = {joDetails}
+                 />)
+              }
           </div>
 
         </>

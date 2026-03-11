@@ -5,6 +5,18 @@ import 'react-datepicker/dist/react-datepicker.css';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
+export const getDefaultLast30Days = () => {
+  const today = new Date();
+  const end = new Date(today);
+  end.setHours(23, 59, 59, 999);
+
+  const start = new Date(today);
+  start.setDate(start.getDate() - 29); // 30 days total
+  start.setHours(0, 0, 0, 0);
+
+  return { startDate: start, endDate: end };
+};
+
 const getPresetDates = (presetId) => {
   const today = new Date();
   const endOfToday = new Date(today);
@@ -32,6 +44,9 @@ const getPresetDates = (presetId) => {
       const last60Start = new Date(today);
       last60Start.setDate(last60Start.getDate() - 60);
       last60Start.setHours(0, 0, 0, 0);
+
+
+      
       return [last60Start, endOfToday];
     
     default:
