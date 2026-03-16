@@ -1,10 +1,10 @@
-import {useState} from 'react'
+import {useState} from 'react';
 // MUI
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 // Custom Utils
 import DateDisplay from '../../Utils/formatDateForInput';
 
-function MvEvalJO({
+function MvWorkOrders({
     onClose,
     onAnimationEnd,
     header,
@@ -52,10 +52,9 @@ function MvEvalJO({
         return selectedItems.includes(`${item.JO_No}-${index}`);
     };
 
-      
-    return(
-      <>
-        <div onAnimationEnd={onAnimationEnd} className={`          
+    return (
+    <>
+          <div onAnimationEnd={onAnimationEnd} className={`          
           fixed inset-0 z-50 items-start w-full max-h-screen overflow-y-auto text-sm
           bg-white ${isClosingJO ? 'animate-slide-out-right' : 'animate-slide-in-right'}`}>
             
@@ -65,7 +64,10 @@ function MvEvalJO({
               </button>
           </div>
           <div className='flex justify-between px-5 py-2 font-sans tracking-wide border-b'>
-            <span className='font-semibold'>{header.JO_No}</span>
+            <div>
+              <span>{header.JO_No}</span>
+              {header.workNo && <span className='text-green-600'> - {header.workNo}</span>}
+            </div>
             <span><DateDisplay value={header.xDate} format="short" /></span>
           </div>
           <div className='flex flex-col gap-3 p-5 text-sm border-b text-slate-500'>
@@ -131,9 +133,10 @@ function MvEvalJO({
               </div>
             )}
           </div>
-        </div>
-      </>
+        </div> 
+    
+    </>
     )
 }
 
-export default MvEvalJO;
+export default MvWorkOrders;

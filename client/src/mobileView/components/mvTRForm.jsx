@@ -13,8 +13,6 @@ import {TextareaAutosize} from '@mui/material';
 import {useApprovalLogs} from '../../hooks/useApprovalLogs';
 // Custom Utils
 import {borderColor} from '../customUtils/filters';
-import {docStatus} from '../customUtils/filters';
-
 
 function MvTRForm({
     useProps,
@@ -158,7 +156,7 @@ function MvTRForm({
                                 {items.map((item, index) => (
                                     <div key={item.ID || index} className='flex flex-col justify-start mb-3'>
                                         
-                                        <div className='flex justify-start w-full gap-3 text-xs '>
+                                        <div className='flex justify-start w-full gap-3'>
 
                                             <span className='pl-2'>{item.qty}</span>
                                             <button onClick={() => handleShowItems(item)} className='font-semibold text-blue-600'>
@@ -187,12 +185,7 @@ function MvTRForm({
                         )}
                         {/* Show approval logs */}
                         {viewApprovers[header.TR_No] && logs.length > 0 &&
-                            <div className='flex flex-col px-3 mt-2 text-sm'>
-                                <div className='flex justify-between tracking-wide text-gray-500'>
-                                    <span>Approvers</span>
-                                    <span className='mr-3'>Date</span>
-                                </div>
-                                
+                            <div className='flex flex-col px-3 mt-2 text-sm'>                                
                                 {logs.map((log) => (<>
 
                                 <div className='flex items-center justify-between mt-2'>

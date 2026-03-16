@@ -188,9 +188,9 @@ function MvADForm({
                                 {items.map((item, index) => (
                                     <div key={item.ID || index} className='flex flex-col justify-start mb-3'>
                                         
-                                        <div className='flex justify-start w-full gap-3 text-xs '>
+                                        <div className='flex justify-start w-full gap-3'>
 
-                                            <span className='pl-2'>{item.qty}</span>
+                                            <span className='pl-2 mt-1'>{item.qty}</span>
                                             <button onClick={() => handleShowItems(item)} className='font-semibold text-blue-600'>
                                                 {item.FAC_name}
                                             </button>                

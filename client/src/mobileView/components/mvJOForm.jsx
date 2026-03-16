@@ -157,11 +157,11 @@ function MvJOForm({
 
                         {/* Items section - dynamically mapped from joDetails */}
                         {viewItems[header.JO_No] && items.length > 0 && (
-                            <div className='flex flex-col w-full mt-1 text-sm'>
+                            <div className='flex flex-col w-full mt-2 text-sm'>
                                 {items.map((item, index) => (
                                     <div key={item.ID || index} className='flex flex-col justify-start mb-3'>
                                         
-                                        <div className='flex justify-start w-full gap-3 text-xs '>
+                                        <div className='flex justify-start w-full gap-3'>
 
                                             <span className='pl-2'>{item.qty}</span>
                                             <button onClick={() => handleShowItems(item)} className='font-semibold text-blue-600'>
@@ -170,7 +170,7 @@ function MvJOForm({
                                             
                                         </div>  
                                         {item.workDet && (
-                                            <span className='text-xs text-gray-900 pl-7'>
+                                            <span className='mt-1 text-xs text-gray-900 pl-7'>
                                                 {item.workDet}
                                             </span>
                                         )}

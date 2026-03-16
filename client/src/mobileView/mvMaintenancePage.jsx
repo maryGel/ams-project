@@ -9,22 +9,23 @@ import MvMaintenanceForm from './components/mvMaintenanceForm';
 
 
 function MvMaintenancePage({
-    onClose,
-    isClosing,
-    onAnimationEnd,
-    joHeaders = [],
-    joDetails = [],
-    isLoading = false,
-    error = null,
+  isClosing,
+  onClose,
+  onAnimationEnd,
+  joHeaders = [],
+  joDetails = [],
+  isLoading = false,
+  error = null,
 
   }){
+
   const [isOpenEvalJo, setIsOpenEvalJo] = useState(true);
   const [isOpenMainForm, setIsOpenMainForm] = useState(false);
 
 
   // ... Handlers
  
-  const handleClosePage = () => {if(close) onClose()};
+  const handleClosePage = () => {if(onClose) onClose()};
 
   const handleOpenEvalJo = () => {
     setIsOpenEvalJo(true);
@@ -40,7 +41,7 @@ function MvMaintenancePage({
     <>
       <div onAnimationEnd={onAnimationEnd} className={`          
         fixed inset-0 z-50 items-start w-full max-h-screen overflow-y-auto 
-        bg-white ${isClosing ? 'animate-slide-out-left' : 'animate-slide-left '}`}>
+        bg-white ${isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'}`}>
         <div className="flex flex-col py-2">
 
           <button className='w-5 px-4 py-2' onClick={handleClosePage}> 
@@ -67,7 +68,10 @@ function MvMaintenancePage({
             />  
           }   
           {isOpenMainForm &&
-            <MvMaintenanceForm/>
+            <MvMaintenanceForm
+              joHeaders = {joHeaders}
+              joDetails = {joDetails}            
+            />
           }                
         </div>            
       </div>        

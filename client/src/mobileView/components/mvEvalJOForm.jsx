@@ -5,6 +5,7 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 // Custom Utils
 import HistoryDatePicker from '../../Utils/datePicker';
 import DateDisplay from '../../Utils/formatDateForInput';
+import {evalStatus} from '../customUtils/filters';
 //Components
 import MvEvalJO from './mvEvalJO';
 
@@ -20,15 +21,14 @@ const getDefaultLast30Days = () => {
   return { startDate: start, endDate: end };
 };
 
-function MvEvalJOForm({
-  
+function MvEvalJOForm({  
     joHeaders,
     joDetails,
 }){
     const [filter, setFilter] = useState('Pending');
     const [dateRange, setDateRange] = useState(getDefaultLast30Days); 
     const [isOptionsOpen, setIsOptionsOpen] = useState(false);
-    const [openJoNo, setOpenJoNo] = useState(null);
+    const [isClosingJO, setIsClosingJO] = useState(false);
     const [selectedJO, setSelectedJO] = useState(null);
 
      // First, apply the status filter
@@ -83,116 +83,132 @@ function MvEvalJOForm({
         });
     }, [filteredJO]);
 
+    // handle open date range selection
     const handleOptionsOpen = () => {
       setIsOptionsOpen(prev => !prev)
     };
-
     const handleDateRangeChange = (range) => {
       setDateRange(range);
     };
 
+    // Handle animation end
     const handleOpenJo = (header) => {
       setSelectedJO(header);
+    };
+    // Handle closing a page
+    const handleClosePage = () => {
+        setIsClosingJO(true);
+    };
+
+    // Handle animation end
+    const handleAnimationEnd = () => {
+        if (isClosingJO) {
+            setSelectedJO(null);
+            setIsClosingJO(false);
+        }
     };
 
     
     return (
-        <>
-          <div className='flex flex-col justify-center gap-3'>
+      <>
+        <div className='flex flex-col justify-center gap-3'>
 
-            <div className='flex justify-center gap-2 mt-2'>
-              {['Pending', 'Evaluated', 'All'].map((status)=> (
-                  <button
-                    key={status}
-                    onClick={() => setFilter(status)}
-                    className={`px-4 text-sm border rounded-2xl transition-colors whitespace-nowrap ${
-                        filter === status 
-                        ? 'text-blue-600 font-semibold border-blue-800' 
-                        : 'bg-white text-slate-600 border-slate-400'
-                    }`}
-                  >
-                  {status}
-                  </button>
-                ))}
-            </div>
-
-            <div className='flex flex-col'>
-              <div className='flex items-center justify-end px-4 text-sm font-semibold tracking-wide'>
-                <button 
-                  onClick={handleOptionsOpen}
-                  className={`flex items-center gap-1 px-3 py-1 rounded-md transition-colors ${
-                    isOptionsOpen ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'
+          <div className='flex justify-center gap-2 mt-2'>
+            {evalStatus.map((item)=> (
+                <button
+                  key={item.id}
+                  onClick={() => setFilter(item.status)}
+                  className={`px-4 text-sm border rounded-2xl transition-colors whitespace-nowrap ${
+                      filter === item.status 
+                      ? 'text-slate-900 font-semibold border-slate-800 bg-slate-100' 
+                      : 'bg-white text-slate-600 border-slate-400'
                   }`}
                 >
-                  <TuneIcon fontSize='small' />
-                  <span className='text-xs'>Filter</span>
+                <div className='flex items-center gap-1'>
+                  <img className='w-4 h-4' src={item.icon}/>
+                  <span>{item.status}</span>
+                </div>
                 </button>
-              </div>
-              
-              {isOptionsOpen && (
-                <div className='mt-2 border-t border-b bg-gray-50'>
-                  <HistoryDatePicker onDateRangeChange={handleDateRangeChange} />
-                </div>
-              )}
-            </div>
-
-            {/* Filter Summary - Optional but helpful */}
-            {(filter !== 'All' || dateRange) && (
-              <div className='px-4 py-2 text-xs text-gray-600 border-blue-100 bg-blue-50 border-y'>
-                <div className='flex items-center gap-2'>
-                  {/* <span>Status: <strong>{filter}</strong></span> */}
-                  {dateRange?.startDate && dateRange?.endDate && (
-                    <>
-                      <span>|</span>
-                      <span>
-                        Date: <strong>
-                          {dateRange.startDate.toLocaleDateString()} - {dateRange.endDate.toLocaleDateString()}
-                        </strong>
-                      </span>
-                    </>
-                  )}
-                  <span>|</span>
-                  <span>Results: <strong>{filteredJO.length}</strong></span>
-                </div>
-              </div>
-            )}
-          </div>  
-
-          {/* Job orders List  */}
-
-          <div className='mt-3 border-t'>
-            {sortedFilteredJo?.map((header ) => {
-             
-              return (
-                <div 
-                  key={header.ID} 
-                  className='grid grid-cols-[20rem_1fr] justify-between h-auto text-xs px-3 py-1 border-b'
-                  onClick={()=> {handleOpenJo(header)}}>
-                  <div className='flex flex-col h-auto '>
-                    <div className='flex justify-between'>
-                      <span className='font-semibold'>{header.JO_No}</span>
-                      <span><DateDisplay value={header.xDate} format="short" /></span>
-                    </div>
-                    <span className='pl-2'>{header.Remarks}</span>
-                    <span className='text-[10px] pl-2 text-slate-500'>{header.Department_Code}</span>
-                  </div>
-                  <button className='p-2' >
-                    <ArrowForwardIosIcon className='p-1 text-blue-800' fontSize='small'/>
-                  </button>
-                </div>
-              )
-            })}
-              {selectedJO &&
-                  (<MvEvalJO 
-                    header = {selectedJO}
-                    openJoNo = {openJoNo}
-                    setOpenJoNo = {setOpenJoNo}
-                    joDetails = {joDetails}
-                 />)
-              }
+              ))}
           </div>
 
-        </>
+          <div className='flex flex-col'>
+            <div className='flex items-center justify-end px-4 text-sm font-semibold tracking-wide'>
+              <button 
+                onClick={handleOptionsOpen}
+                className={`flex items-center gap-1 px-3 py-1 rounded-md transition-colors ${
+                  isOptionsOpen ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'
+                }`}
+              >
+                <TuneIcon fontSize='small' />
+                <span className='text-xs'>Filter</span>
+              </button>
+            </div>
+            
+            {isOptionsOpen && (
+              <div className='mt-2 border-t border-b bg-gray-50'>
+                <HistoryDatePicker onDateRangeChange={handleDateRangeChange} />
+              </div>
+            )}
+          </div>
+
+          {/* Filter Summary - Optional but helpful */}
+          {(filter !== 'All' || dateRange) && (
+            <div className='px-4 py-2 text-xs text-gray-600 border-blue-100 bg-blue-50 border-y'>
+              <div className='flex items-center gap-2'>
+                {/* <span>Status: <strong>{filter}</strong></span> */}
+                {dateRange?.startDate && dateRange?.endDate && (
+                  <>
+                    <span>|</span>
+                    <span>
+                      Date: <strong>
+                        {dateRange.startDate.toLocaleDateString()} - {dateRange.endDate.toLocaleDateString()}
+                      </strong>
+                    </span>
+                  </>
+                )}
+                <span>|</span>
+                <span>Results: <strong>{filteredJO.length}</strong></span>
+              </div>
+            </div>
+          )}
+        </div>  
+
+        {/* Job orders List  */}
+
+        <div className='mt-3 border-t'>
+          {sortedFilteredJo?.map((header ) => {
+            
+            return (
+              <div 
+                key={header.ID} 
+                className='grid grid-cols-[22rem_1fr] justify-between h-auto text-sm px-3 py-1 border-b'
+                onClick={()=> {handleOpenJo(header)}}>
+                <div className='flex flex-col h-auto '>
+                  <div className='flex justify-between'>
+                    <span className='font-semibold'>{header.JO_No}</span>
+                    <span><DateDisplay value={header.xDate} format="short" /></span>
+                  </div>
+                  <span className='pl-2'>{header.Remarks}</span>
+                  <span className='text-[10px] pl-2 text-slate-500'>{header.Department_Code}</span>
+                </div>
+                <button className='p-2' >
+                  <ArrowForwardIosIcon className='p-1 text-blue-800' fontSize='small'/>
+                </button>
+              </div>
+            )
+          })}
+            {selectedJO &&
+                (<MvEvalJO 
+                  onClose={handleClosePage}
+                  onAnimationEnd={handleAnimationEnd}
+                  isClosingJO={isClosingJO}
+                  header = {selectedJO}
+                  joDetails = {joDetails}
+                />)
+            }
+        </div>
+      </>
     )
 }
 

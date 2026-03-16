@@ -23,7 +23,6 @@ function MVAssetLostPage({
     error = null,
 
 }){
-    const [show, setShow] = useState(true); 
     const [filter, setFilter] = useState('Waiting');
     const [isOptionsOpen, setIsOptionsOpen] = useState(false);
     const [dateRange, setDateRange] = useState(getDefaultLast30Days); //state for date range
@@ -83,7 +82,7 @@ function MVAssetLostPage({
       <>
         <div onAnimationEnd={onAnimationEnd} className={`          
           fixed inset-0 z-50 items-start w-full max-h-screen overflow-y-auto 
-          bg-white  ${isClosing ? 'animate-slide-out-left' : 'animate-slide-left '}`}>
+          bg-white  ${isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'}`}>
           <div className="flex flex-col ">
             <Box 
               sx={{ 
@@ -119,14 +118,14 @@ function MVAssetLostPage({
                   <button
                     key={item.id}
                     onClick={() => setFilter(item.status)}
-                    className={`px-2 text-sm border rounded-2xl transition-colors whitespace-nowrap ${
+                    className={`px-2 text-sm py-0.5 border rounded-2xl transition-colors whitespace-nowrap ${
                         filter === item.status 
                         ? 'text-slate-900 font-semibold border-slate-900' 
                         : 'bg-white text-slate-600 border-slate-400'
                     }`}
                   >
                   <span>{item.icon}</span>
-                  <span className='pl-1 text-xs'>{item.status}</span>
+                  <span className='pl-1 text-xs tracking-wide'>{item.status}</span>
                   </button>
                 ))}
               </Stack>

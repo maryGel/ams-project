@@ -1,23 +1,34 @@
 import { useState } from 'react';
 import { Autocomplete, TextField } from '@mui/material';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
-import DoneIcon from '@mui/icons-material/Done';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import CloseIcon from '@mui/icons-material/Close';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 export const statusFilter = [
-  {id: 1, status: 'Waiting', icon: <DoneIcon fontSize='small' className='text-slate-400'/>},
+  {id: 1, status: 'Waiting', icon: <AccessTimeIcon fontSize='small' className='text-slate-400'/>},
   {id: 2, status: 'Fully Approved', icon: <DoneAllIcon fontSize='small' className='text-green-600'/>},
   {id: 3, status: 'Rejected', icon: <CloseIcon fontSize='small' className='text-red-600'/>},
   {id: 4, status: 'All', icon:<ChecklistIcon fontSize='small' className='text-green-600'/> }
 ]
 
+export const evalStatus = [
+  {id: 1, status: 'Pending', icon: '/icons/actions/pending.png'},
+  {id: 2, status: 'Evaluated', icon: '/icons/actions/evaluated.png'},
+  {id: 3, status: 'All', icon: '/icons/actions/selectall.png'}
+]
+
+export const maintStatus = [
+  {id: 1, status: 'Open JOs', icon: '/icons/actions/pending.png'},
+  {id: 2, status: 'Work Orders', icon: '/icons/actions/evaluated.png'},
+  {id: 3, status: 'All', icon: '/icons/actions/selectall.png'}
+]
 export const borderColor = (xpost, disapproved) => {
 
   if (disapproved === 1) return "border-red-600";
   if (xpost === 1) return "border-green-600";
-  if (xpost === 2) return "border-green-200";
-  if (xpost === 3) return "border-orange-200";
+  if (xpost === 2) return "border-orange-300";
+  if (xpost === 3) return "border-slate-200";
   return "";
 };
   

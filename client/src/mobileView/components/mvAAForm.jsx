@@ -160,9 +160,9 @@ function MvAAForm({
                                 {items.map((item, index) => (
                                     <div key={item.ID || index} className='flex flex-col justify-start mb-3'>
                                         
-                                        <div className='flex justify-start w-full gap-3 text-xs '>
+                                        <div className='flex justify-start w-full gap-3'>
 
-                                            <span className='pl-2'>{item.Qty}</span>
+                                            <span className='pl-2 mt-1'>{item.Qty}</span>
                                             <button onClick={() => handleShowItems(item)} className='font-semibold text-blue-600'>
                                                 {item.ItemName}
                                             </button>                
