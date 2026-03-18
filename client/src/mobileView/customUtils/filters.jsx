@@ -20,7 +20,7 @@ export const evalStatus = [
 
 export const maintStatus = [
   {id: 1, status: 'Open JOs', icon: '/icons/actions/pending.png'},
-  {id: 2, status: 'Work Orders', icon: '/icons/actions/evaluated.png'},
+  {id: 2, status: 'Completed', icon: '/icons/actions/evaluated.png'},
   {id: 3, status: 'All', icon: '/icons/actions/selectall.png'}
 ]
 export const borderColor = (xpost, disapproved) => {

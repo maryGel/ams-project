@@ -182,7 +182,7 @@ function MvEvalJOForm({
             return (
               <div 
                 key={header.ID} 
-                className='grid grid-cols-[22rem_1fr] justify-between h-auto text-sm px-3 py-1 border-b'
+                className='grid grid-cols-[1fr_2rem] gap-2 p-2 text-sm border-b'
                 onClick={()=> {handleOpenJo(header)}}>
                 <div className='flex flex-col h-auto '>
                   <div className='flex justify-between'>
@@ -192,9 +192,11 @@ function MvEvalJOForm({
                   <span className='pl-2'>{header.Remarks}</span>
                   <span className='text-[10px] pl-2 text-slate-500'>{header.Department_Code}</span>
                 </div>
-                <button className='p-2' >
+                <div className='flex items-center w-4'>
+                  <button className='p-2' >
                   <ArrowForwardIosIcon className='p-1 text-blue-800' fontSize='small'/>
-                </button>
+                  </button>
+                </div>
               </div>
             )
           })}

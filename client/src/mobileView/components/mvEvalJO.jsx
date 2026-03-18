@@ -1,6 +1,8 @@
 import {useState} from 'react'
 // MUI
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import { Checkbox } from '@mui/material';
+import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
 // Custom Utils
 import DateDisplay from '../../Utils/formatDateForInput';
 
@@ -72,60 +74,68 @@ function MvEvalJO({
             <span>{header.Department_Code}</span>
             <span className='text-base text-black'>Remarks: {header.Remarks}</span>
             <div className='flex flex-col gap-1 mt-1' >
-              <span >For inpection by: {header.Sector_name}</span>
+              <span >For inspection by: {header.Sector_name}</span>
               <span>Requestor: {header.requested_by}</span>
             </div>
           </div>
          
           <div className='px-3 py-1'>
-            {/* <div className='flex items-center justify-between'>
-              {items.length > 0 && (
-                <div className='flex items-center gap-2'>
-                  <Checkbox
-                    checked={isAllSelected}
-                    onChange={handleSelectAll}
-                    size="small"
-                    color="primary"
-                  />
-                  <span className='text-sm text-slate-600'>Select All</span>
-                </div>                
-              )}
+            <div className='flex items-center justify-between'>
+              {!header.eval_status && (
+                <>
+                  <div className='flex items-center gap-2'>
+                    <Checkbox
+                      checked={isAllSelected}
+                      onChange={handleSelectAll}
+                      size="small"
+                      color="primary"
+                    />
+                    <span className='text-sm text-slate-600'>Select All</span>
+                  </div>  
                 <div className={`px-3 py-1 tracking-wide rounded-md shadow-md ${selectedItems.length > 0 ? 'bg-green-600 text-white' : 'text-green-600 border border-green-600'}`}>
                   <button className={`flex gap-1 `}><DriveFileRenameOutlineIcon fontSize='small'/>Evaluate</button>
                 </div>
-            </div> */}
+                </>              
+              )}
+            </div>
             
             {items.map((item, index) => (
               <div 
                 key={index} 
-                className={`flex flex-col py-1 mb-2 rounded-lg cursor-pointer transition-colors duration-200`}
-                  // ${isItemSelected(item, index) 
-                  //   ? 'bg-blue-50 border border-blue-200' 
-                  //   : 'hover:bg-gray-50 border border-transparent'
-                  // }`}
-                // onClick={() => handleItemSelect(item, index)}
+                className={`flex flex-col mb-2 rounded-lg cursor-pointer transition-colors duration-200
+                  ${isItemSelected(item, index) 
+                    ? 'bg-blue-50 border border-blue-200' 
+                    : 'hover:bg-gray-50 border border-transparent'
+                  }`}
+                onClick={() => handleItemSelect(item, index)}
               >
-                <div className='flex items-center gap-1 pl-5 mt-5'>
-                  {/* <Checkbox
+                <div className='flex items-center gap-1 mt-1'>
+                  {!item.eval_status &&
+                  <Checkbox
                     checked={isItemSelected(item, index)}
                     onChange={() => handleItemSelect(item, index)}
                     onClick={(e) => e.stopPropagation()} // Prevent double trigger
                     size="small"
                     color="primary"
-                  /> */}
-                  <span>{item.qty}</span>
-                  <span className='pl-2 font-semibold text-blue-800'>{item.FAC_name}</span>
+                  />}
+                  <div className='flex flex-col gap-1 pl-2'>
+                    <div>
+                      <span className='font-semibold text-blue-800'>{item.FAC_name}</span>
+                      <span className='pl-2 text-slate-500'>({item.FAC_NO})</span>
+                    </div>
+                    <span className='italic text-slate-500'>{item.workDet}</span>
+                  </div>
                 </div>
-                <span className='pl-10 italic text-slate-500'>{item.workDet}</span>
-                {item.eval_status && <div className='flex flex-col pl-3 text-black'>
-                  <span className='pl-16 mt-1 font-semibold'>{item.eval_status}</span>
-                  <span className='pl-16'>Eval. Remarks: {item.eval_remarks}</span>
-                </div>}
+                  {item.eval_status && 
+                  <div className='flex flex-col px-3 py-1 text-black'>
+                    <span className='pl-2 mt-1 font-semibold'>{item.eval_status}</span>
+                    <span className='pl-2'>Eval. Remarks: {item.eval_remarks}</span>
+                  </div>}
               </div>
             ))}
             
             {/* Optional: Display selected count */}
-            {selectedItems.length > 0 && (
+            {(selectedItems.length > 0 && !header.eval_status ) && (
               <div className='px-5 py-3 mt-4 text-sm text-blue-600 rounded-lg bg-blue-50'>
                 {selectedItems.length} item(s) selected
               </div>

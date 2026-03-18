@@ -38,6 +38,7 @@ export default defineConfig({
       '/assetaccdRoute': 'http://localhost:3000',
       '/assetLostHRoute': 'http://localhost:3000',
       '/assetLostDRoute': 'http://localhost:3000',
+      '/jo_woeRoute': 'http://localhost:3000',
     }
   },
   // Add base URL for Vercel

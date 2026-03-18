@@ -14,7 +14,7 @@ export const dashItems =  (counts) => {
             title: 'Maintenance',
             link: '/Home/maintenance',
             imgSrc: '/dashIcons/mechanic.png',
-            num: 2,
+            num: counts.maintCount,
         },
         { id: 3,
             title: 'Transfers',

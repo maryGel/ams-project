@@ -38,7 +38,7 @@ function MvMaintenanceForm({
       if(filter === 'Open JOs'){
         return jo.eval_status === "DONE" && !jo.main_stat; 
       }
-      if(filter === 'Work Orders'){
+      if(filter === 'Completed'){
         return jo.eval_status === "DONE" && jo.main_stat === "DONE"; 
       }
       return false;
@@ -98,8 +98,8 @@ function MvMaintenanceForm({
     
   return (
     <>
-      <div className='flex flex-col justify-center gap-2 mt-2'>
-        <div className='flex justify-center gap-2'>
+      <div className='flex flex-col justify-center gap-2 mt-1'>
+        <div className='flex justify-center gap-2 py-1'>
           {maintStatus.map((item)=> (
             <button
               key={item.id}
@@ -164,14 +164,14 @@ function MvMaintenanceForm({
             return (
               <div 
                 key={header.ID} 
-                className='grid grid-cols-[22rem_1fr] justify-between h-auto text-sm px-5 py-1 border-b'
+                className='grid grid-cols-[1fr_2rem] text-sm px-3 py-1 gap-2 border-b'
                 onClick={()=> {handleOpenJo(header)}}
               >
                 <div className='flex flex-col h-auto '>
                   <div className='flex justify-between'>
                     <div>
                       <span>{header.JO_No}</span>
-                      {header.main_stat && (
+                      {header.workNo && (
                         <span className='pl-2 font-semibold text-green-600'>- {header.workNo}</span>
                       )}
                     </div>

@@ -52,6 +52,7 @@ function MvDashBoard({useProps}){
 
     // Count the pending docs
     const joCount = (joHeaders || []).filter(jo => (jo.xpost === 3 || jo.xpost === 2) && jo.DISAPPROVED === 0).length;
+    const maintCount = (joHeaders || []).filter(jo => (jo.xpost === 1 && !jo.main_stat)).length;
     const trCount = (trHeaders || []).filter(tr => (tr.xpost === 3 || tr.xpost === 2) && tr.DISAPPROVED === 0).length;
     const adCount = (adHeaders || []).filter(ad => (ad.xpost === 3 || ad.xpost === 2) && ad.DISAPPROVED === 0).length;
     const aAcctCount = (assetAccHeaders || []).filter(aa => (aa.xPosted === 3 || aa.xPosted === 2) && aa.DISAPPROVED === 0).length;
@@ -59,7 +60,7 @@ function MvDashBoard({useProps}){
 
     // Count of Documents template
     const items = dashItems({
-      joCount, trCount, adCount, aAcctCount, aLostCount
+      joCount, maintCount, trCount, adCount, aAcctCount, aLostCount
     });
 
     const numStyles = 'pb-2 mr-2 text-xl font-semibold cursor-pointer hover:underline hover:drop-shadow-[0_0_0.5rem_gray] transition-transform duration-150 active:translate-y-0.5 hover:scale-x-95';
