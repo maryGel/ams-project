@@ -1,9 +1,8 @@
 // mvDBoardPage.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Custom Hooks
-import {useUsers} from '../hooks/useUsers';
 import {dashItems} from './components/dashItems';
 import { useJO_h } from '../hooks/useJO_h';
 import { useJO_d } from '../hooks/useJO_d';
@@ -24,11 +23,33 @@ import MvAssetAccPage from './mvAssetAccPage';
 import MvAssetLostPage from './mvAssetLostPage';
 import MvMaintenancePage from './mvMaintenancePage';
 
-function MvDashBoard({useProps}){
+function MvDashBoard({useProps, firstName}){
     const [activePage, setActivePage] = useState(null); // Track which page is open
     const [isClosing, setIsClosing] = useState(false);
-    const { users } = useUsers();    
-    const userName = localStorage.getItem('username') || 'User';
+    // const userName = localStorage.getItem('username') || 'User';
+    // const { 
+    //     selectedUser, 
+    //     setSelectedUser, 
+    //     loading, 
+    // } = useUsers();
+      
+  
+    // Set the selected user on mount
+    // useEffect(() => {
+    //     if (userName && userName !== 'User') {
+    //         console.log('Setting selected user:', userName);
+    //         setSelectedUser(userName);
+    //     }
+    // }, [userName, setSelectedUser]);
+    
+    
+    // // console.log(`user: ${userName}`);
+    // console.log('selectedUser:', selectedUser);
+    // // console.log('loading:', loading);
+    
+    // // Get first name from selectedUser
+    // const firstName = selectedUser?.fname || userName;    
+
 
     // Job Orders Data
     const {joHeaders, isLoading, error} = useJO_h(useProps);
@@ -45,10 +66,6 @@ function MvDashBoard({useProps}){
     // Asset Lost Data
     const {assetLostHeaders} = useAssetLostH(useProps);
     const {assetLostDetails} = useAssetLostD(useProps);
-
-    // Find the user object
-    const loginUser = users?.find(item => item.user === userName);
-    const firstName = loginUser?.fname || userName;
 
     // Count the pending docs
     const joCount = (joHeaders || []).filter(jo => (jo.xpost === 3 || jo.xpost === 2) && jo.DISAPPROVED === 0).length;

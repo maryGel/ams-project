@@ -43,7 +43,7 @@ export function MvHeader({
                   ? <TopicIcon fontSize="medium" className='text-black'/> 
                   : <TopicOutlinedIcon className='text-black'/>}
                 </Button>
-                <span className='text-[10px]'>Transactions</span>
+                <span className='text-[10px]'>Assets</span>
               </div>
               <div className={`${btnStyle} rounded-r-lg`}>
                   <Button 

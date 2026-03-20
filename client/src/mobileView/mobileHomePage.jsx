@@ -1,6 +1,7 @@
-import { useNavigate, useLocation, useMatch } from 'react-router-dom';
-
-
+import { useEffect } from 'react';
+import { useNavigate, useLocation, useMatch} from 'react-router-dom';
+// Hooks
+import {useUsers} from '../hooks/useUsers';
 // Components
 import MvDashBoard from './mvDBoardPage'
 import MvTansactionPage from './mvTransactionPage';
@@ -11,6 +12,21 @@ import MvAccountPage from './mvAccountPage';
 
 function MobileHomePage(){
     const navigate = useNavigate();
+    const userName = localStorage.getItem('username') || 'User';
+    const { 
+        selectedUser, 
+        setSelectedUser, 
+        loading, 
+    } = useUsers();
+
+    useEffect(() => {
+        if (userName && userName !== 'User') {
+            console.log('Setting selected user:', userName);
+            setSelectedUser(userName);
+        }
+    }, [userName, setSelectedUser]);
+
+    const firstName = selectedUser?.fname || userName;  
 
     // Method 1: useMatch (most reliable for route-based highlighting)
     const isExactHome = useMatch('/Home');
@@ -54,7 +70,11 @@ function MobileHomePage(){
         <>
           {pathname === '/Home' &&
             <div className='flex flex-col min-h-screen bg-gray-100 md:hidden'>
-              <MvDashBoard/>
+              <MvDashBoard
+                userName  = {userName}
+                selectedUser = {selectedUser}
+                firstName = {firstName}
+              />
             </div>          
           }
           {pathname === '/Home/TransactionPage' &&
@@ -66,6 +86,8 @@ function MobileHomePage(){
           {isAccountByPath &&
             <div className='md:hidden'>
               <MvAccountPage
+                userName  = {userName}
+                selectedUser = {selectedUser}
               />
             </div>   
           }

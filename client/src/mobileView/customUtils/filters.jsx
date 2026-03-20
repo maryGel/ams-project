@@ -14,7 +14,6 @@ export const statusFilter = [
 
 export const evalStatus = [
   {id: 1, status: 'Pending', icon: '/icons/actions/pending.png'},
-  {id: 2, status: 'Evaluated', icon: '/icons/actions/evaluated.png'},
   {id: 3, status: 'All', icon: '/icons/actions/selectall.png'}
 ]
 

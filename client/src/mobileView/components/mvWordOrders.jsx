@@ -163,7 +163,7 @@ function MvWorkOrders({
                             <span>{header.JO_No}</span>
                             {header.workNo && <span className='text-green-600'> - {header.workNo}</span>}
                         </div>
-                        <span><DateDisplay value={header.xDate} format="short" /></span>
+                        <span><DateDisplay value={header.wo_date} format="short" /></span>
                     </div>
                 
                     <div className='flex flex-col gap-3 p-5 text-sm border-b text-slate-500'>
@@ -204,16 +204,11 @@ function MvWorkOrders({
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <span className='pl-3 text-slate-600'>Remarks: {item.Main_Remarks}</span>
+                                                {item.Main_Remarks && <span className='pl-3 text-slate-600'>Remarks: {item.Main_Remarks}</span>}
                                             </div>
                                         </div>
 
-                                        {/* Remarks section if available */}
-                                        {item.Remarks && (
-                                            <div className='px-3 py-2 text-xs text-gray-600 border-b bg-gray-50/50'>
-                                                <span className='font-medium'>Remarks:</span> {item.Remarks}
-                                            </div>
-                                        )}
+
 
                                         {/* Expense Details Table - Multiple rows per FAC */}
                                         {item.expenseDetails.length > 0 ? (
@@ -304,10 +299,10 @@ function MvWorkOrders({
                         {backToTop && (
                         <div className="sticky bottom-0 flex justify-end p-4">
                             <button
-                            onClick={() =>
-                                scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
-                            }
-                            className="px-4 py-2 text-white bg-blue-600 rounded-full shadow-lg hover:bg-blue-700"
+                                onClick={() =>
+                                    scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+                                }
+                                className="px-4 py-2 text-white bg-blue-600 rounded-full shadow-lg hover:bg-blue-700"
                             >
                             ↑ Top
                             </button>

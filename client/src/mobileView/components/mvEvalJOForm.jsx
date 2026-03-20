@@ -41,10 +41,6 @@ function MvEvalJOForm({
         if(filter === 'Pending'){
           return jo.xpost === 1 && !jo.eval_status; 
         }
-        if(filter === 'Evaluated'){
-          return jo.xpost === 1 && jo.eval_status === 'DONE';
-        }
-
         return false;
       });
     }, [joHeaders, filter]);
