@@ -55,8 +55,8 @@ function MobileHomePage(){
 
     // Navigate to Mobile Transaction Page
     const handleOnClickTrans = () => {
-        // const path = `/Home/TransactionPage`;
-        navigate(isTransactions);        
+        const path = `/Home/TransactionPage`;
+        navigate(path);        
     }
 
     // Navigate to Mobile Transaction Page

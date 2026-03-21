@@ -190,34 +190,25 @@ export const useUsers = () => {
 
     // Get single user
     const getUser = useCallback(async (username) => {
-        console.log('[getUser] START - username:', username); // Add this
         
         if (!username) {
-            console.log('[getUser] No username, clearing selected');
             dispatch({ type: 'CLEAR_SELECTED' });
             return null;
         }
 
         try {
             dispatch({ type: 'FETCH_START' });
-            console.log('[getUser] FETCH_START dispatched');
             
             const res = await api.get(`/users/${encodeURIComponent(username)}`, { 
                 withCredentials: true 
             });
-            
-            console.log('[getUser] API response:', res.data);
 
             const data = res.data;
             if (!data) throw new Error('Failed to fetch user');
-
-            console.log('[getUser] Dispatching FETCH_USER_SUCCESS');
             dispatch({ type: 'FETCH_USER_SUCCESS', payload: data });
-            
-            console.log('[getUser] SUCCESS - completed');
+
             return data;
         } catch (err) {
-            console.error('[getUser] ERROR:', err);
             dispatch({ type: 'FETCH_ERROR', payload: err.message || 'Failed to fetch user' });
             return null;
         }
@@ -323,11 +314,11 @@ export const useUsers = () => {
     const startCreate = () => dispatch({ type: 'START_CREATE'});
     const startEdit = () => dispatch({ type: 'START_EDIT'});
     const updateForm = (formData) => {  // Renamed parameter to avoid confusion
-        console.log('[updateForm] Updating with:', formData); // Add debug log
+
         dispatch({ type: 'UPDATE_FORM', payload: formData });
     };
     const cancelEdit = useCallback(() => {
-        console.log('[cancelEdit] hasUnsavedChanges:', state.hasUnsavedChanges); // Debug
+
         
         if (state.hasUnsavedChanges) {
             dispatch({ type: 'OPEN_CANCEL_DIALOG' });
