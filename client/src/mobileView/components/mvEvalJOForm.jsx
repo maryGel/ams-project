@@ -2,12 +2,14 @@ import {useState, useMemo} from 'react';
 // MUI
 import TuneIcon from '@mui/icons-material/Tune';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import SearchIcon from '@mui/icons-material/Search';
 // Custom Utils
 import HistoryDatePicker from '../../Utils/datePicker';
 import DateDisplay from '../../Utils/formatDateForInput';
 import {evalStatus} from '../customUtils/filters';
 //Components
 import MvEvalJO from './mvEvalJO';
+import SearchOverlay from '../customUtils/searchOverlay'; // Import the SearchOverlay component
 
 const getDefaultLast30Days = () => {
   const today = new Date();
@@ -30,6 +32,7 @@ function MvEvalJOForm({
     const [isOptionsOpen, setIsOptionsOpen] = useState(false);
     const [isClosingJO, setIsClosingJO] = useState(false);
     const [selectedJO, setSelectedJO] = useState(null);
+    const [isSearchOpen, setIsSearchOpen] = useState(false); // State for search overlay
 
      // First, apply the status filter
     const statusFilteredJO = useMemo(() => {
@@ -104,6 +107,19 @@ function MvEvalJOForm({
         }
     };
 
+    // Handle search overlay open/close
+    const handleSearchOpen = () => {
+      setIsSearchOpen(true);
+    };
+
+    const handleSearchClose = () => {
+      setIsSearchOpen(false);
+    };
+
+    // Handle document selection from search
+    const handleSelectDocument = (doc) => {
+      setSelectedJO(doc);
+    };
     
     return (
       <>
@@ -139,6 +155,12 @@ function MvEvalJOForm({
                 <TuneIcon fontSize='small' />
                 <span className='text-xs'>Filter</span>
               </button>
+              <button 
+                onClick={handleSearchOpen}
+                className="p-1 transition-colors rounded-md hover:bg-gray-100"
+              >
+                <SearchIcon />
+              </button>
             </div>
             
             {isOptionsOpen && (
@@ -167,7 +189,7 @@ function MvEvalJOForm({
                 <span>Results: <strong>{filteredJO.length}</strong></span>
               </div>
             </div>
-          )}
+          )}          
         </div>  
 
         {/* Job orders List  */}
@@ -206,6 +228,14 @@ function MvEvalJOForm({
                 />)
             }
         </div>
+
+        {/* Search Overlay */}
+        <SearchOverlay
+          isOpen={isSearchOpen}
+          onClose={handleSearchClose}
+          docHeaders={joHeaders}
+          onSelectDoc={handleSelectDocument}
+        />
       </>
     )
 }
