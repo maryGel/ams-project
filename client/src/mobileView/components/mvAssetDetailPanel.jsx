@@ -41,34 +41,6 @@ function AssetDetailPanel({ open, onClose, asset, fetchAssetByFacN0 }){
     }
   }, [asset, open, fetchAssetByFacN0]);
 
-  const formatFieldLabel = (key) => {
-    const labels = {
-      FacNO: 'Facility Number',
-      FacName: 'Asset Name',
-      Description: 'Description',
-      Location: 'Location',
-      ItemLocation: 'Item Location',
-      CATEGORY: 'Category',
-      ItemClass: 'Asset Class',
-      Status: 'Status',
-      Manufacturer: 'Manufacturer',
-      Model: 'Model',
-      serialNo: 'Serial Number',
-      Adate: 'Acquired Date',
-      WarrantyExpiry: 'Warranty Expiry',
-      LastMaintenance: 'Last Maintenance',
-      NextMaintenance: 'Next Maintenance',
-      AssignedTo: 'Assigned To',
-      Department: 'Department',
-      AAmount: 'Cost',
-      Percent: 'Useful Life (Years)',
-      Abre: 'Salvage Amount',
-      balance_unit: 'Quantity',
-      suppName: 'Supplier'
-    };
-    return labels[key] || key;
-  };
-
   return (
     <Dialog
       fullScreen
@@ -133,57 +105,61 @@ function AssetDetailPanel({ open, onClose, asset, fetchAssetByFacN0 }){
                 </span>
                 <Divider sx={{ mb: 2 }} />
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', fontSize: 'small' }}>
-                  <span className='text-sm tracking-wide text-slate-500'>Description</span>
+                  <span className='text-sm tracking-wide text-slate-400'>Description</span>
                   <span>{detailedAsset.Description}</span>
-                  <span className='mt-2 text-sm tracking-wide text-slate-500'>Category</span>
+                  <span className='mt-3 text-sm tracking-wide text-slate-400'>Category</span>
                   <span>{detailedAsset.CATEGORY}</span>
-                  <span className='mt-2 text-sm tracking-wide text-slate-500'>Asset Class</span>
-                  <span>{detailedAsset.ItemClass}</span>
-                  <span className='mt-2 text-sm tracking-wide text-slate-500'>Location</span>
+                  {detailedAsset.ItemClass &&
+                    (<>
+                    <span className='mt-3 text-sm tracking-wide text-slate-400'>Asset Class</span>
+                    <span>{detailedAsset.ItemClass}</span>
+                    </>)
+                  }
+                  <span className='mt-3 text-sm tracking-wide text-slate-400'>Location</span>
                   <span>{detailedAsset.ItemLocation}</span>
-                  <span className='mt-2 text-sm tracking-wide text-slate-500'>Department</span>
+                  <span className='mt-3 text-sm tracking-wide text-slate-400'>Department</span>
                   <span>{detailedAsset.Department}</span>
-                  <span className='mt-2 text-sm tracking-wide text-slate-500'>Acquired Date</span>
+                  <span className='mt-3 text-sm tracking-wide text-slate-400'>Acquired Date</span>
                   <DateDisplay value={detailedAsset.Adate} format="short" />
-                  <span className='mt-2 text-sm tracking-wide text-slate-500'>Unit Cost</span>
+                  <span className='mt-3 text-sm tracking-wide text-slate-400'>Unit Cost</span>
                   <span>P {formatWithCommas(detailedAsset.AAmount)}</span>
-                  <span className='mt-2 text-sm tracking-wide text-slate-500'>Quantity</span>
+                  <span className='mt-3 text-sm tracking-wide text-slate-400'>Quantity</span>
                   <span>{detailedAsset.balance_unit}</span>
-                  <span className='mt-2 text-sm tracking-wide text-slate-500'>Unit</span>
+                  <span className='mt-3 text-sm tracking-wide text-slate-400'>Unit</span>
                   <span>{detailedAsset.Unit}</span>
-                  <span className='mt-2 text-sm tracking-wide text-slate-500'>Useful Life(Years)</span>
+                  <span className='mt-3 text-sm tracking-wide text-slate-400'>Useful Life(Years)</span>
                   <span>{detailedAsset.Percent}</span>
-                  <span className='mt-2 text-sm tracking-wide text-slate-500'>Residual Value</span>
+                  <span className='mt-3 text-sm tracking-wide text-slate-400'>Residual Value</span>
                   <span>{detailedAsset.Abre}</span>
                   {detailedAsset.serialNo &&
                     (<>
-                    <span className='mt-2 text-sm tracking-wide text-slate-500'>Serial Number</span>
+                    <span className='mt-3 text-sm tracking-wide text-slate-400'>Serial Number</span>
                     <span>{detailedAsset.serialNo}</span>
                     </>)
                   }
                   {detailedAsset.Brand &&
                     (<>
-                    <span className='mt-2 text-sm tracking-wide text-slate-500'>Brand</span>
+                    <span className='mt-3 text-sm tracking-wide text-slate-400'>Brand</span>
                     <span>{detailedAsset.Brand}</span>
                     </>)
                   }
                   {detailedAsset.Color &&
                     (<>
-                    <span className='mt-2 text-sm tracking-wide text-slate-500'>Color</span>
+                    <span className='mt-3 text-sm tracking-wide text-slate-400'>Color</span>
                     <span>{detailedAsset.Color}</span>
                     </>)
                   }
                   {detailedAsset.StartDate &&
                     (<>
-                    <span className='mt-2 text-sm tracking-wide text-slate-500'>Warranty Start Date</span>
+                    <span className='mt-3 text-sm tracking-wide text-slate-400'>Warranty Start Date</span>
                     <span>{detailedAsset.StartDate}</span>
-                    <span className='mt-2 text-sm tracking-wide text-slate-500'>Warranty End Date</span>
+                    <span className='mt-3 text-sm tracking-wide text-slate-400'>Warranty End Date</span>
                     <span>{detailedAsset.EndDate}</span>
                     </>)
                   }
                   {detailedAsset.Holder &&
                     (<>
-                    <span className='mt-2 text-sm tracking-wide text-slate-500'>Assigned to</span>
+                    <span className='mt-3 text-sm tracking-wide text-slate-400'>Assigned to</span>
                     <span>{detailedAsset.Holder}</span>
                     </>)
                   }

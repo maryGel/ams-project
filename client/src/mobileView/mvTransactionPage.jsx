@@ -28,7 +28,7 @@ import AssetCardItem from './components/mvAssetCardItem';
 
 
 // Main Component
-function MvTansactionPage({ setHeaderTitle, setNavLink }) {
+function MvTansactionPage() {
   // Asset hook
   const {
     assets,
@@ -312,18 +312,15 @@ function MvTansactionPage({ setHeaderTitle, setNavLink }) {
     );
   };
 
-  const isLoadingData = isFetching || isLoading;
+  const isLoadingData = isFetching || isLoading || '';
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: '#f9fafb', justifyContent: 'center'}}>
       {/* Header */}
       <Box sx={{ bgcolor: 'white', borderBottom: '1px solid #e5e7eb', p: 2, position: 'sticky', top: 0, zIndex: 10 }}>
-        <Typography variant="h6" sx={{ fontWeight: 600, color: '#1f2937' }}>
+        <span className='font-semibold tracking-wide text-md'>
           Asset Master
-        </Typography>
-        <Typography variant="caption" sx={{ color: '#6b7280' }}>
-          Search and filter assets by multiple criteria
-        </Typography>
+        </span>
       </Box>
 
       {/* Snackbar */}

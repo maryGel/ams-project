@@ -8,8 +8,10 @@ import TuneIcon from '@mui/icons-material/Tune';
 import HistoryDatePicker from '../Utils/datePicker';
 import {getDefaultLast30Days} from '../Utils/datePicker';
 import {statusFilter} from './customUtils/filters';
+import SearchOverlay from './customUtils/searchOverlay';
 // Components
 import MvTRForm from './components/mvTRForm';
+
 
 
 function MvTransferPage({
@@ -26,6 +28,9 @@ function MvTransferPage({
     const [filter, setFilter] = useState('Waiting');
     const [isOptionsOpen, setIsOptionsOpen] = useState(false);
     const [dateRange, setDateRange] = useState(getDefaultLast30Days); //state for date range
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [selectedDoc, setSelectedDoc] = useState(null);
+    const [isSearchActive, setIsSearchActive] = useState(false);
 
     const handleClosePage = () => {if (onClose) onClose()}; 
 
@@ -37,6 +42,24 @@ function MvTransferPage({
       setDateRange(range);
     };
 
+    const handleSearchClick = () => {
+      setIsSearchOpen(true);
+    };
+
+    const handleSearchClose = () => {
+      setIsSearchOpen(false);
+    };
+
+    const handleSelectTr = (tr) => {
+      setSelectedDoc(tr);
+      setIsSearchActive(true);
+      setIsSearchOpen(false);
+    };
+
+    const handleClearSearch = () => {
+      setSelectedDoc(null);
+      setIsSearchActive(false);
+    };
     // First, apply the status filter
     const statusFilteredTR = useMemo(() => {
       return trHeaders.filter((tr) => {
@@ -78,6 +101,14 @@ function MvTransferPage({
       });
     }, [statusFilteredTR, dateRange]);
 
+    // Final data: show selected Doc if search is active, otherwise show filtered data
+    const displayData = useMemo(() => {
+      if (isSearchActive && selectedDoc) {
+        return [selectedDoc]; // Return as array to maintain compatibility with MvJOForm
+      }
+      return filteredTR;
+    }, [isSearchActive, selectedDoc, filteredTR]);
+
     return (
       <>
         <div onAnimationEnd={onAnimationEnd} className={`          
@@ -111,15 +142,21 @@ function MvTransferPage({
                 <button className='w-5' onClick={handleClosePage}> 
                   <ArrowBackIosIcon fontSize='small'/>
                 </button>
-                <button className='w-5'>
+                <button className='w-5' onClick={handleSearchClick}>
                   <SearchIcon />
                 </button>
                 {statusFilter.map((item)=> (
                   <button
                     key={item.id}
-                    onClick={() => setFilter(item.status)}
+                    onClick={() => {
+                      setFilter(item.status);
+                      // Clear search when changing filters
+                      if (isSearchActive) {
+                        handleClearSearch();
+                      }
+                    }}
                     className={`px-2 text-sm border   py-0.5 rounded-2xl transition-colors whitespace-nowrap ${
-                        filter === item.status 
+                        filter === item.status && !isSearchActive
                         ? 'text-slate-900 font-semibold border-slate-900' 
                         : 'bg-white text-slate-600 border-slate-400'
                     }`}
@@ -130,65 +167,102 @@ function MvTransferPage({
                 ))}
               </Stack>
             </Box>
-            
-            {/* Date Range filter */}
-            <div className='grid-cols-1 py-2'>
-              <div className='flex items-center justify-between px-4 text-sm font-semibold tracking-wide'>
-                <span>Transfers</span>
-                <button 
-                  onClick={handleOptionsOpen}
-                  className={`flex items-center gap-1 px-3 py-1 rounded-md transition-colors ${
-                    isOptionsOpen ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'
-                  }`}
-                >
-                  <TuneIcon fontSize='small' />
-                  <span className='text-xs'>Filter</span>
-                </button>
-              </div>
-              
-              {isOptionsOpen && (
-                <div className='flex m-1 border-y bg-gray-50'>
-                  <HistoryDatePicker onDateRangeChange={handleDateRangeChange} />
-                </div>
-              )}
-            </div>
 
-            {/* Filter Summary - Optional but helpful */}
-            {(filter !== 'All' || dateRange) && (
-              <div className='px-4 py-2 text-xs text-gray-600 border-blue-100 bg-blue-50 border-y'>
-                <div className='flex items-center gap-2'>
-                  {/* <span>Status: <strong>{filter}</strong></span> */}
-                  {dateRange?.startDate && dateRange?.endDate && (
-                    <>
-                      <span>|</span>
-                      <span>
-                        Date: <strong>
-                          {dateRange.startDate.toLocaleDateString()} - {dateRange.endDate.toLocaleDateString()}
-                        </strong>
-                      </span>
-                    </>
+            {/* Date Range filter - hide when search is active */}
+            {!isSearchActive && (
+              <>
+                <div className='grid-cols-1 py-2'>
+                  <div className='flex items-center justify-between px-4 text-sm font-semibold tracking-wide'>
+                    <span>Transfers</span>
+                    <button 
+                      onClick={handleOptionsOpen}
+                      className={`flex items-center gap-1 px-3 py-1 rounded-md transition-colors ${
+                        isOptionsOpen ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'
+                      }`}
+                    >
+                      <TuneIcon fontSize='small' />
+                      <span className='text-xs'>Filter</span>
+                    </button>
+                  </div>
+                  
+                  {isOptionsOpen && (
+                    <div className='flex m-1 border-y bg-gray-50'>
+                      <HistoryDatePicker onDateRangeChange={handleDateRangeChange} />
+                    </div>
                   )}
-                  <span>|</span>
-                  <span>Results: <strong>{filteredTR.length}</strong></span>
+                </div>
+
+                {/* Filter Summary - Optional but helpful */}
+                {(filter !== 'All' || dateRange) && (
+                  <div className='px-4 py-2 text-xs text-gray-600 border-blue-100 bg-blue-50 border-y'>
+                    <div className='flex items-center gap-2'>
+                      {/* <span>Status: <strong>{filter}</strong></span> */}
+                      {dateRange?.startDate && dateRange?.endDate && (
+                        <>
+                          <span>|</span>
+                          <span>
+                            Date: <strong>
+                              {dateRange.startDate.toLocaleDateString()} - {dateRange.endDate.toLocaleDateString()}
+                            </strong>
+                          </span>
+                        </>
+                      )}
+                      <span>|</span>
+                      <span>Results: <strong>{filteredTR.length}</strong></span>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+            
+            {/* Search Active Indicator */}
+            {isSearchActive && selectedDoc && (
+              <div className='px-4 py-2 text-xs text-blue-600 border-blue-100 bg-blue-50 border-y'>
+                <div className='flex items-center justify-between'>
+                  <div className='flex items-center gap-2'>
+                    <SearchIcon fontSize='small' />
+                    <span>Search Results: <strong>{selectedDoc.TR_No}</strong></span>
+                  </div>
+                  <button
+                    onClick={handleClearSearch}
+                    className='text-xs text-blue-600 underline hover:text-blue-800'
+                  >
+                    Clear
+                  </button>
                 </div>
               </div>
             )}
             
-            {filteredTR.length > 0 
-            ?  <div className='flex flex-col gap-4 p-4'>
-                <MvTRForm
-                  trHeaders = {trHeaders}
-                  trDetails = {trDetails}
-                  filteredTR = {filteredTR}
-                />
-              </div>   
-            : <span className='flex justify-center p-5 text-sm italic item-center text-slate-500'>
-                No record found within the selected date. 
-              </span>          
-            }
-                        
+            {isLoading ? (
+                <div className='flex justify-center p-8'>Loading...</div>
+              ) : error ? (
+                <div className='p-4 m-4 text-red-500 bg-red-100 rounded'>{error}</div>
+              ) : displayData.length > 0 ? (
+                <div className='flex flex-col gap-4 p-4'>
+                  <MvTRForm
+                    useProps={null}
+                    trHeaders = {trHeaders}
+                    trDetails = {trDetails}
+                    filteredTR = {displayData}
+                  />
+                </div>
+              ) : (
+                <span className='flex justify-center p-5 text-sm italic item-center text-slate-500'>
+                  {isSearchActive 
+                    ? 'No JO record found with that number.' 
+                    : 'No record found within the selected date.'}
+                </span>
+            )}    
+                               
           </div>            
-        </div>        
+        </div>   
+        {/* Search Overlay */}
+        <SearchOverlay
+          isOpen={isSearchOpen}
+          onClose={handleSearchClose}
+          docHeaders={trHeaders}
+          onSelectDoc={handleSelectTr}
+        />     
       </>
     )
 }
