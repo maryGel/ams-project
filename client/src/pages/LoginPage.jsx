@@ -1,6 +1,8 @@
 import { useState } from "react";
 // MUI
-import { TextField } from '@mui/material';
+import { TextField, InputAdornment } from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
+import KeyIcon from '@mui/icons-material/Key';
 import { api } from '../api/axios';
 import { useNavigate } from "react-router-dom";
 
@@ -90,11 +92,11 @@ function LoginPage({setHeaderTitle, setUsername}) {
 
   return (
     <>
-      <div className={`flex h-screen`}>
-        <section className={`grid w-full h-screen place-content-center bg-[url('images/loginBg.png')] bg-cover`}>
-          <h2 className={`text-gray-700 lg:p-4 lg:text-2xl tracking-wider text-center text-base p-5`}>
-            Asset Management System
-          </h2>
+      <div className={`flex h-screen `}>
+        <section className={`grid w-full place-content-center bg-[url('/loginBg.png')] bg-cover`}>
+          <h1 className={`font-sans lg:p-4 lg:text-2xl tracking-wider text-center p-5`}>
+            The Asset Management System
+          </h1>
 
           {/* Debug info panel - TEMPORARY for testing */}
           {debugInfo && (
@@ -103,30 +105,99 @@ function LoginPage({setHeaderTitle, setUsername}) {
             </div>
           )}
 
-          <div className={`flex flex-col w-96 bg-white rounded shadow-md gap-3 lg:p-8 py-8 px-4 m-2 bg-opacity-70`}>
-            {errorMsg && (
-              <div className="p-3 mb-4 text-sm text-red-600 border border-red-200 rounded bg-red-50">
-                {errorMsg}
-              </div>
-            )}
+          <div className={`flex flex-col w-96  bg-white rounded-2xl shadow-md gap-3 lg:p-8 py-8 px-4 bg-opacity-40`}>
+              {errorMsg && (
+                <div className="p-3 mb-4 text-sm text-red-600 border border-red-200 rounded bg-red-50">
+                  {errorMsg}
+                </div>
+              )}
 
             <TextField
               fullWidth
-              label="Username"
               variant="outlined"
-              className="rounded-md"
+              placeholder="Username"
               value={localUsername}
               onChange={(e) => setLocalUsername(e.target.value)}
               disabled={isLoading}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PersonIcon sx={{ color: '#9ca3af' }} /> {/* gray-400 */}
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                // The Container Styling
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: 'white',      // bg-white
+                  borderRadius: '2rem',          // rounded-xl (12px is standard for xl)    
+                  // The Border (Normal State)
+                  '& fieldset': {
+                    borderColor: '#e5e7eb',      // border-gray-200
+                    borderWidth: '1px',
+                  },                  
+                  // The Border (Hover State)
+                  '&:hover fieldset': {
+                    borderColor: '#d1d5db',      // border-gray-300 (slight darken on hover)
+                  },                  
+                  // The Border (Focused State)
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#3b82f6',      // blue-500 (or keep gray if you prefer)
+                    borderWidth: '1px',          // Prevents the border from getting thick
+                  },
+                },
+                // 2. The Label Styling
+                '& .MuiInputLabel-root': {
+                  color: '#6b7280',              // text-gray-500
+                  '&.Mui-focused': {
+                    color: '#3b82f6',            // Matches focus border
+                  },
+                },
+              }}
             />
 
             <TextField
               type="password"
-              label="Password"
               className="rounded-md"
+              placeholder='Password'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <KeyIcon sx={{ color: '#9ca3af' }} /> {/* gray-400 */}
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                // The Container Styling
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: 'white',      // bg-white
+                  borderRadius: '2rem',          // rounded-xl (12px is standard for xl)    
+                  // The Border (Normal State)
+                  '& fieldset': {
+                    borderColor: '#e5e7eb',      // border-gray-200
+                    borderWidth: '1px',
+                  },                  
+                  // The Border (Hover State)
+                  '&:hover fieldset': {
+                    borderColor: '#d1d5db',      // border-gray-300 (slight darken on hover)
+                  },                  
+                  // The Border (Focused State)
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#3b82f6',      // blue-500 (or keep gray if you prefer)
+                    borderWidth: '1px',          // Prevents the border from getting thick
+                  },
+                },
+                // 2. The Label Styling
+                '& .MuiInputLabel-root': {
+                  color: '#6b7280',              // text-gray-500
+                  '&.Mui-focused': {
+                    color: '#3b82f6',            // Matches focus border
+                  },
+                },
+              }}
             />
 
             <button
@@ -143,7 +214,7 @@ function LoginPage({setHeaderTitle, setUsername}) {
               {isLoading ? 'Logging in...' : 'Login'}
             </button>
 
-            <h4 className="p-2 m-3 text-sm text-left text-blue-600 cursor-pointer hover:underline">
+            <h4 className="pl-2 text-sm text-left text-blue-600 cursor-pointer hover:underline">
               Forgot password?
             </h4>
           </div>

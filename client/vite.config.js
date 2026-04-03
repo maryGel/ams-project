@@ -39,6 +39,11 @@ export default defineConfig({
       '/assetLostHRoute': 'http://localhost:3000',
       '/assetLostDRoute': 'http://localhost:3000',
       '/jo_woeRoute': 'http://localhost:3000',
+      '/approval': 'http://localhost:3000',
+      '/trApproval': 'http://localhost:3000',
+      '/adApproval': 'http://localhost:3000',
+      '/accApproval': 'http://localhost:3000',
+      '/lostApproval': 'http://localhost:3000',
     }
   },
   // Add base URL for Vercel

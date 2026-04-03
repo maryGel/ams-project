@@ -1,17 +1,18 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 
 // MUI
 import { 
-  Button, CircularProgress, TextField, 
+  Button, CircularProgress, 
   Typography, Chip, Box, Paper,
-  Autocomplete, createFilterOptions, Collapse, Alert, Snackbar,
-  FormControl, InputLabel, Select, MenuItem, 
-  
+  Collapse, Alert, Snackbar,
+  FormControl, InputLabel, Select, MenuItem,
+  IconButton
 } from '@mui/material';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import RefreshIcon from '@mui/icons-material/Refresh';
-
+import SearchIcon from '@mui/icons-material/Search';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
 // Hooks - Asset Master
 import { useAssetMasterData } from '../hooks/assetMasterHooks';
@@ -25,20 +26,21 @@ import { CustomBtn } from '../Utils/groupbtns';
 // Components
 import AssetDetailPanel from './components/mvAssetDetailPanel';
 import AssetCardItem from './components/mvAssetCardItem';
+import SearchOverlay from './customUtils/searchOverlay';
 
-
-// Main Component
 function MvTansactionPage() {
   // Asset hook
   const {
     assets,
+    singleAsset,
     isLoading,
-    error,
+    error: assetError,
     fetchAssetByFacN0,
     fetchAssets,
     page,
     setPage,
-    total
+    total,
+    clearSingleAsset
   } = useAssetMasterData();
 
   // Reference data hooks
@@ -47,7 +49,7 @@ function MvTansactionPage() {
   const { refDeptData } = useRefDepartment();
   const { refItemClassData } = useRefItemClass();
 
-  // Extract options from reference data
+  // Memoized reference options
   const locationOptions = useMemo(() => 
     ['', ...(refLocData?.map(item => item.LocationName) || [])], 
     [refLocData]
@@ -68,235 +70,300 @@ function MvTansactionPage() {
     [refItemClassData]
   );
 
-  // 1. DRAFT STATE
-  const [draftSearchQuery, setDraftSearchQuery] = useState("");
-  const [draftSelectedAssets, setDraftSelectedAssets] = useState([]);
-  const [draftSelectedLocation, setDraftSelectedLocation] = useState('');
-  const [draftSelectedCategory, setDraftSelectedCategory] = useState('');
-  const [draftSelectedDepartment, setDraftSelectedDepartment] = useState('');
-  const [draftSelectedAssetClass, setDraftSelectedAssetClass] = useState('');
-
-  // 2. COMMITTED FILTER STATE
-  const [searchQuery, setSearchQuery] = useState("");
+  // Filter state
   const [selectedAssets, setSelectedAssets] = useState([]);
-  const [selectedLocation, setSelectedLocation] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedDepartment, setSelectedDepartment] = useState('');
-  const [selectedAssetClass, setSelectedAssetClass] = useState('');
-  const [filterKey, setFilterKey] = useState(0);
+  const [location, setLocation] = useState('');
+  const [category, setCategory] = useState('');
+  const [department, setDepartment] = useState('');
+  const [assetClass, setAssetClass] = useState('');
+  
+  // Draft state for filters
+  const [draftSelectedAssets, setDraftSelectedAssets] = useState([]);
+  const [draftLocation, setDraftLocation] = useState('');
+  const [draftCategory, setDraftCategory] = useState('');
+  const [draftDepartment, setDraftDepartment] = useState('');
+  const [draftAssetClass, setDraftAssetClass] = useState('');
 
-  // Detail panel state
+  // UI State
+  const [hasLoadedData, setHasLoadedData] = useState(false);
+  const [isFetchingAssets, setIsFetchingAssets] = useState(false);
+  const [fetchError, setFetchError] = useState(null);
   const [detailPanelOpen, setDetailPanelOpen] = useState(false);
   const [selectedAssetForDetail, setSelectedAssetForDetail] = useState(null);
-  
-  // UI State
-  const [isFetching, setIsFetching] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState('info');
   const [showFilters, setShowFilters] = useState(false);
   const [displayAssets, setDisplayAssets] = useState([]);
+  const [searchOverlayOpen, setSearchOverlayOpen] = useState(false);
+  
+  // State for search overlay assets
+  const [searchableAssets, setSearchableAssets] = useState([]);
+  const [isLoadingSearchable, setIsLoadingSearchable] = useState(false);
+  
+  // Single asset mode state
+  const [isSingleAssetMode, setIsSingleAssetMode] = useState(false);
 
-  // Filter options for Autocomplete
-  const filterOptions = createFilterOptions({
-    stringify: (option) => `${option.FacNO} ${option.FacName} ${option.Description}`,
-  });
+  // Check if any filter is applied
+  const hasFilters = useMemo(() => {
+    return draftLocation !== '' || draftCategory !== '' || 
+           draftDepartment !== '' || draftAssetClass !== '';
+  }, [draftLocation, draftCategory, draftDepartment, draftAssetClass]);
 
-  // Check if any filter is active
-  const isFilterActive = searchQuery.trim() !== "" 
-    || selectedAssets.length > 0 
-    || selectedLocation !== '' 
-    || selectedCategory !== '' 
-    || selectedDepartment !== '' 
-    || selectedAssetClass !== '';
+  // Check if any assets are selected
+  const hasSelectedAssets = useMemo(() => {
+    return draftSelectedAssets.length > 0;
+  }, [draftSelectedAssets]);
 
-  // Filter assets based on committed filters
-  useEffect(() => {
-    if (!assets || assets.length === 0 || !isFilterActive) {
-      setDisplayAssets([]);
+  // Check if Go button should be enabled
+  const isGoEnabled = useMemo(() => {
+    return (hasSelectedAssets || hasFilters) && !hasLoadedData && !isFetchingAssets;
+  }, [hasSelectedAssets, hasFilters, hasLoadedData, isFetchingAssets]);
+
+  // Load assets for search overlay (lightweight, happens when dialog opens)
+  const loadSearchableAssets = useCallback(async () => {
+    if (searchableAssets.length > 0 || isLoadingSearchable) {
       return;
     }
     
-    const filtered = assets.filter(item => {
-      // Filter by Search Text
-      const matchesText = searchQuery.trim() === "" ||
-        item.FacNO?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.FacName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.Description?.toLowerCase().includes(searchQuery.toLowerCase());
-
-      // Filter by Selected Assets
-      const matchesSelected = selectedAssets.length === 0 ||
-        selectedAssets.some(sel => sel.FacNO === item.FacNO);
-
-      // Filter by Location (single selection)
-      const matchesLocation = selectedLocation === '' ||
-        item.ItemLocation === selectedLocation;
-
-      // Filter by Category (single selection)
-      const matchesCategory = selectedCategory === '' ||
-        item.CATEGORY === selectedCategory;
-
-      // Filter by Department (single selection)
-      const matchesDepartment = selectedDepartment === '' ||
-        item.Department === selectedDepartment;
-
-      // Filter by Asset Class (single selection)
-      const matchesAssetClass = selectedAssetClass === '' ||
-        item.ItemClass === selectedAssetClass;
-
-      return matchesText && matchesSelected && matchesLocation && 
-             matchesCategory && matchesDepartment && matchesAssetClass;
-    });
-    
-    setDisplayAssets(filtered);
-  }, [assets, searchQuery, selectedAssets, selectedLocation, 
-      selectedCategory, selectedDepartment, selectedAssetClass, isFilterActive]);
-
-  // Handle asset click - open detail panel
-  const handleAssetClick = (asset) => {
-    setSelectedAssetForDetail(asset);
-    setDetailPanelOpen(true);
-  };
-
-  // Handle close detail panel
-  const handleCloseDetailPanel = () => {
-    setDetailPanelOpen(false);
-    setSelectedAssetForDetail(null);
-  };
-
-  // Handle Go button click
-  const handleGoClick = async () => {
-    setIsFetching(true);
-    
-    try {
-      // Fetch assets if not already loaded
-      if (!assets || assets.length === 0) {
-        await fetchAssets();
-      }
-      
-      // Commit all draft filters
-      setSearchQuery(draftSearchQuery);
-      setSelectedAssets(draftSelectedAssets);
-      setSelectedLocation(draftSelectedLocation);
-      setSelectedCategory(draftSelectedCategory);
-      setSelectedDepartment(draftSelectedDepartment);
-      setSelectedAssetClass(draftSelectedAssetClass);
-      setPage(0);
-      
-      setSnackbarMessage('Filters applied');
-      setSnackbarSeverity('success');
-      setSnackbarOpen(true);
-    } catch (err) {
-      console.error('Error fetching assets:', err);
-      setSnackbarMessage('Failed to load assets. Please try again.');
-      setSnackbarSeverity('error');
-      setSnackbarOpen(true);
-    } finally {
-      setIsFetching(false);
-    }
-  };
-
-  // Handle Clear button click
-  const handleClearClick = () => {
-    // Clear draft states
-    setDraftSearchQuery("");
-    setDraftSelectedAssets([]);
-    setDraftSelectedLocation('');
-    setDraftSelectedCategory('');
-    setDraftSelectedDepartment('');
-    setDraftSelectedAssetClass('');
-    
-    // Clear committed states
-    setSearchQuery("");
-    setSelectedAssets([]);
-    setSelectedLocation('');
-    setSelectedCategory('');
-    setSelectedDepartment('');
-    setSelectedAssetClass('');
-    
-    setFilterKey(prev => prev + 1);
-    setPage(0);
-    setDisplayAssets([]);
-    
-    setSnackbarMessage('All filters cleared');
-    setSnackbarSeverity('info');
-    setSnackbarOpen(true);
-  };
-
-  // Handle retry
-  const handleRetry = async () => {
-    setIsFetching(true);
+    setIsLoadingSearchable(true);
     try {
       await fetchAssets();
-      setSnackbarMessage('Assets loaded successfully');
-      setSnackbarSeverity('success');
-      setSnackbarOpen(true);
+      setSearchableAssets(assets || []);
     } catch (err) {
-      setSnackbarMessage('Still unable to load assets. Please try again later.');
-      setSnackbarSeverity('error');
-      setSnackbarOpen(true);
+      console.error('Error loading searchable assets:', err);
     } finally {
-      setIsFetching(false);
+      setIsLoadingSearchable(false);
     }
-  };
+  }, [searchableAssets.length, isLoadingSearchable, fetchAssets, assets]);
 
-  // Active Filters Component
-  const ActiveFilters = () => {
-    const filters = [];
-    
-    if (searchQuery) {
-      filters.push({ label: `Search: ${searchQuery}`, type: 'search' });
+  // Update searchable assets when assets are loaded
+  useEffect(() => {
+    if (assets && assets.length > 0 && searchableAssets.length === 0) {
+      setSearchableAssets(assets);
     }
+  }, [assets, searchableAssets.length]);
+
+  // Filter assets based on selected criteria
+  const filterAssets = useCallback(() => {
+    if (!assets || assets.length === 0) {
+      return [];
+    }
+
+    return assets.filter(item => {
+      // Filter by selected assets
+      if (selectedAssets.length > 0) {
+        const isSelected = selectedAssets.some(asset => asset.FacNO === item.FacNO);
+        if (!isSelected) return false;
+      }
+
+      // Filter by location
+      if (location && item.ItemLocation !== location) return false;
+
+      // Filter by category
+      if (category && item.CATEGORY !== category) return false;
+
+      // Filter by department
+      if (department && item.Department !== department) return false;
+
+      // Filter by asset class
+      if (assetClass && item.ItemClass !== assetClass) return false;
+
+      return true;
+    });
+  }, [assets, selectedAssets, location, category, department, assetClass]);
+
+  // Update display assets when filters or assets change
+  useEffect(() => {
+    if (hasLoadedData && assets && !isSingleAssetMode) {
+      const filtered = filterAssets();
+      setDisplayAssets(filtered);
+    } else if (isSingleAssetMode) {
+      // In single asset mode, displayAssets is not used
+      setDisplayAssets([]);
+    } else {
+      setDisplayAssets([]);
+    }
+  }, [assets, selectedAssets, location, category, department, assetClass, hasLoadedData, filterAssets, isSingleAssetMode]);
+
+  // Load main assets when Go is clicked
+  const loadMainAssets = useCallback(async () => {
+    setIsFetchingAssets(true);
+    setFetchError(null);
+    setIsSingleAssetMode(false);
+    clearSingleAsset();
+    
+    try {
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout')), 30000);
+      });
+      
+      await Promise.race([
+        fetchAssets(),
+        timeoutPromise
+      ]);
+      
+      setHasLoadedData(true);
+    } catch (err) {
+      console.error('Error fetching assets:', err);
+      setFetchError(err.message || 'Failed to load assets');
+    } finally {
+      setIsFetchingAssets(false);
+    }
+  }, [fetchAssets, clearSingleAsset]);
+
+  // Handle Go button click
+  const handleGoClick = useCallback(async () => {
+    // Commit draft filters
+    setSelectedAssets(draftSelectedAssets);
+    setLocation(draftLocation);
+    setCategory(draftCategory);
+    setDepartment(draftDepartment);
+    setAssetClass(draftAssetClass);
+    setPage(0);
+    
+    // Load assets
+    await loadMainAssets();
+  }, [draftSelectedAssets, draftLocation, draftCategory, draftDepartment, draftAssetClass, loadMainAssets, setPage]);
+
+  // Handle Clear button click - resets everything
+  const handleClearClick = useCallback(() => {
+    // Reset all filters
+    setDraftSelectedAssets([]);
+    setDraftLocation('');
+    setDraftCategory('');
+    setDraftDepartment('');
+    setDraftAssetClass('');
+    
+    setSelectedAssets([]);
+    setLocation('');
+    setCategory('');
+    setDepartment('');
+    setAssetClass('');
+    
+    setHasLoadedData(false);
+    setFetchError(null);
+    setDisplayAssets([]);
+    setPage(0);
+    
+    // Clear single asset and exit single asset mode
+    clearSingleAsset();
+    setIsSingleAssetMode(false);
+  }, [setPage, clearSingleAsset]);
+
+  // Handle search overlay selection - NOW USES fetchAssetByFacN0
+  const handleSelectAsset = useCallback(async (asset) => {
+    const isAlreadySelected = draftSelectedAssets.some(a => a.FacNO === asset.FacNO);
+    
+    if (!isAlreadySelected) {
+      // Add asset to selection
+      const newSelectedAssets = [...draftSelectedAssets, asset];
+      setDraftSelectedAssets(newSelectedAssets);
+      
+      // Commit the selection
+      setSelectedAssets(newSelectedAssets);
+      
+      // Clear any existing filters
+      setDraftLocation('');
+      setDraftCategory('');
+      setDraftDepartment('');
+      setDraftAssetClass('');
+      setLocation('');
+      setCategory('');
+      setDepartment('');
+      setAssetClass('');
+      
+      // Load the single asset details using fetchAssetByFacN0
+      setIsFetchingAssets(true);
+      setFetchError(null);
+      setIsSingleAssetMode(true);
+      
+      try {
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Request timeout')), 30000);
+        });
+        
+        await Promise.race([
+          fetchAssetByFacN0(asset.FacNO),
+          timeoutPromise
+        ]);
+        
+        setHasLoadedData(true);
+      } catch (err) {
+        console.error('Error fetching asset details:', err);
+        setFetchError(err.message || 'Failed to load asset details');
+        setIsSingleAssetMode(false);
+      } finally {
+        setIsFetchingAssets(false);
+      }
+    }
+  }, [draftSelectedAssets, fetchAssetByFacN0]);
+
+  // Handle opening search overlay
+  const handleOpenSearchOverlay = useCallback(() => {
+    // If we're in single asset mode, clear it before opening search
+    if (isSingleAssetMode) {
+      clearSingleAsset();
+      setIsSingleAssetMode(false);
+      setHasLoadedData(false);
+    }
+    setSearchOverlayOpen(true);
+    loadSearchableAssets();
+  }, [loadSearchableAssets, isSingleAssetMode, clearSingleAsset]);
+
+  // Active Filters Display Component
+  const ActiveFilters = useMemo(() => {
+    const activeFilters = [];
+    
     if (selectedAssets.length > 0) {
-      filters.push({ label: `${selectedAssets.length} asset(s) selected`, type: 'assets' });
+      activeFilters.push({ label: `${selectedAssets.length} asset(s) selected`, type: 'assets' });
     }
-    if (selectedLocation) {
-      filters.push({ label: `Location: ${selectedLocation}`, type: 'location' });
+    if (location) {
+      activeFilters.push({ label: `Location: ${location}`, type: 'location' });
     }
-    if (selectedCategory) {
-      filters.push({ label: `Category: ${selectedCategory}`, type: 'category' });
+    if (category) {
+      activeFilters.push({ label: `Category: ${category}`, type: 'category' });
     }
-    if (selectedDepartment) {
-      filters.push({ label: `Department: ${selectedDepartment}`, type: 'department' });
+    if (department) {
+      activeFilters.push({ label: `Department: ${department}`, type: 'department' });
     }
-    if (selectedAssetClass) {
-      filters.push({ label: `Asset Class: ${selectedAssetClass}`, type: 'class' });
+    if (assetClass) {
+      activeFilters.push({ label: `Asset Class: ${assetClass}`, type: 'class' });
     }
     
-    if (filters.length === 0) return null;
+    if (activeFilters.length === 0) return null;
     
     return (
-      <Box sx={{ mb: 2, overflow: 'auto'}} >
+      <Box sx={{ mb: 2, overflow: 'auto' }}>
         <Typography variant="caption" sx={{ color: '#6b7280', display: 'block', mb: 1 }}>
           Active Filters:
         </Typography>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          {filters.map((filter, idx) => (
+          {activeFilters.map((filter, idx) => (
             <Chip
               key={idx}
               label={filter.label}
               size="small"
               onDelete={() => {
-                if (filter.type === 'search') {
-                  setDraftSearchQuery('');
-                  setSearchQuery('');
-                } else if (filter.type === 'assets') {
-                  setDraftSelectedAssets([]);
-                  setSelectedAssets([]);
-                } else if (filter.type === 'location') {
-                  setDraftSelectedLocation('');
-                  setSelectedLocation('');
-                } else if (filter.type === 'category') {
-                  setDraftSelectedCategory('');
-                  setSelectedCategory('');
-                } else if (filter.type === 'department') {
-                  setDraftSelectedDepartment('');
-                  setSelectedDepartment('');
-                } else if (filter.type === 'class') {
-                  setDraftSelectedAssetClass('');
-                  setSelectedAssetClass('');
+                switch(filter.type) {
+                  case 'assets':
+                    setSelectedAssets([]);
+                    setDraftSelectedAssets([]);
+                    break;
+                  case 'location':
+                    setLocation('');
+                    setDraftLocation('');
+                    break;
+                  case 'category':
+                    setCategory('');
+                    setDraftCategory('');
+                    break;
+                  case 'department':
+                    setDepartment('');
+                    setDraftDepartment('');
+                    break;
+                  case 'class':
+                    setAssetClass('');
+                    setDraftAssetClass('');
+                    break;
                 }
-                setFilterKey(prev => prev + 1);
               }}
             />
           ))}
@@ -310,254 +377,254 @@ function MvTansactionPage() {
         </Box>
       </Box>
     );
+  }, [selectedAssets, location, category, department, assetClass, handleClearClick]);
+
+  const isLoadingData = isFetchingAssets || isLoading;
+
+  // Render content
+  const renderContent = () => {
+    
+    if (!hasLoadedData && !fetchError) {      
+      return (
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          py: 8,
+          textAlign: 'center'
+        }}>
+          {isLoading ? <CircularProgress /> : ''}
+          <span className='px-3 mt-2 text-sm tracking-wide text-gray-400'>
+            Click the search icon to select specific assets, or use the filters above, then click "Go" to view results.
+          </span>
+        </Box>
+      );
+    }
+
+    if (isLoadingData) {
+      return (
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 8 }}>
+          <CircularProgress size={40} />
+          <Typography sx={{ mt: 2, color: '#6b7280' }}>
+            {isSingleAssetMode ? 'Loading asset details...' : 'Loading assets...'}
+          </Typography>
+        </Box>
+      );
+    }
+
+    if (fetchError) {
+      return (
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 5, textAlign: 'center' }}>
+          <ErrorOutlineIcon sx={{ color: '#f87171', fontSize: 48, mb: 2 }} />
+          <Typography variant="body1" sx={{ color: '#4b5563', fontWeight: 500, mb: 1 }}>
+            Failed to load {isSingleAssetMode ? 'asset details' : 'assets'}
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#9ca3af', mt: 1, mb: 2, maxWidth: 400 }}>
+            {fetchError}
+          </Typography>
+          <Button 
+            variant="contained" 
+            startIcon={<RefreshIcon />}
+            onClick={handleClearClick}
+          >
+            Try Again
+          </Button>
+        </Box>
+      );
+    }
+
+    // Display single asset when in single asset mode
+    if (isSingleAssetMode && singleAsset) {
+      return (
+        <>
+          <Typography variant="caption" sx={{ color: '#6b7280', display: 'block', mb: 1, paddingLeft: 1}}>
+            Display results:
+          </Typography>
+          <AssetCardItem 
+            key={singleAsset.FacNO} 
+            asset={singleAsset} 
+            onClick={() => {
+              setSelectedAssetForDetail(singleAsset);
+              setDetailPanelOpen(true);
+            }}
+          />
+        </>
+      );
+    }
+
+    // Display multiple assets when in multi-asset mode
+    if (displayAssets.length === 0 && hasLoadedData) {
+      return (
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 8, textAlign: 'center' }}>
+          <Typography variant="body1" sx={{ color: '#6b7280', mb: 1 }}>
+            No matching assets found
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#9ca3af' }}>
+            Try adjusting your filters or selecting different assets
+          </Typography>
+        </Box>
+      );
+    }
+
+    return (
+      <>
+        <Typography variant="caption" sx={{ color: '#6b7280', display: 'block', mb: 1, paddingLeft: 1}}>
+          Found {displayAssets.length} asset{displayAssets.length !== 1 ? 's' : ''}
+        </Typography>
+        {displayAssets.map((asset, index) => (
+          <AssetCardItem 
+            key={asset.FacNO || index} 
+            asset={asset} 
+            onClick={() => {
+              setSelectedAssetForDetail(asset);
+              setDetailPanelOpen(true);
+            }}
+          />
+        ))}
+      </>
+    );
   };
 
-  const isLoadingData = isFetching || isLoading || '';
-
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: '#f9fafb', justifyContent: 'center'}}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor : 'white' }}>
       {/* Header */}
-      <Box sx={{ bgcolor: 'white', borderBottom: '1px solid #e5e7eb', p: 2, position: 'sticky', top: 0, zIndex: 10 }}>
-        <span className='font-semibold tracking-wide text-md'>
-          Asset Master
-        </span>
-      </Box>
+      <div className='flex items-center justify-between px-5 py-2 m-3 bg-blue-100 rounded-lg shadow-md'>
+          <div className='flex gap-3 '>
+            <img className='w-6 h-6' src='/icons/actions/boxes.png' alt="Assets" />   
+            <span className='text-lg font-semibold tracking-wide'>
+              Asset Master
+            </span>   
+          </div>       
+          <button  
+            onClick={handleOpenSearchOverlay}         
+            disabled={isLoadingData}
+            className='p-1 bg-white border border-gray-300 rounded-lg shadow-sm'
+          >
+            <SearchIcon sx={{ fontSize: 23 }} fontSize='small' />
+          </button>
+ 
+      </div>
 
-      {/* Snackbar */}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={4000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <Alert severity={snackbarSeverity} onClose={() => setSnackbarOpen(false)}
-          sx={{ 
-            width: '100%', 
-            fontSize: '0.875rem', 
-            py: 0, // Reduces vertical padding
-            alignItems: 'center' 
-          }}  
-        >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
 
       {/* Filter Section */}
-      <Paper sx={{ p: 2, borderRadius: 0 }}>
-        {/* Search Assets Autocomplete */}
-        <Autocomplete
-          key={`asset-search-${filterKey}`}
-          multiple
-          limitTags={2}
-          size="small"
-          options={assets}
-          filterOptions={filterOptions}
-          value={draftSelectedAssets}
-          onChange={(e, newValue) => setDraftSelectedAssets(newValue)}
-          inputValue={draftSearchQuery}
-          onInputChange={(e, newInputValue) => setDraftSearchQuery(newInputValue)}
-          getOptionLabel={(option) => `${option.FacNO} - ${option.FacName}`}
-          renderOption={(props, option) => (
-            <li {...props} key={option.FacNO} style={{ padding: '4px 8px' }}>
-              <Box component="span" sx={{ fontSize: '0.875rem', display: 'block' }}>
-                <strong>{option.FacNO}</strong> - {option.FacName}
-                <br />
-                <small>{option.Description}</small>
-              </Box>
-            </li>
-          )}
-          renderInput={(params) => (
-            <TextField {...params} label="Search Assets" placeholder="Search by asset no. or name" />
-          )}
-          sx={{ 
-            mb: 2,
-            // Targets the input element and its placeholder
-            "& .MuiInputBase-input::placeholder": {
-              fontSize: "0.75rem", // Reduces size
-              color: "gray",       // Sets color to gray
-              opacity: 1,          // Ensures the color isn't washed out
-            },
-            // Optional: match the input text size to the placeholder size
-            "& .MuiInputBase-input": {
-              fontSize: "0.875rem",
-            }
-          }}
-          disabled={isLoadingData}
-        />
+      <Paper sx={{ px: 2, py: 2 }} elevation={0} >
 
-        {/* Toggle Advanced Filters */}
+        {/* Toggle Advanced Filters - Disabled when results are loaded */}
         <Button
-          variant="body2"
+          // variant="text"
           size="small"
           onClick={() => setShowFilters(!showFilters)}
-          startIcon={<FilterListIcon />}
-          sx={{ mb: showFilters ? 2 : 0, textTransform: 'none' }}
+          startIcon={<FilterAltIcon />}
+          sx={{ textTransform: 'none', width: '100%' }}
           disabled={isLoadingData}
         >
-          {showFilters ? 'Hide Advanced Filters' : 'Show Advanced Filters'}
+          {(showFilters) ? 'Hide Advanced Filters' : 'Show Advanced Filters'}
         </Button>
 
-        {/* Advanced Filters - Single Selection Dropdowns */}
+        {/* Advanced Filters - Disabled when results are loaded */}
         <Collapse in={showFilters}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 2, }}>
-            {/* Location Filter - Single Select */}
-            <FormControl fullWidth size="small">
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 2 }}>
+            <FormControl fullWidth size="small" disabled={hasLoadedData || isLoadingData}>
               <InputLabel>Location</InputLabel>
               <Select
-                value={draftSelectedLocation}
-                onChange={(e) => setDraftSelectedLocation(e.target.value)}
+                value={draftLocation}
+                onChange={(e) => setDraftLocation(e.target.value)}
                 label="Location"
-                disabled={isLoadingData}
               >
                 {locationOptions.map((option) => (
-                  <MenuItem key={option || 'none'} value={option} sx={{ fontSize: '.80rem', py: 0.5, minHeight: 'auto' }}>
-                    {option || 'All Locations'}
+                  <MenuItem key={option || 'none'} value={option}>
+                    {option}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
 
-            {/* Category Filter - Single Select */}
-            <FormControl fullWidth size="small">
+            <FormControl fullWidth size="small" disabled={hasLoadedData || isLoadingData}>
               <InputLabel>Category</InputLabel>
               <Select
-                value={draftSelectedCategory}
-                onChange={(e) => setDraftSelectedCategory(e.target.value)}
+                value={draftCategory}
+                onChange={(e) => setDraftCategory(e.target.value)}
                 label="Category"
-                disabled={isLoadingData}
               >
                 {categoryOptions.map((option) => (
-                  <MenuItem key={option || 'none'} value={option} sx={{ fontSize: '.80rem', py: 0.5, minHeight: 'auto' }}>
-                    {option || 'All Categories'}
+                  <MenuItem key={option || 'none'} value={option}>
+                    {option}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
 
-            {/* Asset Class Filter - Single Select */}
-            <FormControl fullWidth size="small">
+            <FormControl fullWidth size="small" disabled={hasLoadedData || isLoadingData}>
               <InputLabel>Asset Class</InputLabel>
               <Select
-                value={draftSelectedAssetClass}
-                onChange={(e) => setDraftSelectedAssetClass(e.target.value)}
+                value={draftAssetClass}
+                onChange={(e) => setDraftAssetClass(e.target.value)}
                 label="Asset Class"
-                disabled={isLoadingData}
               >
                 {assetClassOptions.map((option) => (
-                  <MenuItem key={option || 'none'} value={option} sx={{ fontSize: '.80rem', py: 0.5, minHeight: 'auto' }}>
-                    {option || 'All Classes'}
+                  <MenuItem key={option || 'none'} value={option}>
+                    {option}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
 
-            {/* Department Filter - Single Select */}
-            <FormControl fullWidth size="small">
+            <FormControl fullWidth size="small" disabled={hasLoadedData || isLoadingData}>
               <InputLabel>Department</InputLabel>
               <Select
-                value={draftSelectedDepartment}
-                onChange={(e) => setDraftSelectedDepartment(e.target.value)}
+                value={draftDepartment}
+                onChange={(e) => setDraftDepartment(e.target.value)}
                 label="Department"
-                disabled={isLoadingData}
               >
                 {departmentOptions.map((option) => (
-                  <MenuItem key={option || 'none'} value={option} sx={{ fontSize: '.80rem', py: 0.5, minHeight: 'auto' }}>
-                    {option || 'All Departments'}
+                  <MenuItem key={option || 'none'} value={option}>
+                    {option}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
+          <button 
+            className='py-2 text-white bg-green-600 rounded-full '
+            onClick={handleGoClick}
+            disabled={!isGoEnabled}
+            >
+              GO
+            </button>
           </Box>
         </Collapse>
-
-        {/* Action Buttons */}
-        <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-          <CustomBtn 
-            variant="goBtn" 
-            iconType="go" 
-            onClick={handleGoClick}
-            disabled={isLoadingData}
-          >
-            Go
-          </CustomBtn>
-        </Box>
       </Paper>
 
-
-      <div className='flex justify-center'>{isLoadingData ? <CircularProgress size={40} /> : ''}</div>
-
       {/* Active Filters Display */}
-      <Box sx={{ px: 2, pt: 2 }}>
-        <ActiveFilters />
-      </Box>
+      {hasLoadedData && (selectedAssets.length > 0 || location || category || department || assetClass) && (
+        <Box sx={{ px: 2, pt: 2 }}>
+          {ActiveFilters}
+        </Box>
+      )}
 
-      {/* Results Section - Asset Cards */}
+      {/* Results Section */}
       <Box sx={{ flex: 1, overflowY: 'auto', p: 1 }}>
-        {!isFilterActive ? (
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 2, textAlign: 'center' }}>
-            <Typography variant="body1" sx={{ color: '#6b7280' }}>No filters applied</Typography>
-            <Typography variant="body2" sx={{ color: '#9ca3af', mt: 1 }}>
-              Use the search or filters above to find assets
-            </Typography>
-          </Box>
-        ) : isLoadingData && displayAssets.length === 0 ? (
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 8 }}>
-            <CircularProgress size={40} />
-            <Typography sx={{ mt: 2, color: '#6b7280' }}>Loading assets...</Typography>
-          </Box>
-        ) : error && displayAssets.length === 0 ? (
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 8, textAlign: 'center' }}>
-            <ErrorOutlineIcon sx={{ color: '#f87171', fontSize: 48, mb: 2 }} />
-            <Typography variant="body1" sx={{ color: '#4b5563', fontWeight: 500 }}>
-              Failed to load assets
-            </Typography>
-            <Typography variant="body2" sx={{ color: '#9ca3af', mt: 1, mb: 2 }}>
-              {error}
-            </Typography>
-            <Button 
-              variant="contained" 
-              startIcon={<RefreshIcon />}
-              onClick={handleRetry}
-            >
-              Retry
-            </Button>
-          </Box>
-        ) :  (
-          <>
-            <Typography variant="caption" sx={{ color: '#6b7280', display: 'block', mb: 1, paddingLeft: 1}}>
-              Found {displayAssets.length} asset{displayAssets.length !== 1 ? 's' : ''}
-            </Typography>
-            {displayAssets.map((asset, index) => (
-              <AssetCardItem 
-                key={asset.FacNO || index} 
-                asset={asset} 
-                onClick={handleAssetClick}
-              />
-            ))}
-          </>
-        )}
+        {renderContent()}
       </Box>
 
-      {/* Asset Detail Slide Panel */}
+      {/* Asset Detail Panel */}
       <AssetDetailPanel
         open={detailPanelOpen}
-        onClose={handleCloseDetailPanel}
+        onClose={() => {
+          setDetailPanelOpen(false);
+          setSelectedAssetForDetail(null);
+        }}
         asset={selectedAssetForDetail}
         fetchAssetByFacN0={fetchAssetByFacN0}
       />
 
-      <style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 3;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
+      {/* Search Overlay */}
+      <SearchOverlay
+        isOpen={searchOverlayOpen}
+        onClose={() => setSearchOverlayOpen(false)}
+        docHeaders={searchableAssets}
+        onSelectDoc={handleSelectAsset}
+      />
     </Box>
   );
 }

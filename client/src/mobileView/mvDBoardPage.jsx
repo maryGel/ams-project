@@ -23,49 +23,25 @@ import MvAssetAccPage from './mvAssetAccPage';
 import MvAssetLostPage from './mvAssetLostPage';
 import MvMaintenancePage from './mvMaintenancePage';
 
-function MvDashBoard({useProps, firstName}){
+function MvDashBoard({useProps, firstName, selectedUser}){
     const [activePage, setActivePage] = useState(null); // Track which page is open
     const [isClosing, setIsClosing] = useState(false);
-    // const userName = localStorage.getItem('username') || 'User';
-    // const { 
-    //     selectedUser, 
-    //     setSelectedUser, 
-    //     loading, 
-    // } = useUsers();
-      
-  
-    // Set the selected user on mount
-    // useEffect(() => {
-    //     if (userName && userName !== 'User') {
-    //         console.log('Setting selected user:', userName);
-    //         setSelectedUser(userName);
-    //     }
-    // }, [userName, setSelectedUser]);
-    
-    
-    // // console.log(`user: ${userName}`);
-    // console.log('selectedUser:', selectedUser);
-    // // console.log('loading:', loading);
-    
-    // // Get first name from selectedUser
-    // const firstName = selectedUser?.fname || userName;    
-
 
     // Job Orders Data
-    const {joHeaders, isLoading, error} = useJO_h(useProps);
-    const {joDetails} = useJO_d(useProps);
+    const {joHeaders, isLoading, error, joRefresh} = useJO_h(useProps);
+    const {joDetails, joDetailsRefresh} = useJO_d(useProps);
     // Transfer Data
-    const {trHeaders} = useTR_h(useProps);
-    const {trDetails} = useTR_d(useProps);
+    const {trHeaders, trHRefresh} = useTR_h(useProps);
+    const {trDetails, trDRefresh} = useTR_d(useProps);
     // Disposal Data
-    const {adHeaders} = useAD_h(useProps);
-    const {adDetails} = useAD_d(useProps);
+    const {adHeaders, adHRefresh}  = useAD_h(useProps);
+    const {adDetails, adDRefresh} = useAD_d(useProps);
     // Asset Accountability Data
-    const {assetAccHeaders} = useAssetAccH(useProps);
-    const {assetAccDetails} = useAssetAccD(useProps);
+    const {assetAccHeaders, accHRefresh} = useAssetAccH(useProps);
+    const {assetAccDetails, accDRefresh} = useAssetAccD(useProps);
     // Asset Lost Data
-    const {assetLostHeaders} = useAssetLostH(useProps);
-    const {assetLostDetails} = useAssetLostD(useProps);
+    const {assetLostHeaders, aLostHRefresh} = useAssetLostH(useProps);
+    const {assetLostDetails, aLostDRefresh} = useAssetLostD(useProps);
 
     // Count the pending docs
     const joCount = (joHeaders || []).filter(jo => (jo.xpost === 3 || jo.xpost === 2) && jo.DISAPPROVED === 0).length;
@@ -108,12 +84,12 @@ function MvDashBoard({useProps, firstName}){
             onClose: handleClosePage,
             isClosing: isClosing,
             onAnimationEnd: handleAnimationEnd,
-            joHeaders, joDetails, isLoading, error,
-            trHeaders, trDetails,
-            adHeaders, adDetails,
-            assetAccHeaders, assetAccDetails,
-            assetLostHeaders, assetLostDetails,
-            useProps
+            joHeaders, joDetails, isLoading, error, joRefresh, joDetailsRefresh,
+            trHeaders, trDetails, trHRefresh, trDRefresh,
+            adHeaders, adDetails, adHRefresh, adDRefresh,
+            assetAccHeaders, assetAccDetails, accHRefresh, accDRefresh,
+            assetLostHeaders, assetLostDetails, accHRefresh, accDRefresh,
+            selectedUser, useProps
         };
 
         switch(activePage) {
@@ -172,13 +148,13 @@ function MvDashBoard({useProps, firstName}){
                 }`}
                 disabled={!!activePage}
               >
-                <div className='flex flex-col justify-start gap-2 p-2'>
+                <div className='flex flex-col justify-start gap-2 p-3'>
                     <img
                         className='w-8 h-8 bg-white'
                         src={item.imgSrc}
                         alt={item.title}
                     />
-                    <span className='text-sm'>{item.title}</span>
+                    <span>{item.title}</span>
                 </div>
                 <span className={numStyles}>{item.num}</span> 
               </button>

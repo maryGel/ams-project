@@ -3,6 +3,7 @@ import {useState, useMemo} from 'react';
 import TuneIcon from '@mui/icons-material/Tune';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import SearchIcon from '@mui/icons-material/Search';
+import DescriptionIcon from '@mui/icons-material/Description';
 // Custom Utils
 import HistoryDatePicker from '../../Utils/datePicker';
 import DateDisplay from '../../Utils/formatDateForInput';
@@ -125,42 +126,45 @@ function MvEvalJOForm({
       <>
         <div className='flex flex-col justify-center gap-3'>
 
-          <div className='flex justify-center gap-2 mt-2'>
-            {evalStatus.map((item)=> (
-                <button
-                  key={item.id}
-                  onClick={() => setFilter(item.status)}
-                  className={`px-4 text-sm border rounded-2xl transition-colors whitespace-nowrap ${
-                      filter === item.status 
-                      ? 'text-slate-900 font-semibold border-slate-800 bg-slate-100' 
-                      : 'bg-white text-slate-600 border-slate-400'
-                  }`}
-                >
-                <div className='flex items-center gap-1'>
-                  <img className='w-4 h-4' src={item.icon}/>
-                  <span>{item.status}</span>
-                </div>
-                </button>
-              ))}
-          </div>
-
           <div className='flex flex-col'>
-            <div className='flex items-center justify-end px-4 text-sm font-semibold tracking-wide'>
-              <button 
-                onClick={handleOptionsOpen}
-                className={`flex items-center gap-1 px-3 py-1 rounded-md transition-colors ${
-                  isOptionsOpen ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'
-                }`}
-              >
-                <TuneIcon fontSize='small' />
-                <span className='text-xs'>Filter</span>
-              </button>
-              <button 
-                onClick={handleSearchOpen}
-                className="p-1 transition-colors rounded-md hover:bg-gray-100"
-              >
-                <SearchIcon />
-              </button>
+            
+            <div className='flex items-center justify-between px-2 my-3 text-sm tracking-wide'>
+              <div className='flex justify-center border rounded-full'>
+                {evalStatus.map((item)=> (
+                    <button
+                      key={item.id}
+                      onClick={() => setFilter(item.status)}
+                      className={`px-3 text-sm py-1 rounded-2xl transition-colors whitespace-nowrap ${
+                          filter === item.status 
+                          ? 'text-white  bg-blue-700' 
+                          : 'bg-white text-slate-600 '
+                      }`}
+                    >
+                    <div className='flex items-center justify-center gap-1'>
+                     {item.icon}
+                      {/* <img className='w-4 h-4' src={item.icon}/> */}
+                      <span>{item.status}</span>
+                    </div>
+                    </button>
+                  ))}
+              </div>
+              <div className='flex gap-2 '>
+                <button 
+                  onClick={handleOptionsOpen}
+                  className={`flex items-center gap-1 px-3 py-1 rounded-md transition-colors ${
+                    isOptionsOpen ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'
+                    }`}
+                >
+                  <TuneIcon fontSize='small' />
+                  <span className='text-xs'>Filter</span>
+                </button>
+                <button 
+                  onClick={handleSearchOpen}
+                  className="p-1 transition-colors rounded-md hover:bg-gray-100"
+                >
+                  <SearchIcon />
+                </button>
+              </div>
             </div>
             
             {isOptionsOpen && (

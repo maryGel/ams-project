@@ -22,7 +22,7 @@ function AssetCardItem({ asset, onClick }) {
 
   return (
     <div 
-      className='border-b cursor-pointer hover:bg-gray-50' 
+      className='cursor-pointer hover:bg-gray-50 ' 
       onClick={() => onClick(asset)}
     >
       <div className='p-2 grid grid-cols-[1fr_2rem] items-start'>
@@ -54,7 +54,8 @@ function AssetCardItem({ asset, onClick }) {
                 color: '#1976d2',
                 cursor: 'pointer',
                 fontSize: '0.7rem',
-                fontWeight: 600,
+                fontWeight: 300,
+                fontStyle: 'italic',
                 mt: 0.2,
                 '&:hover': { textDecoration: 'underline' }
               }}

@@ -116,27 +116,27 @@ function MvMaintenanceForm({
   return (
     <>
       <div className='flex flex-col justify-center gap-2 mt-1'>
-        <div className='flex justify-center gap-2 py-1'>
-          {maintStatus.map((item)=> (
-            <button
-              key={item.id}
-              onClick={() => setFilter(item.status)}
-              className={`px-4 text-sm border rounded-2xl transition-colors whitespace-nowrap ${
-                  filter === item.status 
-                  ? 'text-slate-900 font-semibold border-slate-800 bg-slate-100' 
-                  : 'bg-white text-slate-600 border-slate-400'
-              }`}
-            >
-            <div className='flex items-center gap-1'>
-              <img className='w-4 h-4' src={item.icon}/>
-              <span>{item.status}</span>
+        <div className='flex flex-col'>
+          <div className='flex items-center justify-between px-2 my-3 text-sm tracking-wide'>
+            <div className='flex justify-center border rounded-full'>
+              {maintStatus.map((item)=> (
+              <button
+                key={item.id}
+                onClick={() => setFilter(item.status)}
+                className={`px-3 text-sm py-1 rounded-2xl transition-colors whitespace-nowrap ${
+                    filter === item.status 
+                    ? 'text-white  bg-blue-700' 
+                    : 'bg-white text-slate-600'
+                }`}
+              >
+              <div className='flex items-center justify-center gap-1'>
+                {item.icon}
+                <span>{item.status}</span>
+              </div>
+              </button>
+            ))}
             </div>
-            </button>
-          ))}
-        </div>
-
-          <div className='flex flex-col'>
-            <div className='flex items-center justify-end px-4 text-sm font-semibold tracking-wide'>
+            <div className='flex gap-2'>
               <button 
                 onClick={handleOptionsOpen}
                 className={`flex items-center gap-1 px-3 py-1 rounded-md transition-colors ${
@@ -153,13 +153,14 @@ function MvMaintenanceForm({
                 <SearchIcon/>
               </button>
             </div>
-            
-            {isOptionsOpen && (
-              <div className='mt-2 border-t border-b bg-gray-50'>
-                <HistoryDatePicker onDateRangeChange={handleDateRangeChange} />
-              </div>
-            )}
           </div>
+          
+          {isOptionsOpen && (
+            <div className='mt-2 border-t border-b bg-gray-50'>
+              <HistoryDatePicker onDateRangeChange={handleDateRangeChange} />
+            </div>
+          )}
+        </div>
           
         {/* Filter Summary - Optional but helpful */}
         {(filter !== 'All' || dateRange) && (

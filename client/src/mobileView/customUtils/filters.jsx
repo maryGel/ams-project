@@ -4,6 +4,9 @@ import DoneAllIcon from '@mui/icons-material/DoneAll';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import CloseIcon from '@mui/icons-material/Close';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import DescriptionIcon from '@mui/icons-material/Description';
+import ChecklistRtlIcon from '@mui/icons-material/ChecklistRtl';
+
 
 export const statusFilter = [
   {id: 1, status: 'Waiting', icon: <AccessTimeIcon fontSize='small' className='text-slate-400'/>},
@@ -13,21 +16,19 @@ export const statusFilter = [
 ]
 
 export const evalStatus = [
-  {id: 1, status: 'Pending', icon: '/icons/actions/pending.png'},
-  {id: 3, status: 'All', icon: '/icons/actions/selectall.png'}
+  {id: 1, status: 'Pending', icon: <DescriptionIcon fontSize='small'/>},
+  {id: 3, status: 'All', icon: <ChecklistRtlIcon fontSize='small'/>}
 ]
 
 export const maintStatus = [
-  {id: 1, status: 'Open JOs', icon: '/icons/actions/pending.png'},
-  {id: 2, status: 'Completed', icon: '/icons/actions/evaluated.png'},
-  {id: 3, status: 'All', icon: '/icons/actions/selectall.png'}
+  {id: 1, status: 'Open JOs', icon:  <DescriptionIcon fontSize='small'/>},
+  {id: 2, status: 'Completed', icon:  <DoneAllIcon fontSize='small'/>}
 ]
 export const borderColor = (xpost, disapproved) => {
 
   if (disapproved === 1) return "border-red-600";
   if (xpost === 1) return "border-green-600";
-  if (xpost === 2) return "border-orange-300";
-  if (xpost === 3) return "border-slate-200";
+  if (xpost === 3 && xpost === 2) return "border-slate-200";
   return "";
 };
   

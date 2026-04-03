@@ -124,7 +124,7 @@ function MvALForm({
                             <div className='flex gap-3'>
                                 <button 
                                     className={clsx(
-                                        'flex gap-1 text-xs items-center mt-1 px-2 py-1 border rounded-xl',
+                                        'flex gap-1 text-xs items-center mt-1 px-2 py-1 border rounded-full',
                                           !viewItems[header.AAFNo] ? 'border-slate-400' : 'border-blue-500 text-blue-700'
                                         )}
                                     onClick={() => handleViewItemsOpen(header.AAFNo)}
@@ -134,7 +134,7 @@ function MvALForm({
                                 </button>
                                 {header.appStat && <button 
                                   className={clsx(
-                                    'flex gap-1 text-xs items-center mt-1 px-2 border rounded-xl',
+                                    'flex gap-1 text-xs items-center mt-1 px-2 border rounded-full',
                                       !viewApprovers[header.AAFNo] ? 'border-slate-400' : 'border-blue-500 text-blue-700'
                                     )}
                                     onClick={() => handleViewApprovers(header.AAFNo)}

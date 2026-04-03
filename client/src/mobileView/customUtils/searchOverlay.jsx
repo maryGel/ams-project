@@ -1,163 +1,294 @@
+// components/SearchOverlay.jsx
 import { useState, useEffect } from 'react';
-// MUI
-import { Box, Stack, TextField, InputAdornment } from '@mui/material';
+import { 
+  TextField, 
+  InputAdornment, 
+  Box, 
+  IconButton,
+  Paper,
+  CircularProgress
+} from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
-
-// Search Overlay Component
-function SearchOverlay ({ isOpen, onClose, docHeaders, onSelectDoc }){
+function SearchOverlay({ isOpen, onClose, docHeaders, onSelectDoc, selectedAssets = [] }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     if (searchTerm.trim() === '') {
       setSearchResults([]);
+      setIsSearching(false);
       return;
     }
 
-    // Filter JO headers by JO number
-    const results = docHeaders.filter((doc) => {
-      const docNumber = doc.JO_No  || doc.TR_No || doc.AD_No || doc.AAFNo ||'';
-      return docNumber.toString().toLowerCase().includes(searchTerm.toLowerCase());
-    });
-
-    setSearchResults(results);
+    setIsSearching(true);
+    
+    // Simulate search delay for better UX
+    const searchTimeout = setTimeout(() => {
+      // Filter assets by result number, name, or description
+      const results = docHeaders.filter((result) => {
+        const searchLower = searchTerm.toLowerCase();
+        return (
+          result.FacNO?.toLowerCase().includes(searchLower) ||
+          result.FacName?.toLowerCase().includes(searchLower) ||
+          result.Description?.toLowerCase().includes(searchLower) ||
+          result.JO_No?.toLowerCase().includes(searchLower) ||
+          result.TR_No?.toLowerCase().includes(searchLower) ||
+          result.AD_No?.toLowerCase().includes(searchLower) ||
+          result.AAFNo?.toLowerCase().includes(searchLower) 
+        );
+      });
+      
+      setSearchResults(results);
+      setIsSearching(false);
+    }, 300);
+    
+    return () => clearTimeout(searchTimeout);
   }, [searchTerm, docHeaders]);
 
-  const handleSelectJO = (doc) => {
-    onSelectDoc(doc);
+  const handleSelectAsset = (result) => {
+    onSelectDoc(result);
     handleClose();
   };
 
   const handleClose = () => {
     setSearchTerm('');
     setSearchResults([]);
+    setIsSearching(false);
     onClose();
+  };
+
+  const isAssetSelected = (result) => {
+    return selectedAssets?.some(selected => selected.FacNO === result.FacNO);
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black bg-opacity-50">
-      <div className="w-full max-w-md mx-4 mt-20 bg-white rounded-lg shadow-xl animate-slide-down">
+    <Box
+      sx={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 1300,
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        bgcolor: 'rgba(0, 0, 0, 0.5)',
+      }}
+    >
+      <Paper
+        elevation={24}
+        sx={{
+          width: '100%',
+          maxWidth: '800px',
+          mt: 5,
+          mx: 2,
+          maxHeight: 'calc(100vh - 64px)',
+          display: 'flex',
+          flexDirection: 'column',
+          borderRadius: 2,
+          overflow: 'hidden',
+          animation: 'slideDown 0.2s ease-out',
+          '@keyframes slideDown': {
+            from: {
+              opacity: 0,
+              transform: 'translateY(-20px)',
+            },
+            to: {
+              opacity: 1,
+              transform: 'translateY(0)',
+            },
+          },
+        }}
+      >
         {/* Search Header */}
-        <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="text-lg font-semibold">Search Document No.</h3>
-          <button
-            onClick={handleClose}
-            className="p-1 transition-colors rounded-full hover:bg-gray-100"
-          >
-            <CloseIcon fontSize="small" />
-          </button>
-        </div>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            p: 2,
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <span className='text-gray-400'>
+            Search
+          </span>
+          <IconButton onClick={handleClose} size="small">
+            <CloseIcon />
+          </IconButton>
+        </Box>
 
         {/* Search Input */}
-        <div className="p-4">
+        <Box sx={{ p: 2 }}>
           <TextField
             autoFocus
             fullWidth
             variant="outlined"
-            placeholder="Enter Doc number..."
+            placeholder="Type here.."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
+                  <SearchIcon sx={{ color: 'text.secondary' }} />
                 </InputAdornment>
               ),
               endAdornment: searchTerm && (
                 <InputAdornment position="end">
-                  <button
+                  <IconButton
                     onClick={() => setSearchTerm('')}
-                    className="text-gray-400 hover:text-gray-600"
+                    size="small"
+                    sx={{ color: 'text.secondary' }}
                   >
                     <CloseIcon fontSize="small" />
-                  </button>
+                  </IconButton>
                 </InputAdornment>
               ),
             }}
             sx={{
               '& .MuiOutlinedInput-root': {
-                borderRadius: '8px',
-              }
+                borderRadius: 2,
+                '&:hover fieldset': {
+                  borderColor: 'primary.main',
+                },
+              },
             }}
           />
 
           {/* Search Results */}
-          {searchTerm && (
-            <div className="mt-4">
-              <div className="mb-2 text-sm text-gray-600">
-                Found {searchResults.length} result(s)
-              </div>
-              <div className="overflow-y-auto max-h-96">
+          <Box sx={{ mt: 3, flex: 1, overflow: 'auto' }}>
+            {searchTerm && (
+              <Box sx={{ mb: 2 }}>
+                <span className='text-xs '>
+                  {isSearching ? 'Searching...' : `Found ${searchResults.length} result(s)`}
+                </span>
+              </Box>
+            )}
+
+            {isSearching ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+                <CircularProgress size={40} />
+              </Box>
+            ) : (
+              <Box sx={{ maxHeight: 'calc(100vh - 300px)', overflowY: 'auto' }}>
                 {searchResults.length > 0 ? (
-                  <div className="space-y-2">
-                    {searchResults.map((result) => (
-                      <div
-                        key={result.ID || result.JO_No || result.TR_No || result.AD_No || result.AAFNo}
-                        onClick={() => handleSelectJO(result)}
-                        className="p-3 transition-colors border rounded-lg cursor-pointer hover:bg-blue-50"
-                      >
-                        <div className="font-semibold text-blue-600">
-                          {result.JO_No || result.TR_No || result.AD_No || result.AAFNo}
-                        </div>
-                        <div className="mt-1 text-xs text-gray-600">
-                          {result.Department || result.department || result.Department_Name || result.Dep}
-                        </div>
-                        {result.Remarks && (
-                          <div className="mt-1 text-xs text-gray-500">
-                            Remarks: {result.Remarks}
-                          </div>
-                        )}
-                        {result.requested_by && (
-                          <div className="mt-1 text-xs text-gray-500">
-                            Requestor: {result.requested_by} 
-                          </div>
-                        )}
-                        {result.Holder && (
-                          <div className="mt-1 text-xs text-gray-500">
-                            Holder: {result.Holder} 
-                          </div>
-                        )}
-                        {result.EmpName && (
-                          <div className="mt-1 text-xs text-gray-500">
-                            Employee: {result.EmpName} 
-                          </div>
-                        )}
-                        {result.Custodian && (
-                          <div className="mt-1 text-xs text-gray-500">
-                            Employee: {result.Custodian} 
-                          </div>
-                        )}
-                        {result.xDate && (
-                          <div className="mt-1 text-xs text-gray-500">
-                            Date: {new Date(result.xDate).toLocaleDateString()}
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    {searchResults.map((result) => {
+                      const selected = isAssetSelected(result);
+                      return (
+                        <Paper
+                          key={result.id}
+                          onClick={() => !selected && handleSelectAsset(result)}
+                          elevation={0}
+                          sx={{
+                            px: 2,
+                            border: '1px solid',
+                            borderColor: selected ? 'primary.main' : 'divider',
+                            borderRadius: 2,
+                            cursor: selected ? 'default' : 'pointer',
+                            transition: 'all 0.2s',
+                            opacity: selected ? 0.7 : 1,
+                            bgcolor: selected ? 'action.selected' : 'background.paper',
+                            '&:hover': {
+                              borderColor: selected ? 'primary.main' : 'primary.light',
+                              bgcolor: selected ? 'action.selected' : 'action.hover',
+                              transform: selected ? 'none' : 'translateX(4px)',
+                            },
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }} >
+                            <Box sx={{ flex: 1 }}>
+                              <span className='text-sm font-semibold tracking-wide text-blue-500' >
+                                {result.FacName}
+                              </span>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1}}>
+                                <span className='text-xs tracking-wide text-gray-500' >
+                                  {result.FacNO}
+                                </span>
+                                <span className='text-sm font-semibold tracking-wide text-blue-500' >
+                                  {result.JO_No || result.TR_No || result.AD_No || result.AAFNo}
+                                </span>
+                                {selected && (
+                                  <CheckCircleIcon sx={{ fontSize: 16, color: 'success.main' }} />
+                                )}
+                              </Box>
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
+                                {result.ItemLocation && (
+                                  <span className='text-sm text-gray-400'>
+                                    📍 {result.ItemLocation || result.Department || result.department || result.Department_Name || result.Dep}
+                                  </span>
+                                )}
+                              </Box>
+                                  <div className='p-1'>
+                                    {result.Remarks && (
+                                      <div className="mt-1 text-xs text-gray-500">
+                                        Remarks: {result.Remarks}
+                                      </div>
+                                    )}
+                                    {result.requested_by && (
+                                    <div className="mt-1 text-xs text-gray-500">
+                                        Requestor: {result.requested_by} 
+                                      </div>
+                                    )}
+                                    {result.Holder && (
+                                      <div className="mt-1 text-xs text-gray-500">
+                                        Holder: {result.Holder} 
+                                      </div>
+                                    )}
+                                    {result.EmpName && (
+                                      <div className="mt-1 text-xs text-gray-500">
+                                        Employee: {result.EmpName} 
+                                      </div>
+                                    )}
+                                    {result.Custodian && (
+                                      <div className="mt-1 text-xs text-gray-500">
+                                        Employee: {result.Custodian} 
+                                      </div>
+                                    )}
+                                    {result.xDate && (
+                                      <div className="mt-1 text-xs text-gray-500">
+                                        Date: {new Date(result.xDate).toLocaleDateString()}
+                                      </div>
+                                    )}
+                                  </div>
+                            </Box>                          
+                          </Box>
+                        </Paper>
+                      );
+                    })}
+                  </Box>
+                ) : searchTerm && !isSearching ? (
+                  <div className='flex flex-col'>
+                    <SearchIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
+                    <span className='text-sm text-gray-500'>
+                      No matching assets found
+                    </span>
+                    <span className='text-sm text-gray-500'>
+                      Try searching by a different term
+                    </span>
                   </div>
-                ) : (
-                  <div className="py-8 text-center text-gray-500">
-                    No matching Doc numbers found
+                ) : !searchTerm && (
+                  <div className='flex flex-col items-center gap-1'>
+                    <span className='text-sm text-gray-500'>
+                      Search by doc/asset number, name, or description
+                    </span>
                   </div>
                 )}
-              </div>
-            </div>
-          )}
-
-          {!searchTerm && (
-            <div className="py-8 text-center text-gray-400">
-              <SearchIcon sx={{ fontSize: 48, opacity: 0.5 }} />
-              <p className="mt-2">Start typing a Doc number to search</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+              </Box>
+            )}
+          </Box>
+        </Box>
+      </Paper>
+    </Box>
   );
-};
+}
 
 export default SearchOverlay;
