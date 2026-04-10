@@ -1,113 +1,19 @@
+// routes/jo_appRoute.js
 import express from 'express';
 import { db } from '../server.js';
+// helper config
+import { getApprovalConfig, getCurrentApprovalStatus, getLatestApprovalLevel, calculateXpost, getApprovalStat} from './approvalConfigRoute.js';
 
 const router = express.Router();
 
 /**
- * Helper function to get approval configuration
- */
-const getApprovalConfig = async (connection, module) => {
-  return new Promise((resolve, reject) => {
-    const sql = `
-      SELECT APP_CODE, MODULE, APP_LEVEL, SIGNATORY 
-      FROM ref_approval 
-      WHERE MODULE = ? 
-      ORDER BY APP_LEVEL ASC
-    `;
-    
-    connection.query(sql, [module], (error, results) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(results);
-      }
-    });
-  });
-};
-
-/**
- * Helper function to get current approval status of a document
- */
-const getCurrentApprovalStatus = async (connection, TR_No) => {
-  return new Promise((resolve, reject) => {
-    const sql = `
-      SELECT TR_No, xpost, appStat, approved, disapproved
-      FROM tr_h 
-      WHERE TR_No = ?
-    `;
-    
-    connection.query(sql, [TR_No], (error, results) => {
-      if (error) {
-        reject(error);
-      } else if (results.length === 0) {
-        reject(new Error('Document not found'));
-      } else {
-        resolve(results[0]);
-      }
-    });
-  });
-};
-
-/**
- * Helper function to get the latest approval level from logs
- */
-const getLatestApprovalLevel = async (connection, TR_No) => {
-  return new Promise((resolve, reject) => {
-    const sql = `
-      SELECT MAX(APP_LEVEL) as max_level, STAT
-      FROM approval_logs 
-      WHERE TRNO = ? AND STAT IN ('Approved', 'Confirmed')
-    `;
-    
-    connection.query(sql, [TR_No], (error, results) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(results[0]?.max_level || 0);
-      }
-    });
-  });
-};
-
-/**
- * Calculate xpost based on current approval level and total levels
- * xpost values:
- * 3 = Not started (initial state)
- * 2 = Partially approved (still needs more approvals)
- * 1 = Fully approved (all approvals completed)
- */
-const calculateXpost = (currentApprovedLevel, totalLevels) => {
-  if (currentApprovedLevel === 0) {
-    return 3; // Not started
-  } else if (currentApprovedLevel === totalLevels) {
-    return 1; // Fully approved
-  } else {
-    return 2; // Partially approved
-  }
-};
-
-/**
- * Determine STAT value based on approval progress
- * 'Confirmed' for partial approvals
- * 'Approved' for final approval
- */
-const getApprovalStat = (currentApprovedLevel, totalLevels, nextLevel) => {
-  // Check if this approval will complete all levels
-  const willBeComplete = (currentApprovedLevel + 1) === totalLevels;
-  
-  if (willBeComplete) {
-    return 'Approved'; // Final approval
-  } else {
-    return 'Confirmed'; // Partial approval
-  }
-};
-
-/**
- * Approve a Transfer with multi-level approval support
+ * Approve a Transfer Request - Simplified for single-level approval
  */
 router.put('/approve/:TR_No', (req, res) => {
   const { TR_No } = req.params;
   const { approved, remarks, userInfo, appLevel } = req.body;
+
+  // console.log('Approval request:', { TR_No, approved, remarks });
 
   const decodedJONo = decodeURIComponent(TR_No);
   const cleanDocNo = decodedJONo
@@ -124,6 +30,7 @@ router.put('/approve/:TR_No', (req, res) => {
       });
     }
 
+    // Begin transaction
     connection.beginTransaction(async (transactionErr) => {
       if (transactionErr) {
         connection.release();
@@ -142,8 +49,14 @@ router.put('/approve/:TR_No', (req, res) => {
           throw new Error('No approval configuration found for this module');
         }
 
+        const sql = `
+          SELECT TR_No, xpost, appStat, approved, disapproved
+          FROM tr_h
+          WHERE TR_No = ?
+        `;
+
         // 2. Get current document status
-        const currentDoc = await getCurrentApprovalStatus(connection, cleanDocNo);
+        const currentDoc = await getCurrentApprovalStatus(connection, cleanDocNo, sql);
         
         // 3. Get the latest approved level from logs (only Approved or Confirmed)
         const currentApprovedLevel = await getLatestApprovalLevel(connection, cleanDocNo);
@@ -183,7 +96,7 @@ router.put('/approve/:TR_No', (req, res) => {
         const approvalStat = getApprovalStat(currentApprovedLevel, totalLevels, nextLevel);
         
         // 7. Update tr_h table with new values
-        const updateTrHSql = `
+        const updateHeaderSql = `
           UPDATE tr_h 
           SET xpost = ?, 
               appStat = ?,
@@ -192,7 +105,7 @@ router.put('/approve/:TR_No', (req, res) => {
         `;
         
         const updateResult = await new Promise((resolve, reject) => {
-          connection.query(updateTrHSql, [newXpost, newAppStat, approved || '', cleanDocNo], (error, result) => {
+          connection.query(updateHeaderSql, [newXpost, newAppStat, approved || '', cleanDocNo], (error, result) => {
             if (error) reject(error);
             else resolve(result);
           });
@@ -206,11 +119,11 @@ router.put('/approve/:TR_No', (req, res) => {
         const isFinalApproval = approvedLevelsCount === totalLevels;
         
         // 9. Update tr_d table only on final approval (when xpost becomes 1)
-        let trDUpdateResult = null;
+        let DetailsUpdateResult = null;
         if (isFinalApproval) {
-          const updateTrDSql = `UPDATE tr_d SET xpost = 1 WHERE TR_No = ?`;
-          trDUpdateResult = await new Promise((resolve, reject) => {
-            connection.query(updateTrDSql, [cleanDocNo], (error, result) => {
+          const updateDetailsSql = `UPDATE tr_d SET xpost = 1 WHERE TR_No = ?`;
+          DetailsUpdateResult = await new Promise((resolve, reject) => {
+            connection.query(updateDetailsSql, [cleanDocNo], (error, result) => {
               if (error) reject(error);
               else resolve(result);
             });
@@ -263,7 +176,7 @@ router.put('/approve/:TR_No', (req, res) => {
             message: message,
             data: {
               doc_h_updated: updateResult.affectedRows,
-              tr_d_updated: trDUpdateResult?.affectedRows || 0,
+              doc_d_updated: DetailsUpdateResult?.affectedRows || 0,
               status: approvalStat,
               currentLevel: nextLevel,
               approvedLevels: approvedLevelsCount,
@@ -290,13 +203,14 @@ router.put('/approve/:TR_No', (req, res) => {
 });
 
 /**
- * Reject a Transfer
+ * Reject a Transfer (Internal)
  */
+
 router.put('/reject/:TR_No', (req, res) => {
   const { TR_No } = req.params;
   const { approved, remarks, userInfo, appLevel } = req.body;
 
-  console.log('Rejection request:', { TR_No, approved, remarks, appLevel });
+  console.log('Rejection request:', { TR_No, approved, remarks });
 
   const decodedJONo = decodeURIComponent(TR_No);
   const cleanDocNo = decodedJONo
@@ -316,6 +230,7 @@ router.put('/reject/:TR_No', (req, res) => {
     connection.beginTransaction(async (transactionErr) => {
       if (transactionErr) {
         connection.release();
+        console.error('Transaction begin error:', transactionErr);
         return res.status(500).json({
           success: false,
           error: 'Failed to start transaction'
@@ -323,29 +238,71 @@ router.put('/reject/:TR_No', (req, res) => {
       }
 
       try {
-        // Get approval config to know total levels
+        // 1. Get approval configuration for Transfer (Internal) module
         const approvalConfig = await getApprovalConfig(connection, 'Transfer (Internal)');
+        
+        if (approvalConfig.length === 0) {
+          throw new Error('No approval configuration found for this module');
+        }
+
+        const sql = `
+          SELECT TR_No, xpost, appStat, approved, disapproved
+          FROM tr_h
+          WHERE TR_No = ?
+        `;
+
+        // 2. Get current document status
+        const currentDoc = await getCurrentApprovalStatus(connection, cleanDocNo, sql);
+        
+        // 3. Get the latest approved level from logs (only Approved or Confirmed)
+        const currentApprovedLevel = await getLatestApprovalLevel(connection, cleanDocNo);
+        
+        // Determine the level being rejected
+        const nextLevel = appLevel || (currentApprovedLevel + 1);
+        
+        // Check if the next level exists in configuration
+        const nextLevelConfig = approvalConfig.find(config => config.APP_LEVEL === nextLevel);
+        
+        if (!nextLevelConfig) {
+          throw new Error(`Invalid approval level: ${nextLevel}`);
+        }
+
         const totalLevels = approvalConfig.length;
         
-        // Determine which level is being rejected
-        const rejectLevel = appLevel || 1;
+        // 4. Calculate new appStat value (track which levels are processed - same as approve)
+        let newAppStat = currentDoc.appStat || '';
+        const levelStr = nextLevel.toString();
         
-        // On rejection, reset to initial state (xpost = 3, appStat = '')
-        const newXpost = 3;
-        const newAppStat = '';
+        if (!newAppStat) {
+          newAppStat = levelStr;
+        } else {
+          const existingLevels = newAppStat.split(',').filter(l => l.trim());
+          if (!existingLevels.includes(levelStr)) {
+            newAppStat = [...existingLevels, levelStr].sort((a,b) => a-b).join(',');
+          }
+        }
         
-        // Update tr_h for disapproval
-        const updateTrHSql = `
+        // Calculate the processed level count (same as approve)
+        const processedLevelsCount = newAppStat.split(',').filter(l => l.trim()).length;
+        
+        // 5. Calculate new xpost - RESET TO 3 for rejection (but follow same calculation pattern)
+        const newXpost = 3; // Reset to 3 on rejection
+        
+        // 6. Determine the STAT value for the approval log - ALWAYS 'Disapproved' for rejection
+        const approvalStat = 'Disapproved';
+        
+        // 7. Update tr_h table - Set DISAPPROVED to 1, keep appStat same as approve flow
+        const updateHeaderSql = `
           UPDATE tr_h 
-          SET DISAPPROVED = ?,
-              approved = ?,
-              xpost = ?,
-              appStat = ?
+          SET DISAPPROVED = 1,
+              xpost = ?, 
+              appStat = ?,
+              approved = ?
           WHERE TR_No = ?
         `;
         
         const updateResult = await new Promise((resolve, reject) => {
-          connection.query(updateTrHSql, [1, approved || '', newXpost, newAppStat, cleanDocNo], (error, result) => {
+          connection.query(updateHeaderSql, [newXpost, newAppStat, approved || '', cleanDocNo], (error, result) => {
             if (error) reject(error);
             else resolve(result);
           });
@@ -355,31 +312,32 @@ router.put('/reject/:TR_No', (req, res) => {
           throw new Error('TR header not found');
         }
         
-        // Also reset tr_d xpost if it was updated
-        const updateTrDSql = `UPDATE tr_d SET xpost = 3 WHERE TR_No = ?`;
-        await new Promise((resolve, reject) => {
-          connection.query(updateTrDSql, [cleanDocNo], (error, result) => {
+        // 8. Reset tr_d table xpost to 3 on rejection
+        const updateDetailsSql = `UPDATE tr_d SET xpost = 3 WHERE TR_No = ?`;
+        const DetailsUpdateResult = await new Promise((resolve, reject) => {
+          connection.query(updateDetailsSql, [cleanDocNo], (error, result) => {
             if (error) reject(error);
             else resolve(result);
           });
         });
         
-        // Create disapproval log
+        // 9. Create rejection log with STAT = 'Disapproved'
         const insertLogSql = `
           INSERT INTO approval_logs 
           (TRNO, Module, X_USER, DT, APP_LEVEL, STAT, REMARKS) 
           VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?)
         `;
         
-        const xUser = userInfo ? `${userInfo.user} - ${userInfo.fname}, ${userInfo.lname}` : String(approved);
+        const xUser = userInfo ? `${userInfo.user} - ${userInfo.lname}, ${userInfo.fname}` : String(approved);
         
         await new Promise((resolve, reject) => {
-          connection.query(insertLogSql, [cleanDocNo, 'Transfer (Internal)', xUser, rejectLevel, 'Disapproved', remarks || ''], (error) => {
+          connection.query(insertLogSql, [cleanDocNo, 'Transfer (Internal)', xUser, nextLevel, approvalStat, remarks || ''], (error) => {
             if (error) reject(error);
             else resolve();
           });
         });
         
+        // 10. Commit transaction
         connection.commit((commitErr) => {
           if (commitErr) {
             console.error('Commit error:', commitErr);
@@ -393,14 +351,20 @@ router.put('/reject/:TR_No', (req, res) => {
           }
           
           connection.release();
+          
           res.json({
             success: true,
             message: 'Transfer rejected successfully',
             data: {
               doc_h_updated: updateResult.affectedRows,
-              status: 'Disapproved',
+              doc_d_updated: DetailsUpdateResult?.affectedRows || 0,
+              status: approvalStat,
+              currentLevel: nextLevel,
+              processedLevels: processedLevelsCount,
+              totalLevels: totalLevels,
               xpost: newXpost,
-              appStat: newAppStat
+              appStat: newAppStat,
+              disapproved: 1
             }
           });
         });
@@ -420,167 +384,40 @@ router.put('/reject/:TR_No', (req, res) => {
 });
 
 /**
- * Get approval status for a document
+ * Get total approval levels for a module
  */
-router.get('/status/:TR_No', (req, res) => {
-  const { TR_No } = req.params;
-  
-  const decodedDocNo = decodeURIComponent(TR_No);
-  const cleanDocNo = decodedDocNo
-    .replace(/\u00A0/g, '')
-    .replace(/\s/g, '')
-    .toUpperCase();
-  
-  db.getConnection(async (err, connection) => {
-    if (err) {
-      console.error('Database connection error:', err);
-      return res.status(500).json({
-        success: false,
-        error: 'Database connection error'
-      });
-    }
-    
-    try {
-      // Get document status
-      const docStatus = await getCurrentApprovalStatus(connection, cleanDocNo);
-      
-      // Get approval logs
-      const logsQuery = `
-        SELECT APP_LEVEL, STAT, X_USER, DT, REMARKS 
-        FROM approval_logs 
-        WHERE TRNO = ? 
-        ORDER BY DT ASC
-      `;
-      
-      const logs = await new Promise((resolve, reject) => {
-        connection.query(logsQuery, [cleanDocNo], (error, results) => {
-          if (error) reject(error);
-          else resolve(results);
-        });
-      });
-      
-      // Get approval configuration
-      const config = await getApprovalConfig(connection, 'Transfer (Internal)');
-      
-      // Calculate status based on xpost
-      let statusText = '';
-      if (docStatus.disapproved === 1) {
-        statusText = 'Disapproved';
-      } else if (docStatus.xpost === 3) {
-        statusText = 'For Approval';
-      } else if (docStatus.xpost === 2) {
-        statusText = 'Partially Approved';
-      } else if (docStatus.xpost === 1) {
-        statusText = 'Fully Approved';
-      }
-      
-      const approvedLevels = docStatus.appStat ? docStatus.appStat.split(',').filter(l => l.trim()).map(Number) : [];
-      
-      connection.release();
-      
-      res.json({
-        success: true,
-        data: {
-          document: docStatus,
-          statusText: statusText,
-          approvalHistory: logs,
-          approvalConfig: config,
-          approvedLevels: approvedLevels,
-          currentApprovalLevel: approvedLevels.length,
-          totalLevels: config.length,
-          nextLevel: approvedLevels.length < config.length ? approvedLevels.length + 1 : null,
-          isFullyApproved: docStatus.xpost === 1,
-          isDisapproved: docStatus.disapproved === 1
-        }
-      });
-      
-    } catch (error) {
-      connection.release();
-      console.error('Error getting status:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to get approval status'
-      });
-    }
-  });
-});
 
-/**
- * Check if a document is ready for the next approval level
- */
-router.post('/check-next-level/:TR_No', (req, res) => {
-  const { TR_No } = req.params;
+router.get('/total-levels', (req, res) => {
+  const { module } = req.query;
   
-  const decodedDocNo = decodeURIComponent(TR_No);
-  const cleanDocNo = decodedDocNo
-    .replace(/\u00A0/g, '')
-    .replace(/\s/g, '')
-    .toUpperCase();
+  console.log('=== TOTAL LEVELS API CALLED ===');
+  console.log('Module requested:', module);
   
-  db.getConnection(async (err, connection) => {
-    if (err) {
-      console.error('Database connection error:', err);
-      return res.status(500).json({
-        success: false,
-        error: 'Database connection error'
+  // Simple query without connection pooling issues
+  const query = `
+    SELECT MAX(APP_LEVEL) as total_levels
+    FROM ref_approval 
+    WHERE MODULE = ?
+  `;
+  
+  db.query(query, [module], (error, results) => {
+    if (error) {
+      console.error('Database error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        error: error.message 
       });
     }
     
-    try {
-      const config = await getApprovalConfig(connection, 'Transfer (Internal)');
-      const currentDoc = await getCurrentApprovalStatus(connection, cleanDocNo);
-      const currentApprovedLevel = await getLatestApprovalLevel(connection, cleanDocNo);
-      
-      const nextLevel = currentApprovedLevel + 1;
-      const isFullyApproved = nextLevel > config.length;
-      const isDisapproved = currentDoc.disapproved === 1;
-      
-      // Determine if document can be approved
-      let canApprove = false;
-      let reason = '';
-      
-      if (isDisapproved) {
-        reason = 'Document has been disapproved';
-      } else if (isFullyApproved) {
-        reason = 'Document is already fully approved';
-      } else if (currentDoc.xpost === 1) {
-        reason = 'Document is already fully approved';
-      } else if (currentDoc.xpost === 3 && nextLevel === 1) {
-        canApprove = true;
-        reason = 'Ready for level 1 approval';
-      } else if (currentDoc.xpost === 2 && nextLevel > 1) {
-        canApprove = true;
-        reason = `Ready for level ${nextLevel} approval`;
-      } else {
-        reason = 'Document is not ready for approval';
-      }
-      
-      connection.release();
-      
-      res.json({
-        success: true,
-        data: {
-          nextLevel: isFullyApproved ? null : nextLevel,
-          totalLevels: config.length,
-          currentApprovedLevel,
-          isFullyApproved,
-          isDisapproved,
-          canApprove,
-          reason,
-          currentXpost: currentDoc.xpost,
-          currentAppStat: currentDoc.appStat,
-          nextLevelConfig: !isFullyApproved && !isDisapproved && canApprove ? config.find(c => c.APP_LEVEL === nextLevel) : null
-        }
-      });
-      
-    } catch (error) {
-      connection.release();
-      console.error('Error checking next level:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to check next approval level'
-      });
-    }
+    console.log('Query results:', results);
+    
+    const totalLevels = results[0]?.total_levels || 3;
+    
+    res.json({
+      success: true,
+      totalLevels: totalLevels,
+      module: module
+    });
   });
 });
 
@@ -594,5 +431,6 @@ router.get('/test', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
 
 export default router;

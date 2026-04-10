@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 // MUI
 import { Box, Stack, CircularProgress } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
@@ -47,14 +47,10 @@ function MvTransferPage({
     
     // Use the approval hook
     const { 
-        getXpostStatusText,
         canApprove,
         loading: approvalLoading 
     } = useTRApproval();
 
-    // useEffect(() => {
-    //     console.log('UPDATED HEADERS:', trHeaders);
-    // }, [trHeaders]);
 
     // Function to trigger refresh
     const handleRefresh = async () => {
@@ -125,6 +121,13 @@ function MvTransferPage({
         }
     };
 
+    const handleExitSelectionMode = () => {
+        setSelectionMode(false);
+        setSelectedTR([]);
+        setSelectAll(false);
+    };
+
+
     // First, apply the status filter with multi-level support
     const statusFilteredTR = useMemo(() => {
         return trHeaders.filter((tr) => {
@@ -143,7 +146,6 @@ function MvTransferPage({
             if(filter === 'Partially Approved'){
                 return tr.xpost === 2 && tr.DISAPPROVED === 0;
             }
-
             return false;
         });
     }, [trHeaders, filter]);
@@ -173,10 +175,9 @@ function MvTransferPage({
         // Add computed fields to each TR without fetching
         return filteredTR.map(tr => ({
             ...tr,
-            statusText: getXpostStatusText(tr.xpost),
             canBeApproved: canApprove(tr),
         }));
-    }, [isSearchActive, selectedDoc, filteredTR, getXpostStatusText, canApprove]);
+    }, [isSearchActive, selectedDoc, filteredTR,  canApprove]);
 
     useEffect(() => {
         if (selectedTR.length === 0) {
@@ -187,6 +188,15 @@ function MvTransferPage({
             setSelectAll(false);
         }
     }, [selectedTR, displayData]);
+
+    useEffect(() => {
+        // Clear selection mode when data changes (after approval/rejection)
+        if (selectionMode) {
+            setSelectionMode(false);
+            setSelectedTR([]);
+            setSelectAll(false);
+        }
+    }, [trHeaders]); // This will trigger when trHeaders updates after approval
 
     // Show loading state
     if (isLoading || approvalLoading) {
@@ -210,8 +220,8 @@ function MvTransferPage({
     return (
         <>
             <div onAnimationEnd={onAnimationEnd} className={`          
-                fixed inset-0 z-50 items-start w-full max-h-screen overflow-y-auto shadow-xl
-                bg-white  ${isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'}`}>
+                fixed inset-0 z-50 items-start w-full max-h-screen overflow-y-auto shadow-xl bg-white  
+                ${isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'}`}>
                 <div className="flex flex-col ">
                     <Box 
                         sx={{ 
@@ -364,7 +374,7 @@ function MvTransferPage({
                                 selectedTR={selectedTR}
                                 setSelectedTR={setSelectedTR} 
                                 onEnterSelectionMode={handleEnterSelectionMode}        
-                                onExitSelectionMode={() => setSelectionMode(false)}
+                                onExitSelectionMode={handleExitSelectionMode} 
                                 onSelectAll={handleSelectAll} 
                                 selectAll={selectAll}
                             />

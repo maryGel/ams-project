@@ -13,6 +13,8 @@ import {statusFilter} from './customUtils/filters';
 import SearchOverlay from './customUtils/searchOverlay';
 // Components
 import MvJOForm from './components/mvJOForm';
+// Hooks
+import { useJobOrderApproval } from '../hooks/useJobOrderApproval';
 
 function MvJobOrderPage({
     onClose,
@@ -42,14 +44,14 @@ function MvJobOrderPage({
     const [isLoading, setIsLoading] = useState(externalLoading);
     const [error, setError] = useState(externalError);
 
-    useEffect(() => {
-    console.log('UPDATED HEADERS:', joHeaders);
-    }, [joHeaders]);
-
+    // Use the approval hook
+    const { 
+        canApprove,
+        loading: approvalLoading 
+    } = useJobOrderApproval();
 
     // Function to trigger refresh
     const handleRefresh = async () => {
-    console.log('Triggering refresh...');
     setIsLoading(true);
 
     try {
@@ -62,9 +64,7 @@ function MvJobOrderPage({
     }
     };
 
-    const handleClosePage = () => {
-        if (onClose) onClose();
-    };
+    const handleClosePage = () => {if (onClose) onClose()};
 
     const handleOptionsOpen = () => {
         setIsOptionsOpen(prev => !prev);
@@ -97,39 +97,50 @@ function MvJobOrderPage({
     const handleEnterSelectionMode = (joNo) => {
     setSelectionMode(true);
     if (!selectedJO.includes(joNo)) {
-        setSelectedJO([joNo]); // select only the long-pressed JO initially
+        setSelectedJO([joNo]); 
     }
     };
 
     // Toggle Select All
     const handleSelectAll = () => {
-    if (selectAll) {
-        setSelectedJO([]);
-        setSelectAll(false);
-    } else {
-        // Ensure we only get Waiting status JOs from the current display data
-        const waitingJOs = displayData
-        .filter(jo => jo.xpost === 3 && !jo.DISAPPROVED)
-        .map(jo => jo.JO_No);
-        setSelectedJO(waitingJOs);
-        setSelectAll(true);
-    }
+        if (selectAll) {
+            setSelectedJO([]);
+            setSelectAll(false);
+        } else {
+             const eligibleJOs = displayData
+                .filter(jo => {
+                    const canBeApproved = canApprove(jo);
+                    return canBeApproved.canApprove;
+                })
+                .map(jo => jo.TR_No);
+            setSelectedJO(eligibleJOs);
+            setSelectAll(true);
+        }
     };
 
+    const handleExitSelectionMode = () => {
+        setSelectionMode(false);
+        setSelectedJO([]);
+        setSelectAll(false);
+    };
 
     // First, apply the status filter
     const statusFilteredJO = useMemo(() => {
         return [...joHeaders].filter((jo) => {
-            if (filter === 'All') return true;
+            if(filter === 'All') return true;
             
-            if (filter === 'Waiting') {
-                return jo.xpost === 3 && !jo.DISAPPROVED;
+            if(filter === 'Waiting'){
+                // Waiting includes: Not Started (xpost=3) and Partially Approved (xpost=2)
+                return (jo.xpost === 3 || jo.xpost === 2) && jo.DISAPPROVED === 0; 
             }
-            if (filter === 'Fully Approved') {
-                return jo.xpost === 1 && !jo.DISAPPROVED;
+            if(filter === 'Fully Approved'){
+                return jo.xpost === 1 && jo.DISAPPROVED === 0;
             }
-            if (filter === 'Rejected') {
-                return jo.DISAPPROVED === 1;
+            if(filter === 'Rejected'){
+                return (jo.xpost === 3 || jo.xpost === 2) && jo.DISAPPROVED === 1;
+            }
+            if(filter === 'Partially Approved'){
+                return jo.xpost === 2 && jo.DISAPPROVED === 0;
             }
             return false;
         });
@@ -170,6 +181,15 @@ function MvJobOrderPage({
         }
     }, [selectedJO, displayData]);
 
+    useEffect(() => {
+        // Clear selection mode when data changes (after approval/rejection)
+        if (selectionMode) {
+            setSelectionMode(false);
+            setSelectedJO([]);
+            setSelectAll(false);
+        }
+    }, [joHeaders]); // This will trigger when joHeaders updates after approval
+
     // Show loading state
     if (isLoading) {
         return (
@@ -193,9 +213,8 @@ function MvJobOrderPage({
         <>
             <div 
                 onAnimationEnd={onAnimationEnd}
-                className={`fixed inset-0 z-50 w-full h-full overflow-y-auto bg-white shadow-xl ${
-                    isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'
-                }`}
+                className={`fixed inset-0 z-50 w-full h-full overflow-y-auto bg-white shadow-xl 
+                ${isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'}`}
             >
                 <div className="flex flex-col min-h-full">
                     <Box 
@@ -218,6 +237,7 @@ function MvJobOrderPage({
                             sx={{
                                 justifyContent: 'space-between',
                                 px: 1,
+                                overflowX: 'auto',
                                 alignItems: 'center'
                             }}              
                         >
@@ -348,7 +368,7 @@ function MvJobOrderPage({
                                 selectedJO={selectedJO}
                                 setSelectedJO={setSelectedJO} 
                                 onEnterSelectionMode={handleEnterSelectionMode}        
-                                onExitSelectionMode={() => setSelectionMode(false)}
+                                onExitSelectionMode={handleExitSelectionMode}
                                 onSelectAll={handleSelectAll} 
                                 selectAll={selectAll}     
                             />  

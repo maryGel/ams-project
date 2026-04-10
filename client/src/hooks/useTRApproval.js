@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import axios from 'axios';
 
 export const useTRApproval = () => {
@@ -11,7 +11,7 @@ export const useTRApproval = () => {
     
     try {
       const response = await axios.put(`/trApproval/approve/${encodeURIComponent(TR_No)}`, {
-        approved_by: userInfo?.userId || userInfo?.user,
+        approved: userInfo?.userId || userInfo?.user,
         remarks,
         userInfo: {
           user: userInfo?.user,
@@ -43,13 +43,13 @@ export const useTRApproval = () => {
     }
   };
   
-  const rejectTR = async (TR_No, remarks, userInfo, appLevel = null) => {
+  const rejectTR = async (TR_No, remarks, userInfo, appLevel ) => {
     setLoading(true);
     setError(null);
     
     try {
       const response = await axios.put(`/trApproval/reject/${encodeURIComponent(TR_No)}`, {
-        approved_by: userInfo?.userId || userInfo?.user,
+        approved: userInfo?.userId || userInfo?.user,
         remarks,
         userInfo: {
           user: userInfo?.user,
@@ -76,86 +76,9 @@ export const useTRApproval = () => {
       };
     }
   };
+
   
-  /**
-   * Get the current approval status of a document
-   * @param {string} TR_No - Transfer document number
-   * @returns {Promise<Object>} Approval status details
-   */
-  const getApprovalStatus = async (TR_No) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const response = await axios.get(`/trApproval/status/${encodeURIComponent(TR_No)}`);
-      setLoading(false);
-      return response.data;
-    } catch (err) {
-      console.error('Error getting approval status:', err);
-      const errorMessage = err.response?.data?.error || err.message || 'Failed to get approval status';
-      setError(errorMessage);
-      setLoading(false);
-      return { success: false, error: errorMessage };
-    }
-  };
-  
-  /**
-   * Check the next approval level available for a document
-   * @param {string} TR_No - Transfer document number
-   * @returns {Promise<Object>} Next level information
-   */
-  const checkNextLevel = async (TR_No) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const response = await axios.post(`/trApproval/check-next-level/${encodeURIComponent(TR_No)}`);
-      setLoading(false);
-      return response.data;
-    } catch (err) {
-      console.error('Error checking next level:', err);
-      const errorMessage = err.response?.data?.error || err.message || 'Failed to check next approval level';
-      setError(errorMessage);
-      setLoading(false);
-      return { success: false, error: errorMessage };
-    }
-  };
-  
-  /**
-   * Check if user has approval rights for a specific level
-   * @param {Array} userMultiApp - User's multi-approval codes
-   * @param {string} module - Module name (e.g., 'Transfer (Internal)')
-   * @param {number} level - Approval level to check
-   * @returns {Promise<Object>} Rights information
-   */
-  const checkApprovalRights = async (userMultiApp, module, level) => {
-    try {
-      const response = await axios.post('/trApproval/check-rights', {
-        userMultiApp,
-        module,
-        level
-      });
-      return response.data;
-    } catch (err) {
-      console.error('Error checking rights:', err);
-      return { hasRights: false, requiredAppCode: null };
-    }
-  };
-  
-  /**
-   * Get xpost status text description
-   * @param {number} xpost - xpost value (1, 2, or 3)
-   * @returns {string} Status description
-   */
-  const getXpostStatusText = (xpost) => {
-    switch(xpost) {
-      case 1: return 'Fully Approved';
-      case 2: return 'Partially Approved';
-      case 3: return 'For Approval';
-      default: return 'Unknown';
-    }
-  };
-  
+
   /**
    * Check if document can be approved based on current status
    * @param {Object} docStatus - Document status object
@@ -183,7 +106,39 @@ export const useTRApproval = () => {
     return { canApprove: false, reason: 'Document not ready for approval' };
   };
   
-  /**
+  const getTotalLevels = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
+      const response = await axios.get(`/trApproval/total-levels?module=${encodeURIComponent('Transfer (Internal)')}`, {
+        signal: controller.signal,
+        timeout: 10000,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      clearTimeout(timeoutId);
+      setLoading(false);
+      return response.data;
+    } catch (err) {
+      clearTimeout(timeoutId);
+      console.error('Error getting total levels:', {
+        message: err.message,
+        code: err.code,
+        name: err.name
+      });
+      setError(err.message);
+      setLoading(false);
+      return { success: false, error: err.message, totalLevels: 3 };
+    }
+  }, []);
+  
+    /**
    * Get the next approver level based on current appStat
    * @param {string} appStat - Current appStat value (e.g., "1,2")
    * @param {number} totalLevels - Total number of approval levels
@@ -199,20 +154,14 @@ export const useTRApproval = () => {
     
     return nextLevel <= totalLevels ? nextLevel : null;
   };
-  
+
   return {
     // Main functions
     approveTR,
     rejectTR,
-    getApprovalStatus,
-    checkNextLevel,
-    checkApprovalRights,
-    
-    // Helper functions
-    getXpostStatusText,
     canApprove,
+    getTotalLevels,
     getNextApproverLevel,
-    
     // State
     loading,
     error
