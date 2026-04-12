@@ -610,41 +610,32 @@ function MvADForm({
               }}
               onClick={handleCloseDetails}
             >
-              <div className='animate-slide-up'
-                style={{
-                  backgroundColor: 'whitesmoke',
-                  width: '100%',
-                  maxWidth: '600px',
-                  maxHeight: '80vh',
-                  overflowY: 'auto',
-                  borderTopLeftRadius: '0.5rem',
-                  borderTopRightRadius: '0.5rem',
-                  padding: '1rem',
-                  position: 'relative',
-                  zIndex: 99999999,
-                  boxShadow: '0 -2px 3px -1px rgba(0, 0, 0, 0.1)',
-                }}
+              <div 
+                className='bg-white w-full max-h-[80vh] overflow-y-auto rounded-t-2xl shadow-xl animate-slide-up'
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex items-center justify-between mb-1">
-                  <h2 className="text-sm font-semibold ">
-                      Asset : {selectedDetails.FAC_name}
-                  </h2>
-                  <button 
+                <div className='sticky top-0 px-6 py-4 bg-white border-b'>
+                  <div className='flex items-center justify-between'>
+                    <h2 className='text-lg font-semibold text-gray-900'>
+                      Asset Details
+                    </h2>
+                    <button 
                       onClick={handleCloseDetails}
-                      className="text-base hover:text-gray-600"
-                  >
-                  <KeyboardArrowDownIcon  />
-                  </button>
+                      className="p-1 transition-colors rounded-full hover:bg-gray-100"
+                    >
+                      <KeyboardArrowDownIcon />
+                    </button>
+                  </div>
                 </div>
-                <div className='flex gap-2 py-1 mb-3 text-sm border-b '>
-                  <div className="text-gray-500">Asset No:</div>
-                  <div >{selectedDetails.FAC_NO}</div>
-                </div>
+
+                <div className='p-6'>
+                  <div className='pb-3 mb-4 border-b'>
+                    <h3 className='font-semibold text-blue-700 text-md'>{selectedDetails.FAC_name}</h3>
+                    <p className='text-sm text-gray-500'>Asset No: {selectedDetails.FAC_NO}</p>
+                  </div>
                 
-                  {/* Quantity and Target Date */}
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                      
+                   {/* Quantity and Target Date */}
+                  <div className="grid grid-cols-2 gap-2 text-sm">                    
                     <div>
                       <div className="text-gray-400">TR NO:</div>
                       <div >{selectedDetails.AD_No}</div>
@@ -677,6 +668,7 @@ function MvADForm({
                     </>
                     }                      
                   </div>
+                </div>
               </div>
             </div>,
             document.body

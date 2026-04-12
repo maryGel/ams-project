@@ -46,15 +46,15 @@ export const getCurrentApprovalStatus = async (connection, docNo, sql) => {
 /**
  * Helper function to get the latest approval level from logs
  */
-export const getLatestApprovalLevel = async (connection, docNo) => {
+export const getLatestApprovalLevel = async (connection, docNo, module) => {
   return new Promise((resolve, reject) => {
     const sql = `
       SELECT MAX(APP_LEVEL) as max_level, STAT
       FROM approval_logs 
-      WHERE TRNO = ? AND STAT IN ('Approved', 'Confirmed')
+      WHERE TRNO = ? AND STAT IN ('Approved', 'Confirmed') AND MODULE = ?
     `;
     
-    connection.query(sql, [docNo], (error, results) => {
+    connection.query(sql, [docNo, module], (error, results) => {
       if (error) {
         reject(error);
       } else {

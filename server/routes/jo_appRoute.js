@@ -59,10 +59,11 @@ router.put('/approve/:JO_No', (req, res) => {
         const currentDoc = await getCurrentApprovalStatus(connection, cleanDocNo, sql);
         
         // 3. Get the latest approved level from logs (only Approved or Confirmed)
-        const currentApprovedLevel = await getLatestApprovalLevel(connection, cleanDocNo);
+        const currentApprovedLevel = await getLatestApprovalLevel(connection, cleanDocNo, 'Job Order');
         
         // Determine the next level to approve
         const nextLevel = appLevel || (currentApprovedLevel + 1);
+        console.log(`nextLevel: ${nextLevel}, currentApprovedLevel: ${currentApprovedLevel}`);
         
         // Check if the next level exists in configuration
         const nextLevelConfig = approvalConfig.find(config => config.APP_LEVEL === nextLevel);
@@ -254,7 +255,7 @@ router.put('/reject/:JO_No', (req, res) => {
         const currentDoc = await getCurrentApprovalStatus(connection, cleanDocNo, sql);
         
         // 3. Get the latest approved level from logs (only Approved or Confirmed)
-        const currentApprovedLevel = await getLatestApprovalLevel(connection, cleanDocNo);
+        const currentApprovedLevel = await getLatestApprovalLevel(connection, cleanDocNo, 'Job Order');
         
         // Determine the level being rejected
         const nextLevel = appLevel || (currentApprovedLevel + 1);

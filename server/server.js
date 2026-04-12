@@ -46,7 +46,7 @@ import assetLostDRoute from './routes/assetLostDRoute.js';
 import jo_appRoute from './routes/jo_appRoute.js';
 import tr_appRoute from './routes/tr_appRoute.js';
 import ad_appRoute from './routes/ad_appRoute.js';
-import acc_appRoute from './routes/assetAccAppRoute.js';
+import assetacc_appRoute from './routes/assetacc_appRoute.js';
 import assetLostAppRoute from './routes/assetLostAppRoute.js';
 
 
@@ -185,7 +185,7 @@ app.use('/assetLostDRoute', assetLostDRoute);
 app.use('/approval', jo_appRoute);
 app.use('/trApproval', tr_appRoute);
 app.use('/adApproval', ad_appRoute);
-app.use('/accApproval', acc_appRoute);
+app.use('/accApproval', assetacc_appRoute);
 app.use('/assetLostApproval', assetLostAppRoute);
 
 

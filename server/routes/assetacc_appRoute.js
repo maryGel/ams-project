@@ -7,15 +7,15 @@ import { getApprovalConfig, getCurrentApprovalStatus, getLatestApprovalLevel, ca
 const router = express.Router();
 
 /**
- * Approve a Disposal Request - Simplified for single-level approval
+ * Approve a Asset Accountability- Simplified for single-level approval
  */
-router.put('/approve/:AD_No', (req, res) => {
-  const { AD_No } = req.params;
-  const { approved_by, remarks, userInfo, appLevel } = req.body;
+router.put('/approve/:AAFNo', (req, res) => {
+  const { AAFNo } = req.params;
+  const { approver, remarks, userInfo, appLevel } = req.body;
 
-  // console.log('Approval request:', { AD_No, approved, remarks });
+  // console.log('Approval request:', { AAFNo, approver, remarks });
 
-  const decodedJONo = decodeURIComponent(AD_No);
+  const decodedJONo = decodeURIComponent(AAFNo);
   const cleanDocNo = decodedJONo
     .replace(/\u00A0/g, '')
     .replace(/\s/g, '')
@@ -42,27 +42,28 @@ router.put('/approve/:AD_No', (req, res) => {
       }
 
       try {
-        // 1. Get approval configuration for Disposal  module
-        const approvalConfig = await getApprovalConfig(connection, 'Disposal');
+        // 1. Get approval configuration for Asset Accountabilitymodule
+        const approvalConfig = await getApprovalConfig(connection, 'Asset Accountability');
         
         if (approvalConfig.length === 0) {
           throw new Error('No approval configuration found for this module');
         }
 
         const sql = `
-          SELECT AD_No, xpost, appStat, approved_by, disapproved
-          FROM ad_h
-          WHERE AD_No = ?
+          SELECT AAFNo, xPosted, appStat, approver, disapproved
+          FROM assestacch
+          WHERE AAFNo = ?
         `;
 
         // 2. Get current document status
         const currentDoc = await getCurrentApprovalStatus(connection, cleanDocNo, sql);
         
         // 3. Get the latest approved level from logs (only Approved or Confirmed)
-        const currentApprovedLevel = await getLatestApprovalLevel(connection, cleanDocNo, 'Disposal');
+        const currentApprovedLevel = await getLatestApprovalLevel(connection, cleanDocNo, 'Asset Accountability');
         
         // Determine the next level to approve
         const nextLevel = appLevel || (currentApprovedLevel + 1);
+        console.log(`nextLevel: ${nextLevel}, currentApprovedLevel: ${currentApprovedLevel}`);
         
         // Check if the next level exists in configuration
         const nextLevelConfig = approvalConfig.find(config => config.APP_LEVEL === nextLevel);
@@ -89,46 +90,46 @@ router.put('/approve/:AD_No', (req, res) => {
         // Calculate the new approved level count
         const approvedLevelsCount = newAppStat.split(',').filter(l => l.trim()).length;
         
-        // 5. Calculate new xpost based on approved levels count
+        // 5. Calculate new xPosted based on approved levels count
         const newXpost = calculateXpost(approvedLevelsCount, totalLevels);
         
         // 6. Determine the STAT value for the approval log
         const approvalStat = getApprovalStat(currentApprovedLevel, totalLevels, nextLevel);
         
-        // 7. Update ad_h table with new values
+        // 7. Update assestacch table with new values
         const updateHeaderSql = `
-          UPDATE ad_h 
-          SET xpost = ?, 
+          UPDATE assestacch 
+          SET xPosted = ?, 
               appStat = ?,
-              approved_by = ?
-          WHERE AD_No = ?
+              approver = ?
+          WHERE AAFNo = ?
         `;
         
         const updateResult = await new Promise((resolve, reject) => {
-          connection.query(updateHeaderSql, [newXpost, newAppStat, approved_by || '', cleanDocNo], (error, result) => {
+          connection.query(updateHeaderSql, [newXpost, newAppStat, approver || '', cleanDocNo], (error, result) => {
             if (error) reject(error);
             else resolve(result);
           });
         });
         
         if (updateResult.affectedRows === 0) {
-          throw new Error('TR header not found');
+          throw new Error('Asset Accountability header not found');
         }
         
-        // 8. Check if this is the final approval level (xpost becomes 1)
+        // 8. Check if this is the final approval level (xPosted becomes 1)
         const isFinalApproval = approvedLevelsCount === totalLevels;
         
-        // 9. Update ad_d table only on final approval (when xpost becomes 1)
-        let DetailsUpdateResult = null;
-        if (isFinalApproval) {
-          const updateDetailsSql = `UPDATE ad_d SET xpost = 1 WHERE AD_No = ?`;
-          DetailsUpdateResult = await new Promise((resolve, reject) => {
-            connection.query(updateDetailsSql, [cleanDocNo], (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            });
-          });
-        }
+        // // 9. Update assestaccd table only on final approval (when xPosted becomes 1)
+        // let DetailsUpdateResult = null;
+        // if (isFinalApproval) {
+        //   const updateDetailsSql = `UPDATE assestaccd SET xPosted = 1 WHERE AAFNo = ?`;
+        //   DetailsUpdateResult = await new Promise((resolve, reject) => {
+        //     connection.query(updateDetailsSql, [cleanDocNo], (error, result) => {
+        //       if (error) reject(error);
+        //       else resolve(result);
+        //     });
+        //   });
+        // }
         
         // 10. Create approval log with appropriate STAT value
         const insertLogSql = `
@@ -140,7 +141,7 @@ router.put('/approve/:AD_No', (req, res) => {
         const xUser = userInfo ? `${userInfo.user} - ${userInfo.lname}, ${userInfo.fname}` : String(approved);
         
         await new Promise((resolve, reject) => {
-          connection.query(insertLogSql, [cleanDocNo, 'Disposal', xUser, nextLevel, approvalStat, remarks || ''], (error) => {
+          connection.query(insertLogSql, [cleanDocNo, 'Asset Accountability', xUser, nextLevel, approvalStat, remarks || ''], (error) => {
             if (error) reject(error);
             else resolve();
           });
@@ -164,7 +165,7 @@ router.put('/approve/:AD_No', (req, res) => {
           // Prepare response message based on approval status
           let message = '';
           if (isFinalApproval) {
-            message = 'Disposal fully approved successfully';
+            message = 'Asset Accountabilityfully approved successfully';
           } else if (approvedLevelsCount === 1) {
             message = 'Level 1 approval confirmed';
           } else {
@@ -176,13 +177,13 @@ router.put('/approve/:AD_No', (req, res) => {
             message: message,
             data: {
               doc_h_updated: updateResult.affectedRows,
-              doc_d_updated: DetailsUpdateResult?.affectedRows || 0,
+              // doc_d_updated: DetailsUpdateResult?.affectedRows || 0,
               status: approvalStat,
               currentLevel: nextLevel,
               approvedLevels: approvedLevelsCount,
               totalLevels: totalLevels,
               isFinalApproval: isFinalApproval,
-              xpost: newXpost,
+              xPosted: newXpost,
               appStat: newAppStat
             }
           });
@@ -203,16 +204,15 @@ router.put('/approve/:AD_No', (req, res) => {
 });
 
 /**
- * Reject a Disposal 
+ * Reject a Job Order
  */
+router.put('/reject/:AAFNo', (req, res) => {
+  const { AAFNo } = req.params;
+  const { approver, remarks, userInfo, appLevel } = req.body;
 
-router.put('/reject/:AD_No', (req, res) => {
-  const { AD_No } = req.params;
-  const { approved_by, remarks, userInfo, appLevel } = req.body;
+  console.log('Rejection request:', { AAFNo, approver, remarks });
 
-  console.log('Rejection request:', { AD_No, approved_by, remarks });
-
-  const decodedJONo = decodeURIComponent(AD_No);
+  const decodedJONo = decodeURIComponent(AAFNo);
   const cleanDocNo = decodedJONo
     .replace(/\u00A0/g, '')
     .replace(/\s/g, '')
@@ -238,24 +238,24 @@ router.put('/reject/:AD_No', (req, res) => {
       }
 
       try {
-        // 1. Get approval configuration for Disposal  module
-        const approvalConfig = await getApprovalConfig(connection, 'Disposal');
+        // 1. Get approval configuration for Asset Accountabilitymodule
+        const approvalConfig = await getApprovalConfig(connection, 'Asset Accountability');
         
         if (approvalConfig.length === 0) {
           throw new Error('No approval configuration found for this module');
         }
 
         const sql = `
-          SELECT AD_No, xpost, appStat, approved_by, disapproved
-          FROM ad_h
-          WHERE AD_No = ?
+          SELECT AAFNo, xPosted, appStat, approver, disapproved
+          FROM assestacch
+          WHERE AAFNo = ?
         `;
 
         // 2. Get current document status
         const currentDoc = await getCurrentApprovalStatus(connection, cleanDocNo, sql);
         
         // 3. Get the latest approved level from logs (only Approved or Confirmed)
-        const currentApprovedLevel = await getLatestApprovalLevel(connection, cleanDocNo, 'Disposal');
+        const currentApprovedLevel = await getLatestApprovalLevel(connection, cleanDocNo,  'Asset Accountability');
         
         // Determine the level being rejected
         const nextLevel = appLevel || (currentApprovedLevel + 1);
@@ -285,41 +285,41 @@ router.put('/reject/:AD_No', (req, res) => {
         // Calculate the processed level count (same as approve)
         const processedLevelsCount = newAppStat.split(',').filter(l => l.trim()).length;
         
-        // 5. Calculate new xpost - RESET TO 3 for rejection (but follow same calculation pattern)
+        // 5. Calculate new xPosted - RESET TO 3 for rejection (but follow same calculation pattern)
         const newXpost = 3; // Reset to 3 on rejection
         
         // 6. Determine the STAT value for the approval log - ALWAYS 'Disapproved' for rejection
         const approvalStat = 'Disapproved';
         
-        // 7. Update ad_h table - Set DISAPPROVED to 1, keep appStat same as approve flow
+        // 7. Update assestacch table - Set DISAPPROVED to 1, keep appStat same as approve flow
         const updateHeaderSql = `
-          UPDATE ad_h 
+          UPDATE assestacch 
           SET DISAPPROVED = 1,
-              xpost = ?, 
+              xPosted = ?, 
               appStat = ?,
-              approved_by = ?
-          WHERE AD_No = ?
+              approver = ?
+          WHERE AAFNo = ?
         `;
         
         const updateResult = await new Promise((resolve, reject) => {
-          connection.query(updateHeaderSql, [newXpost, newAppStat, approved_by || '', cleanDocNo], (error, result) => {
+          connection.query(updateHeaderSql, [newXpost, newAppStat, approver || '', cleanDocNo], (error, result) => {
             if (error) reject(error);
             else resolve(result);
           });
         });
         
         if (updateResult.affectedRows === 0) {
-          throw new Error('TR header not found');
+          throw new Error('Asset Accountability header not found');
         }
         
-        // 8. Reset ad_d table xpost to 3 on rejection
-        const updateDetailsSql = `UPDATE ad_d SET xpost = 3 WHERE AD_No = ?`;
-        const DetailsUpdateResult = await new Promise((resolve, reject) => {
-          connection.query(updateDetailsSql, [cleanDocNo], (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          });
-        });
+        // // 8. Reset assestaccd table xPosted to 3 on rejection
+        // const updateDetailsSql = `UPDATE assestaccd SET xPosted = 3 WHERE AAFNo = ?`;
+        // const DetailsUpdateResult = await new Promise((resolve, reject) => {
+        //   connection.query(updateDetailsSql, [cleanDocNo], (error, result) => {
+        //     if (error) reject(error);
+        //     else resolve(result);
+        //   });
+        // });
         
         // 9. Create rejection log with STAT = 'Disapproved'
         const insertLogSql = `
@@ -331,7 +331,7 @@ router.put('/reject/:AD_No', (req, res) => {
         const xUser = userInfo ? `${userInfo.user} - ${userInfo.lname}, ${userInfo.fname}` : String(approved);
         
         await new Promise((resolve, reject) => {
-          connection.query(insertLogSql, [cleanDocNo, 'Disposal', xUser, nextLevel, approvalStat, remarks || ''], (error) => {
+          connection.query(insertLogSql, [cleanDocNo, 'Asset Accountability', xUser, nextLevel, approvalStat, remarks || ''], (error) => {
             if (error) reject(error);
             else resolve();
           });
@@ -354,15 +354,15 @@ router.put('/reject/:AD_No', (req, res) => {
           
           res.json({
             success: true,
-            message: 'Disposal rejected successfully',
+            message: 'Transfer rejected successfully',
             data: {
               doc_h_updated: updateResult.affectedRows,
-              doc_d_updated: DetailsUpdateResult?.affectedRows || 0,
+              // doc_d_updated: DetailsUpdateResult?.affectedRows || 0,
               status: approvalStat,
               currentLevel: nextLevel,
               processedLevels: processedLevelsCount,
               totalLevels: totalLevels,
-              xpost: newXpost,
+              xPosted: newXpost,
               appStat: newAppStat,
               disapproved: 1
             }

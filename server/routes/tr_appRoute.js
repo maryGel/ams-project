@@ -59,7 +59,7 @@ router.put('/approve/:TR_No', (req, res) => {
         const currentDoc = await getCurrentApprovalStatus(connection, cleanDocNo, sql);
         
         // 3. Get the latest approved level from logs (only Approved or Confirmed)
-        const currentApprovedLevel = await getLatestApprovalLevel(connection, cleanDocNo);
+        const currentApprovedLevel = await getLatestApprovalLevel(connection, cleanDocNo, 'Transfer (Internal)');
         
         // Determine the next level to approve
         const nextLevel = appLevel || (currentApprovedLevel + 1);
@@ -255,7 +255,7 @@ router.put('/reject/:TR_No', (req, res) => {
         const currentDoc = await getCurrentApprovalStatus(connection, cleanDocNo, sql);
         
         // 3. Get the latest approved level from logs (only Approved or Confirmed)
-        const currentApprovedLevel = await getLatestApprovalLevel(connection, cleanDocNo);
+        const currentApprovedLevel = await getLatestApprovalLevel(connection, cleanDocNo, 'Transfer (Internal)');
         
         // Determine the level being rejected
         const nextLevel = appLevel || (currentApprovedLevel + 1);
