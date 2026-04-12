@@ -500,24 +500,30 @@ function MvTRForm({
 
                   {/* Show approval logs with level information */}
                   {viewApprovers[header.TR_No] && logs.length > 0 &&
-                    <div className='flex flex-col px-3 mt-2 text-sm'>                                
+                     <div className='flex flex-col px-3 mt-2 text-sm'>
                       {logs.map((log, idx) => (
-                        <div key={idx} className='mb-2'>
-                          <div className='flex items-center justify-between mt-2'>
-                            <div className='flex items-center gap-1'>
-                              <span className='w-5 text-green-500'>
-                                  {log.TRNO && log.STAT !== 'Disapproved' ? <CheckCircleIcon fontSize='small' /> : <CancelIcon fontSize='small' className='text-red-500'/>}
+                        <div key={idx} className="py-2 border-b border-gray-100 last:border-0">
+                          <div className='flex items-center justify-between'>
+                            <div className='flex items-center gap-2'>
+                              <span className='w-5'>
+                                {log.STAT !== 'Disapproved' ? 
+                                  <CheckCircleIcon fontSize='small' className='text-green-500' /> : 
+                                  <CancelIcon fontSize='small' className='text-red-500'/>
+                                }
                               </span>
                               <span className='font-medium'>Level {log.APP_LEVEL}:</span>
-                              <span>{log.X_USER?.split('-')[1]}</span>
+                              <span className="font-medium">{log.X_USER?.split('-')[1]}</span>
                             </div>
-                            <div className='flex gap-2'>
-                              {log.STAT !== 'Disapproved' && <span > {log.STAT}</span> }
-                              
-                              <span><DateDisplay value={log.DT} format="short" /></span>    
-                            </div>                                    
+                            <div className='flex gap-2 text-xs text-gray-500'>
+                                {log.STAT !== 'Disapproved' && <span > {log.STAT}</span> }
+                              <span><DateDisplay value={log.DT} format="short" /></span>       
+                            </div>                             
                           </div>
-                          <span className='pt-1 pl-6 text-slate-500'>{log.REMARKS}</span>
+                          {log.REMARKS && (
+                            <div className='pt-1 text-xs italic text-gray-600 pl-7'>
+                              "{log.REMARKS}"
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

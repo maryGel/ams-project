@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 // MUI
 import { Box, Stack, } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import SearchIcon from '@mui/icons-material/Search';
 import TuneIcon from '@mui/icons-material/Tune';
+import RefreshIcon from '@mui/icons-material/Refresh';
 // Custom Utils
 import HistoryDatePicker from '../Utils/datePicker';
 import {getDefaultLast30Days} from '../Utils/datePicker';
@@ -11,18 +12,20 @@ import {statusFilter} from './customUtils/filters';
 import SearchOverlay from './customUtils/searchOverlay'
 // Components
 import MvADForm from './components/mvADForm';
+import {useDisposalApproval} from '../hooks/useADApproval';
 
 
 function MvDisposalPage({
     onClose,
     isClosing,
     onAnimationEnd,
-    adHeaders = [],
-    adDetails = [],
-    isLoading = false,
-    error = null,
-
-
+    adHeaders: initialAdHeaders =[],
+    adDetails: initialAdDetails =[],
+    adHRefresh,
+    adDRefresh,
+    selectedUser,
+    isLoading: externalLoading = false,
+    error: externalError = null,
 }){
     const [filter, setFilter] = useState('Waiting');
     const [isOptionsOpen, setIsOptionsOpen] = useState(false);
@@ -30,6 +33,37 @@ function MvDisposalPage({
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [selectedDoc, setSelectedDoc] = useState(null);
     const [isSearchActive, setIsSearchActive] = useState(false);
+    const [selectionMode, setSelectionMode] = useState(false);
+    const [selectedAD, setSelectedAD] = useState([]);
+    const [selectAll, setSelectAll] = useState(false);
+
+    const adHeaders = initialAdHeaders;
+    const adDetails = initialAdDetails;
+
+    // Local state to manage data refresh
+    const [isLoading, setIsLoading] = useState(externalLoading);
+    const [error, setError] = useState(externalError);
+
+    // Use the approval hook
+    const { 
+        canApprove,
+        loading: approvalLoading 
+    } = useDisposalApproval();
+
+
+    // Function to trigger refresh
+    const handleRefresh = async () => {
+        setIsLoading(true);
+
+        try {
+            await adHRefresh(); 
+            await adDRefresh();
+        } catch (err) {
+            setError('Failed to refresh data');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleClosePage = () => {if (onClose) onClose()}; 
 
@@ -60,6 +94,39 @@ function MvDisposalPage({
       setIsSearchActive(false);
     };
 
+     // Triggered when user long-press a TR
+    const handleEnterSelectionMode = (trNo) => {
+        setSelectionMode(true);
+        if (!selectedAD.includes(trNo)) {
+            setSelectedAD([trNo]);
+        }
+    };
+
+    // Toggle Select All - Only select documents that are eligible for approval
+    const handleSelectAll = () => {
+      if (selectAll) {
+        setSelectedAD([]);
+        setSelectAll(false);
+      } else {
+        // Only select documents that are not fully approved and not disapproved
+        const eligibleADs = displayData
+          .filter(ad => {
+              const canBeApproved = canApprove(ad);
+              return canBeApproved.canApprove;
+          })
+          .map(ad => ad.TR_No);
+        setSelectedAD(eligibleADs);
+        setSelectAll(true);
+      }
+    };
+
+    const handleExitSelectionMode = () => {
+        setSelectionMode(false);
+        setSelectedAD([]);
+        setSelectAll(false);
+    };
+
+
     // First, apply the status filter
     const statusFilteredAD = useMemo(() => {
       return adHeaders.filter((ad) => {
@@ -73,6 +140,9 @@ function MvDisposalPage({
         }
         if(filter === 'Rejected'){
           return (ad.xpost === 3 || ad.xpost ===2) && ad.DISAPPROVED === 1;
+        }
+        if(filter === 'Partially Approved'){
+          return ad.xpost === 2 && ad.DISAPPROVED === 0;
         }
 
         return false;
@@ -108,6 +178,26 @@ function MvDisposalPage({
       }
       return filteredAD;
     }, [isSearchActive, selectedDoc, filteredAD]);
+
+
+    useEffect(() => {
+        if (selectedAD.length === 0) {
+            setSelectAll(false);
+        } else if (selectedAD.length === displayData.filter(ad => ad.canBeApproved?.canApprove).length) {
+            setSelectAll(true);
+        } else {
+            setSelectAll(false);
+        }
+    }, [selectedAD, displayData]);
+
+    useEffect(() => {
+        // Clear selection mode when data changes (after approval/rejection)
+        if (selectionMode) {
+            setSelectionMode(false);
+            setSelectedAD([]);
+            setSelectAll(false);
+        }
+    }, [adHeaders]); // This will trigger when adHeaders updates after approval
 
     return (
       <>
@@ -170,26 +260,35 @@ function MvDisposalPage({
             
             {!isSearchActive && (
               <>
-                <div className='flex flex-col py-2'>
-                  <div className='flex items-center justify-between px-4 text-sm font-semibold tracking-wide'>
-                    <span>Disposals</span>
-                    <button 
-                      onClick={handleOptionsOpen}
-                      className={`flex items-center gap-1 px-3 py-1 rounded-md transition-colors ${
-                        isOptionsOpen ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'
-                      }`}
-                    >
-                      <TuneIcon fontSize='small' />
-                      <span className='text-xs'>Filter</span>
-                    </button>
+                 <div className='grid-cols-1 py-2'>
+                      <div className='flex items-center justify-between px-4 text-sm font-semibold tracking-wide'>
+                        <span>Disposal</span>
+                        <div className='flex'>
+                          <button 
+                            onClick={handleOptionsOpen}
+                            className={`flex items-center gap-1 px-3 py-1 rounded-md transition-colors ${
+                                isOptionsOpen ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'
+                            }`}
+                          >
+                            <TuneIcon fontSize='small' />
+                            <span className='text-xs'>Filter</span>
+                          </button>
+                          <button 
+                            onClick={handleRefresh}
+                            className="p-1 transition-colors rounded-full hover:bg-gray-100"
+                            title="Refresh"
+                          >
+                            <RefreshIcon />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      {isOptionsOpen && (
+                          <div className='flex m-1 border-t border-b bg-gray-50'>
+                              <HistoryDatePicker onDateRangeChange={handleDateRangeChange} />
+                          </div>
+                      )}
                   </div>
-                  
-                  {isOptionsOpen && (
-                    <div className='m-1 border-t border-b bg-gray-50'>
-                      <HistoryDatePicker onDateRangeChange={handleDateRangeChange} />
-                    </div>
-                  )}
-                </div>
 
                 {/* Filter Summary - Optional but helpful */}
                 {(filter !== 'All' || dateRange) && (
@@ -237,12 +336,24 @@ function MvDisposalPage({
               ) : error ? (
                 <div className='p-4 m-4 text-red-500 bg-red-100 rounded'>{error}</div>
               ) : displayData.length > 0 ? (
-                <div className='flex flex-col gap-4 p-4'>
+                <div className='flex flex-col gap-4 mt-2'>
                   <MvADForm
                     useProps={null}
                     adHeaders = {adHeaders}
                     adDetails = {adDetails}
                     filteredAD = {displayData}
+                    isLoading={isLoading}
+                    error={error}
+                    selectedUser={selectedUser}  
+                    adHRefresh={adHRefresh} 
+                    adDetailsRefresh={adDRefresh}            
+                    selectionMode={selectionMode}
+                    selectedAD={selectedAD}
+                    setSelectedAD={setSelectedAD} 
+                    onEnterSelectionMode={handleEnterSelectionMode}        
+                    onExitSelectionMode={handleExitSelectionMode} 
+                    onSelectAll={handleSelectAll} 
+                    selectAll={selectAll}
                   />
                 </div>
               ) : (

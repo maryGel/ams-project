@@ -99,7 +99,7 @@ function MvJOForm({
                   } else {
                       console.error('❌ Failed to fetch total levels:', result.error);
                       console.log('⚠️ Using default totalLevels: 3');
-                      setTotalLevels(3);
+                      setTotalLevels();
                   }
               }
           } catch (err) {
