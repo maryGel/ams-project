@@ -44,6 +44,7 @@ export default defineConfig({
       '/adApproval': 'http://localhost:3000',
       '/accApproval': 'http://localhost:3000',
       '/alostApproval': 'http://localhost:3000',
+      '/jo_evalRoute': 'http://localhost:3000'
     }
   },
   // Add base URL for Vercel

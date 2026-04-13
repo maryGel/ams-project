@@ -1,9 +1,10 @@
 import {useState, useMemo} from 'react';
 // MUI
+import { CircularProgress } from '@mui/material';
 import TuneIcon from '@mui/icons-material/Tune';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import SearchIcon from '@mui/icons-material/Search';
-import DescriptionIcon from '@mui/icons-material/Description';
+import RefreshIcon from '@mui/icons-material/Refresh';
 // Custom Utils
 import HistoryDatePicker from '../../Utils/datePicker';
 import DateDisplay from '../../Utils/formatDateForInput';
@@ -25,8 +26,15 @@ const getDefaultLast30Days = () => {
 };
 
 function MvEvalJOForm({  
+    onClose,
+    onAnimationEnd,
+    isClosing,
     joHeaders,
     joDetails,
+    joRefresh,
+    joDetailsRefresh,
+    isLoading: externalLoading = false,
+    error: externalError = null,
 }){
     const [filter, setFilter] = useState('Pending');
     const [dateRange, setDateRange] = useState(getDefaultLast30Days); 
@@ -35,11 +43,29 @@ function MvEvalJOForm({
     const [selectedJO, setSelectedJO] = useState(null);
     const [isSearchOpen, setIsSearchOpen] = useState(false); // State for search overlay
 
+        // Local state to manage data refresh
+    const [isLoading, setIsLoading] = useState(externalLoading);
+    const [error, setError] = useState(externalError);
+
+        // Function to trigger refresh
+    const handleRefresh = async () => {
+    setIsLoading(true);
+
+    try {
+        await joRefresh(); 
+        await joDetailsRefresh();
+    } catch (err) {
+        setError('Failed to refresh data');
+    } finally {
+        setIsLoading(false);
+    }
+    };
+
      // First, apply the status filter
     const statusFilteredJO = useMemo(() => {
       return joHeaders.filter((jo) => {
-        if(filter === 'All') {
-          return jo.xpost === 1;
+        if(filter === 'Completed') {
+          return jo.xpost === 1 && jo.eval_status;
         };
         
         if(filter === 'Pending'){
@@ -122,9 +148,29 @@ function MvEvalJOForm({
       setSelectedJO(doc);
     };
     
+        // Filter functions
+    const getItemsByJONo = (JO_No) => {
+        return joDetails?.filter(detail => detail.JO_No === JO_No) || [];
+    };
+
+    if (isLoading) {
+        return (
+            <div 
+                className={`fixed inset-0 z-50 w-full h-full overflow-y-auto bg-white shadow-xl `}
+            >
+                <div className="flex flex-col items-center justify-center min-h-full">
+                    <CircularProgress />
+                    <span className="mt-3 text-sm text-gray-500">
+                        {'Loading job orders...'}
+                    </span>
+                </div>
+            </div>
+        );
+    }
+
     return (
       <>
-        <div className='flex flex-col justify-center gap-3'>
+        <div className='flex flex-col justify-center gap-3' onAnimationEnd={onAnimationEnd}>
 
           <div className='flex flex-col'>
             
@@ -164,6 +210,13 @@ function MvEvalJOForm({
                 >
                   <SearchIcon />
                 </button>
+                <button 
+                  onClick={handleRefresh}
+                  className="p-1 transition-colors rounded-full hover:bg-gray-100"
+                  title="Refresh"
+                >
+                  <RefreshIcon />
+                </button>
               </div>
             </div>
             
@@ -200,15 +253,15 @@ function MvEvalJOForm({
 
         <div className='mt-3 border-t'>
           {sortedFilteredJo?.map((header ) => {
-            
+            const items = getItemsByJONo(header.JO_No);
             return (
               <div 
                 key={header.ID} 
-                className='grid grid-cols-[1fr_2rem] gap-2 p-2 text-sm border-b'
+                className='grid grid-cols-[1fr_2rem] gap-2 px-4 py-1 text-sm border-b'
                 onClick={()=> {handleOpenJo(header)}}>
                 <div className='flex flex-col h-auto '>
                   <div className='flex justify-between'>
-                    <span className='font-semibold'>{header.JO_No}</span>
+                    <span className='font-semibold'>{header.JO_No} ({items.length})</span>
                     <span><DateDisplay value={header.xDate} format="short" /></span>
                   </div>
                   <span className='pl-2'>{header.Remarks}</span>

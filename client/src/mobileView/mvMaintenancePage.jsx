@@ -14,6 +14,8 @@ function MvMaintenancePage({
   onAnimationEnd,
   joHeaders = [],
   joDetails = [],
+  joRefresh,
+  joDetailsRefresh,
   isLoading = false,
   error = null,
 
@@ -65,12 +67,16 @@ function MvMaintenancePage({
             <MvEvalJOForm
               joHeaders = {joHeaders}
               joDetails = {joDetails}
+              joRefresh={joRefresh}        
+              joDetailsRefresh={joDetailsRefresh}    
             />  
           }   
           {isOpenMainForm &&
             <MvMaintenanceForm
               joHeaders = {joHeaders}
-              joDetails = {joDetails}            
+              joDetails = {joDetails}     
+              joRefresh={joRefresh}        
+              joDetailsRefresh={joDetailsRefresh}        
             />
           }                
         </div>            

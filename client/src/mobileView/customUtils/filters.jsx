@@ -17,7 +17,7 @@ export const statusFilter = [
 
 export const evalStatus = [
   {id: 1, status: 'Pending', icon: <DescriptionIcon fontSize='small'/>},
-  {id: 3, status: 'All', icon: <ChecklistRtlIcon fontSize='small'/>}
+  {id: 3, status: 'Completed', icon: <ChecklistRtlIcon fontSize='small'/>}
 ]
 
 export const maintStatus = [

@@ -48,6 +48,7 @@ import tr_appRoute from './routes/tr_appRoute.js';
 import ad_appRoute from './routes/ad_appRoute.js';
 import assetacc_appRoute from './routes/assetacc_appRoute.js';
 import assetLostAppRoute from './routes/assetLostAppRoute.js';
+import jo_evalRoute from './routes/jo_evalRoute.js';
 
 
 
@@ -187,6 +188,7 @@ app.use('/trApproval', tr_appRoute);
 app.use('/adApproval', ad_appRoute);
 app.use('/accApproval', assetacc_appRoute);
 app.use('/alostApproval', assetLostAppRoute);
+app.use('/jo_evalRoute', jo_evalRoute);
 
 
 // React (Vite Dist)
