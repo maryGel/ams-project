@@ -65,155 +65,153 @@ function MvAAForm({
     setToast(prev => ({ ...prev, show: false }));
   }, []);
 
-    // Fetch total levels only once when component mounts
-    useEffect(() => {
-      let isMounted = true;
-      let timeoutId = null;
-      
-      const fetchTotalLevels = async () => {
-        try {
-          console.log('🔍 Starting to fetch total levels...');
-          console.log('📊 Current totalLevels state before fetch:', totalLevels);
-          
-          const timeoutPromise = new Promise((_, reject) => {
-              timeoutId = setTimeout(() => reject(new Error('Fetch timeout after 10 seconds')), 10000);
-          });
-          
-          const fetchPromise = getTotalLevels();
-          const result = await Promise.race([fetchPromise, timeoutPromise]);
-          
-          clearTimeout(timeoutId);
-          
-          console.log('📦 Fetch result received:', result);
-          
-          if (isMounted && result) {
-              if (result.success) {
-                  console.log('✅ Setting totalLevels to:', result.totalLevels);
-                  setTotalLevels(result.totalLevels);
-                  
-                  // Verify state was updated
-                  setTimeout(() => {
-                      console.log('🔍 After setTotalLevels, current value should be:', result.totalLevels);
-                  }, 100);
-              } else {
-                  console.error('❌ Failed to fetch total levels:', result.error);
-                  console.log('⚠️ Using default totalLevels: 3');
-                  setTotalLevels();
-              }
-          }
-        } catch (err) {
-          clearTimeout(timeoutId);
-          console.error('❌ Error fetching total levels:', err);
-          if (isMounted) {
-              console.log('⚠️ Using default totalLevels due to error: 3');
-              setTotalLevels();
-          }
+  // Fetch total levels only once when component mounts
+  useEffect(() => {
+    let isMounted = true;
+    let timeoutId = null;
+    
+    const fetchTotalLevels = async () => {
+      try {
+        console.log('🔍 Starting to fetch total levels...');
+        console.log('📊 Current totalLevels state before fetch:', totalLevels);
+        
+        const timeoutPromise = new Promise((_, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Fetch timeout after 10 seconds')), 10000);
+        });
+        
+        const fetchPromise = getTotalLevels();
+        const result = await Promise.race([fetchPromise, timeoutPromise]);
+        
+        clearTimeout(timeoutId);
+        
+        console.log('📦 Fetch result received:', result);
+        
+        if (isMounted && result) {
+            if (result.success) {
+                console.log('✅ Setting totalLevels to:', result.totalLevels);
+                setTotalLevels(result.totalLevels);
+                
+                // Verify state was updated
+                setTimeout(() => {
+                    console.log('🔍 After setTotalLevels, current value should be:', result.totalLevels);
+                }, 100);
+            } else {
+                console.error('❌ Failed to fetch total levels:', result.error);
+                console.log('⚠️ Using default totalLevels: 3');
+                setTotalLevels();
+            }
         }
-      };
-      
-      fetchTotalLevels();
-      
-      return () => {
-          isMounted = false;
-          if (timeoutId) clearTimeout(timeoutId);
-      };
-    }, [getTotalLevels]); 
+      } catch (err) {
+        clearTimeout(timeoutId);
+        console.error('❌ Error fetching total levels:', err);
+        if (isMounted) {
+            console.log('⚠️ Using default totalLevels due to error: 3');
+            setTotalLevels();
+        }
+      }
+    };
+    
+    fetchTotalLevels();
+    
+    return () => {
+        isMounted = false;
+        if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [getTotalLevels]); 
 
-      // Get Doc data by ID
-    const getDocData = useCallback((DocNo) => {
-        return filteredAA?.find(ad => ad.AAFNo === DocNo);
-    }, [filteredAA]);
+    // Get Doc data by ID
+  const getDocData = useCallback((DocNo) => {
+      return filteredAA?.find(ad => ad.AAFNo === DocNo);
+  }, [filteredAA]);
   
-      // Use the approval actions hook
-      const {
-        processingItem: processingAA,
-        remarks,
-        bulkDialogOpen,
-        bulkActionType,
-        bulkRemarks,
-        bulkLoading,
-        handleIndividualAction,
-        processBulkAction,
-        openBulkDialog,
-        closeBulkDialog,
-        updateRemarks,
-        clearRemarks,
-        setBulkRemarks
-      } = useApprovalActions({
-          onApprove: approveAssetAcc,
-          onReject: rejectAssetAcc,
-          // No getItemLevel for JO since it doesn't have multi-level approval
-          onRefresh: () => {
-              accHRefresh?.();
-              accDRefresh?.();
-              if (onExitSelectionMode) {onExitSelectionMode();}
-          },
-          onExitSelectionMode,
-          showToast
-          // getUserInfo is not needed since we'll pass selectedUser directly
-      });
+  // Use the approval actions hook
+  const {
+    processingItem: processingAA,
+    remarks,
+    bulkDialogOpen,
+    bulkActionType,
+    bulkRemarks,
+    bulkLoading,
+    handleIndividualAction,
+    processBulkAction,
+    openBulkDialog,
+    closeBulkDialog,
+    updateRemarks,
+    clearRemarks,
+    setBulkRemarks
+  } = useApprovalActions({
+    onApprove: approveAssetAcc,
+    onReject: rejectAssetAcc,
+    // No getItemLevel for JO since it doesn't have multi-level approval
+    onRefresh: () => {
+      accHRefresh?.();
+      accDRefresh?.();
+      if (onExitSelectionMode) {onExitSelectionMode();}
+    },
+    onExitSelectionMode,
+    showToast
+    // getUserInfo is not needed since we'll pass selectedUser directly
+  });
   
     // Handle bulk action wrapper
-    const handleBulkAction = useCallback(() => {
-      processBulkAction(
-        selectedAA, 
-        bulkActionType, 
-        bulkRemarks, 
-        getDocData,
-        selectedUser  // Pass the user info here
-      );
-    }, [selectedAA, bulkActionType, bulkRemarks, processBulkAction, getDocData, selectedUser]);
+  const handleBulkAction = useCallback(() => {
+    processBulkAction(
+      selectedAA, 
+      bulkActionType, 
+      bulkRemarks, 
+      getDocData,
+      selectedUser  // Pass the user info here
+    );
+  }, [selectedAA, bulkActionType, bulkRemarks, processBulkAction, getDocData, selectedUser]);
 
-    const handleViewItemsOpen = (e, AAFNo) => {
-        e.stopPropagation(); // Prevent event from bubbling up
-        setViewItems(prev => ({
-            ...prev,
-            [AAFNo]: !prev[AAFNo]
-        }));
-        setViewApprovers(prev => ({
-            ...prev,
-            [AAFNo]: false
-        }));
-    };
-
-    const handleViewApprovers = (e, AAFNo) => {
+  const handleViewItemsOpen = (e, AAFNo) => {
       e.stopPropagation(); // Prevent event from bubbling up
-      setViewApprovers(prev => ({
-          ...prev,
-          [AAFNo]: !prev[AAFNo]
-      }));
       setViewItems(prev => ({
           ...prev,
-          [AAFNo]: false
-      }));
-    };
-
-    const handleOpenAppOptions = (e, AAFNo) => {
-      e.stopPropagation(); // Prevent event from bubbling up
-      setOpenAppOptions(prev => ({
-          ...prev,
           [AAFNo]: !prev[AAFNo]
       }));
-      document.body.style.overflow = 'hidden';
-    };
-
-
-
-    const handleShowItems = (item,e) => {
-      e.stopPropagation(); // Prevent event from bubbling up
-      setSelectedDetails(item)
-      // Prevent background scrolling
-      document.body.style.overflow = 'hidden';
-    };
-
-    const handleCloseAppOptions = (AAFNo) => {
-      setOpenAppOptions(prev => ({
+      setViewApprovers(prev => ({
           ...prev,
           [AAFNo]: false
       }));
-      document.body.style.overflow = 'unset';
-      clearRemarks(AAFNo);
-    };
+  };
+
+  const handleViewApprovers = (e, AAFNo) => {
+    e.stopPropagation(); // Prevent event from bubbling up
+    setViewApprovers(prev => ({
+        ...prev,
+        [AAFNo]: !prev[AAFNo]
+    }));
+    setViewItems(prev => ({
+        ...prev,
+        [AAFNo]: false
+    }));
+  };
+
+  const handleOpenAppOptions = (e, AAFNo) => {
+    e.stopPropagation(); // Prevent event from bubbling up
+    setOpenAppOptions(prev => ({
+        ...prev,
+        [AAFNo]: !prev[AAFNo]
+    }));
+    document.body.style.overflow = 'hidden';
+  };
+
+  const handleShowItems = (item,e) => {
+    e.stopPropagation(); // Prevent event from bubbling up
+    setSelectedDetails(item)
+    // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
+  };
+
+  const handleCloseAppOptions = (AAFNo) => {
+    setOpenAppOptions(prev => ({
+        ...prev,
+        [AAFNo]: false
+    }));
+    document.body.style.overflow = 'unset';
+    clearRemarks(AAFNo);
+  };
 
     const handleCloseDetails = () => {
         setSelectedDetails(null);
@@ -222,24 +220,24 @@ function MvAAForm({
     };
 
      // Handle individual approve/reject action
-    const handleApproveReject = useCallback(async (DocNo, action, remarkText, DocData, currentLevel) => {
-      const result = await handleIndividualAction(
-        DocNo, 
-        action, 
-        remarkText, 
-        DocData, 
-        selectedUser,
-        currentLevel
-      );
-      // If successful, close the modal
-      if (result && result.success) {
-        handleCloseAppOptions(DocNo);
-        // Exit selection mode if we're in it
-        if (selectionMode && onExitSelectionMode) {
-            onExitSelectionMode();
-        }
-      }       
-      return result;
+  const handleApproveReject = useCallback(async (DocNo, action, remarkText, DocData, currentLevel) => {
+    const result = await handleIndividualAction(
+      DocNo, 
+      action, 
+      remarkText, 
+      DocData, 
+      selectedUser,
+      currentLevel
+    );
+    // If successful, close the modal
+    if (result && result.success) {
+      handleCloseAppOptions(DocNo);
+      // Exit selection mode if we're in it
+      if (selectionMode && onExitSelectionMode) {
+          onExitSelectionMode();
+      }
+    }       
+    return result;
   }, [handleIndividualAction, selectedUser, handleCloseAppOptions, selectionMode, onExitSelectionMode]);
 
 

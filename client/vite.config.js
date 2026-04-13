@@ -43,7 +43,7 @@ export default defineConfig({
       '/trApproval': 'http://localhost:3000',
       '/adApproval': 'http://localhost:3000',
       '/accApproval': 'http://localhost:3000',
-      '/lostApproval': 'http://localhost:3000',
+      '/alostApproval': 'http://localhost:3000',
     }
   },
   // Add base URL for Vercel

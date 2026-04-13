@@ -88,7 +88,7 @@ function MvDashBoard({useProps, firstName, selectedUser}){
             trHeaders, trDetails, trHRefresh, trDRefresh,
             adHeaders, adDetails, adHRefresh, adDRefresh,
             assetAccHeaders, assetAccDetails, accHRefresh, accDRefresh,
-            assetLostHeaders, assetLostDetails, accHRefresh, accDRefresh,
+            assetLostHeaders, assetLostDetails, aLostHRefresh, aLostDRefresh,
             selectedUser, useProps
         };
 

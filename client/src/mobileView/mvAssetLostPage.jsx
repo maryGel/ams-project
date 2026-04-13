@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 // MUI
-import { Box, Stack, } from '@mui/material';
+import { Box, Stack, CircularProgress  } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import SearchIcon from '@mui/icons-material/Search';
 import TuneIcon from '@mui/icons-material/Tune';
+import RefreshIcon from '@mui/icons-material/Refresh';
 // Custom Utils
 import HistoryDatePicker from '../Utils/datePicker';
 import {getDefaultLast30Days} from '../Utils/datePicker';
@@ -11,6 +12,8 @@ import {statusFilter} from './customUtils/filters';
 import SearchOverlay from './customUtils/searchOverlay';
 // Components
 import MvALForm from './components/mvALForm';
+// Hooks
+import { useAssetLostApproval } from '../hooks/useAssetLostApproval';
 
 
 
@@ -18,11 +21,13 @@ function MVAssetLostPage({
     onClose,
     isClosing,
     onAnimationEnd,
-    assetLostHeaders = [],
-    assetLostDetails = [],
-    isLoading = false,
-    error = null,
-
+    assetLostHeaders: initialDocHeaders = [],
+    assetLostDetails: initialDocDetails = [],
+    aLostHRefresh,
+    aLostDRefresh,
+    selectedUser,
+    isLoading: externalLoading = false,
+    error: externalError = null,
 }){
     const [filter, setFilter] = useState('Waiting');
     const [isOptionsOpen, setIsOptionsOpen] = useState(false);
@@ -30,6 +35,35 @@ function MVAssetLostPage({
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [selectedDoc, setSelectedDoc] = useState(null);
     const [isSearchActive, setIsSearchActive] = useState(false);
+    const [selectionMode, setSelectionMode] = useState(false);
+    const [selectedAL, setSelectedAL] = useState([]);
+    const [selectAll, setSelectAll] = useState(false);
+    const assetLostHeaders = initialDocHeaders;
+    const assetLostDetails = initialDocDetails;
+
+    // Local state to manage data refresh
+    const [isLoading, setIsLoading] = useState(externalLoading);
+    const [error, setError] = useState(externalError);
+
+    // Use the approval hook
+    const { 
+        canApprove,
+        loading: approvalLoading 
+    } = useAssetLostApproval();
+
+    // Function to trigger refresh
+    const handleRefresh = async () => {
+    setIsLoading(true);
+
+    try {
+        await aLostHRefresh(); 
+        await aLostDRefresh();
+      } catch (err) {
+          setError('Failed to refresh data');
+      } finally {
+          setIsLoading(false);
+      }
+    };
 
     const handleClosePage = () => {if(onClose) onClose()}; 
 
@@ -61,6 +95,37 @@ function MVAssetLostPage({
       setIsSearchActive(false);
     };
 
+    // Triggered when user long-press a Accountability Form
+    const handleEnterSelectionMode = (DocNo) => {
+    setSelectionMode(true);
+    if (!selectedAL.includes(DocNo)) {
+        setSelectedAL([DocNo]); 
+    }
+    };
+
+    // Toggle Select All
+    const handleSelectAll = () => {
+        if (selectAll) {
+            setSelectedAL([]);
+            setSelectAll(false);
+        } else {
+             const eligibleJOs = displayData
+                .filter(aa => {
+                    const canBeApproved = canApprove(aa);
+                    return canBeApproved.canApprove;
+                })
+                .map(aa => aa.AAFNo);
+            setSelectedAL(eligibleJOs);
+            setSelectAll(true);
+        }
+    };
+
+    const handleExitSelectionMode = () => {
+        setSelectionMode(false);
+        setSelectedAL([]);
+        setSelectAll(false);
+    };
+
     // First, apply the status filter
     const statusFilteredAL = useMemo(() => {
       return assetLostHeaders.filter((al) => {
@@ -73,7 +138,10 @@ function MVAssetLostPage({
           return al.xPosted === 1 && al.DISAPPROVED === 0;
         }
         if(filter === 'Rejected'){
-          return (al.xPosted === 3 || al.post ===2) && al.DISAPPROVED === 1;
+          return (al.xPosted === 3 || al.xPosted === 2) && al.DISAPPROVED === 1;
+        }
+        if(filter === 'Partially Approved'){
+          return al.xPosted === 2 && al.DISAPPROVED === 0;
         }
 
         return false;
@@ -110,11 +178,51 @@ function MVAssetLostPage({
       return filteredAL;
     }, [isSearchActive, selectedDoc, filteredAL]);
 
+     useEffect(() => {
+      if (selectedAL.length === 0) {
+          setSelectAll(false); // all unselected → uncheck Select All
+      } else if (selectedAL.length === displayData.length) {
+          setSelectAll(true);  // all selected → check Select All
+      } else {
+          setSelectAll(false); // partial selection → uncheck Select All
+      }
+    }, [selectedAL, displayData]);
+
+    useEffect(() => {
+      // Clear selection mode when data changes (after approval/rejection)
+      if (selectionMode) {
+        setSelectionMode(false);
+        setSelectedAL([]);
+        setSelectAll(false);
+      }
+    }, [assetLostHeaders]); // This will trigger when assetLostHeaders updates after approval
+
+    // Show loading state
+    if (isLoading) {
+      return (
+        <div 
+          onAnimationEnd={onAnimationEnd}
+          className={`fixed inset-0 z-50 w-full h-full overflow-y-auto bg-white shadow-xl ${
+            isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'
+          }`}
+        >
+          <div className="flex flex-col items-center justify-center min-h-full">
+            <CircularProgress />
+            <span className="mt-3 text-sm text-gray-500">
+              {'Loading job orders...'}
+            </span>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <>
-        <div onAnimationEnd={onAnimationEnd} className={`          
-          fixed inset-0 z-50 items-start w-full max-h-screen overflow-y-auto 
-          bg-white  ${isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'}`}>
+        <div 
+          onAnimationEnd={onAnimationEnd}
+          className={`fixed inset-0 z-50 w-full h-full overflow-y-auto bg-white shadow-xl 
+          ${isClosing ? 'animate-slide-out-right' : 'animate-slide-in-right'}`}
+        >
           <div className="flex flex-col ">
             <Box 
               sx={{ 
@@ -171,24 +279,33 @@ function MVAssetLostPage({
             
             {!isSearchActive && (
               <>
-                <div className='flex flex-col py-2'>
+                <div className='grid-cols-1 py-2'>
                   <div className='flex items-center justify-between px-4 text-sm font-semibold tracking-wide'>
-                    <span>Lost Assets</span>
-                    <button 
-                      onClick={handleOptionsOpen}
-                      className={`flex items-center gap-1 px-3 py-1 rounded-md transition-colors ${
-                        isOptionsOpen ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'
-                      }`}
-                    >
-                      <TuneIcon fontSize='small' />
-                      <span className='text-xs'>Filter</span>
-                    </button>
-                  </div>
-                  
-                  {isOptionsOpen && (
-                    <div className='m-1 border-t border-b bg-gray-50'>
-                      <HistoryDatePicker onDateRangeChange={handleDateRangeChange} />
+                    <span>Asset Accountability</span>
+                    <div className='flex'>
+                      <button 
+                        onClick={handleOptionsOpen}
+                        className={`flex items-center gap-1 px-3 py-1 rounded-md transition-colors ${
+                            isOptionsOpen ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100'
+                        }`}
+                      >
+                        <TuneIcon fontSize='small' />
+                        <span className='text-xs'>Filter</span>
+                      </button>
+                      <button 
+                        onClick={handleRefresh}
+                        className="p-1 transition-colors rounded-full hover:bg-gray-100"
+                        title="Refresh"
+                      >
+                        <RefreshIcon />
+                      </button>
                     </div>
+                  </div>
+                    
+                  {isOptionsOpen && (
+                      <div className='flex m-1 border-t border-b bg-gray-50'>
+                          <HistoryDatePicker onDateRangeChange={handleDateRangeChange} />
+                      </div>
                   )}
                 </div>
 
@@ -238,11 +355,24 @@ function MVAssetLostPage({
           ) : error ? (
             <div className='p-4 m-4 text-red-500 bg-red-100 rounded'>{error}</div>
           ) : filteredAL.length > 0 
-            ? <div className='flex flex-col gap-4 p-4'>
+            ? <div className='flex flex-col gap-4 mt-2'>
                 <MvALForm
                   useProps={null}
                   assetLostDetails = {assetLostDetails}
                   filteredAL = {displayData}
+                  assetLostHeaders = {assetLostHeaders}
+                  isLoading={isLoading}
+                  error={error}
+                  selectedUser={selectedUser}   
+                  aLostHRefresh={aLostHRefresh}        
+                  aLostDRefresh={aLostDRefresh}     
+                  selectionMode={selectionMode}
+                  selectedAL={selectedAL}
+                  setSelectedAL={setSelectedAL} 
+                  onEnterSelectionMode={handleEnterSelectionMode}        
+                  onExitSelectionMode={handleExitSelectionMode}
+                  onSelectAll={handleSelectAll} 
+                  selectAll={selectAll}     
                 />
               </div>  
             : (

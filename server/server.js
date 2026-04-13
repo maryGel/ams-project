@@ -186,7 +186,7 @@ app.use('/approval', jo_appRoute);
 app.use('/trApproval', tr_appRoute);
 app.use('/adApproval', ad_appRoute);
 app.use('/accApproval', assetacc_appRoute);
-app.use('/assetLostApproval', assetLostAppRoute);
+app.use('/alostApproval', assetLostAppRoute);
 
 
 // React (Vite Dist)
