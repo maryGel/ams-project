@@ -9,13 +9,13 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
 // TabPanel component to render the content of each tab
-import AssetMasterTile from '../a_assetMaster/assetMaster/assetMasterTile'
-import AssetMovement from '../a_Movement/custom Utils/assetMoveTile';
-import Depreciation from '../a_Depreciation/assetDepRun';
-import AssetReports from '../a_Reports/assetReport';
-import PhysicalCount from '../a_Physical/assetPhysicalCount';
-import DashboardPage from '../a_Dash/dashBoardPage';
-import SystemSetup from '../a_SystemSetup/custom Utils/systemSetupTile';
+import AssetMasterTile from '../Modules/assetMaster/assetMaster/assetMasterTile'
+import AssetMovement from '../Modules/Movement/custom Utils/assetMoveTile';
+import Depreciation from '../Modules/Depreciation/assetDepRun';
+import AssetReports from '../Modules/Reports/assetReport';
+import PhysicalCount from '../Modules/Physical/assetPhysicalCount';
+import DashboardPage from '../Modules/Dashboard/dashBoardPage';
+import SystemSetup from '../Modules/SystemSetup/custom Utils/systemSetupTile';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -49,8 +49,6 @@ function a11yProps(index) {
     'aria-controls': `full-width-tabpanel-${index}`,
   };
 }
-
-
 
 /* --------------------------------------------
 -          H O M E  * P A G E *  M E N U
@@ -90,28 +88,26 @@ export default function FullWidthTabs({
         <Tabs
           value={value}
           onChange={handleChange}
-          sx={{ bgcolor: 'white', color: '#263238', fontFamily: 'Roboto' }}
+          sx={{ bgcolor: 'white', color: '#263238', fontFamily: 'Roboto', letterSpacing: "0.2em" }}
           indicatorColor="secondary"
           textColor="inherit"
           variant="fullWidth"
           aria-label="full width tabs example"
         >
-          <Tab label="DASHBOARD" {...a11yProps(0)} />
-          <Tab label="ASSET MASTER" {...a11yProps(1)} />
-          <Tab label="MOVEMENT" {...a11yProps(2)} />
-          <Tab label="DEPRECIATION" {...a11yProps(3)} />
-          <Tab label="REPORTS" {...a11yProps(4)} />
-          <Tab label="PHYSICAL COUNT" {...a11yProps(5)} />
-          <Tab label="SYSTEM SETUP" {...a11yProps(6)} />
+          <Tab label="DASHBOARD" sx={{ letterSpacing: "0.1em" }} {...a11yProps(0)} />
+          <Tab label="ASSET MASTER" sx={{ letterSpacing: "0.1em" }} {...a11yProps(1)} />
+          <Tab label="MOVEMENT" sx={{ letterSpacing: "0.1em" }} {...a11yProps(2)} />
+          <Tab label="DEPRECIATION" sx={{ letterSpacing: "0.1em" }} {...a11yProps(3)} />
+          <Tab label="REPORTS" sx={{ letterSpacing: "0.1em" }} {...a11yProps(4)} />
+          <Tab label="PHYSICAL COUNT" sx={{ letterSpacing: "0.1em" }} {...a11yProps(5)} />
+          <Tab label="SYSTEM SETUP" sx={{ letterSpacing: "0.1em" }} {...a11yProps(6)} />
         </Tabs>
       </AppBar>
       <TabPanel value={value} index={0} dir={theme.direction}>
         <DashboardPage/>
       </TabPanel>
       <TabPanel value={value} index={1} dir={theme.direction}>
-        <AssetMasterTile 
-          // setHeaderTitle={setHeaderTitle}          
-        />
+        <AssetMasterTile />
       </TabPanel>
       <TabPanel value={value} index={2} dir={theme.direction}>
         <AssetMovement/>

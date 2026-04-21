@@ -68,10 +68,8 @@ router.get('/', requireAuth, requireAdmin, (req, res) => {
 router.get('/:user', requireAuth, (req, res) => {
 
     // Optionally add authorization
-  if (!req.user.isAdmin && req.params.user !== req.user.user) {
-    return res.status(403).json({ error: 'You can only access your own data' });
-  }
-  
+  if (!req.user.Admin) return res.status(403).json({ error: 'You can only access your own data' });
+    
   const sql = `
     SELECT 
       user, fname, mname, lname, xPosi, xDept, Admin, Log, xlevel, Approver, xSection, MULTI_DEPT, MULTI_APP          

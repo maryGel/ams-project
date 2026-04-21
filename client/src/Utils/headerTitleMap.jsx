@@ -1,7 +1,3 @@
-import { useLocation } from 'react-router-dom';
-
-const currentPath = location.pathname;
-
 export const headerTitleMap = {
   "/home": "Asset Management System",
   "/Home": "Asset Management System",
@@ -25,11 +21,10 @@ export const headerTitleMap = {
 };
 
 
-export const getBackPath = () => {
+export const getBackPath = (currentPath) => {
   if (currentPath.startsWith('/assetFolder/assetMasterDisplay')) return '/assetFolder/pages/assetMasterList';
   if (currentPath.startsWith('/assetFolder/createAsset')) return '/assetFolder/pages/assetMasterList';
   if (currentPath.startsWith('/assetMovement/pages/JOFormPage')) return '/Home/Movement';
   if (currentPath.startsWith('/systemSetup/user/userProfile')) return '/Home/SystemSetup';
-  if (currentPath === '/assetFolder/pages/assetMasterList' || '/assetFolder/pages/referentialPage') return '/Home/AssetMasterPage';
-  return null;
+  if (currentPath.startsWith('/assetFolder/pages')) return '/Home/AssetMasterPage';
 };

@@ -27,16 +27,12 @@ function Header({ username, headerTitle, setHeaderTitle }) {
   
   // derive title from URL
   const title = headerTitleMap[currentPath] || '';
-  console.log( `isHomeTab: ${isHomeTab}`)
-  console.log(`currentPath: ${currentPath}`);
-  console.log(`title: ${title}`)
-
 
   useEffect(() => {
     setHeaderTitle(title);
   }, [title]);
 
-  const backPath = getBackPath();
+  const backPath = getBackPath(currentPath);
 
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
   
@@ -83,9 +79,9 @@ function Header({ username, headerTitle, setHeaderTitle }) {
       </Backdrop>
 
       <header className="items-center p-2 pl-6 tracking-wider text-black bg-blue-100 md:flex">
-        <button className="transition-transform duration-150 active:translate-y-0.5 hover:scale-x-95">
+        <button className="transition-transform duration-150 active:translate-y-0.5 hover:scale-x-95 mr-1">
           {isHomeTab 
-            ? ( <Button onClick={handleBackChange}>
+            ? ( <Button onClick={() => { navigate('/Home')}} className='rounded-full'>
                   <HomeIcon sx={{ fontSize: 30, color: 'Black' }} />
                 </Button>) 
             : ( <Button onClick= {handleBackChange}>
