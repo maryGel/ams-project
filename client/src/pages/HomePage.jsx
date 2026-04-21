@@ -6,8 +6,6 @@ import FullWidthTabs from '../Utils/TabPanel'
 
 function HomePage({
   setHeaderTitle,
-  username,
-  setNavLink,
   isMobile
 }) {
   
@@ -27,7 +25,6 @@ function HomePage({
         <div className='md:flex'>
           <FullWidthTabs 
             setHeaderTitle={setHeaderTitle}
-            setNavLink={setNavLink}
             tabPaths={tabPaths}
           />
         </div> 

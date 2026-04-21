@@ -18,7 +18,7 @@ import { useRefDepartment } from '../../hooks/refDepartment';
 
 
 
-function AssetMasterListPage({ useProps, setHeaderTitle, setNavLink }) {
+function AssetMasterListPage({ useProps, setHeaderTitle}) {
 
   const {assets, isLoading, error, page, setPage, total} = useAssetMasterData();
   const {refCategoryData} = useRefCategory(useProps)
@@ -281,7 +281,6 @@ function AssetMasterListPage({ useProps, setHeaderTitle, setNavLink }) {
           searchQuery={searchQuery}  
           isTableActive={isTableActive}
           setHeaderTitle={setHeaderTitle}
-          setNavLink={setNavLink}
           selected = {selected}
           setSelected = {setSelected}
         />

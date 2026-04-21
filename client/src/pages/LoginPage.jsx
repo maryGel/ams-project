@@ -21,10 +21,7 @@ function LoginPage({setHeaderTitle, setUsername}) {
 
     if (e) e.preventDefault();
     
-    if (!localUsername.trim() || !password.trim()) {
-      setErrorMsg("Please enter both username and password");
-      return;
-    }
+    if (!localUsername.trim() || !password.trim()) return setErrorMsg("Please enter both username and password");
 
     setIsLoading(true);
     setErrorMsg("");

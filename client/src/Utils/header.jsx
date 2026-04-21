@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { headerTitleMap } from './headerTitleMap';
+// Custom Hooks
+import { headerTitleMap, getBackPath  } from './headerTitleMap';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 
@@ -12,7 +13,8 @@ import HistoryIcon from '@mui/icons-material/History';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
-function Header({ username, headerTitle, setHeaderTitle, navLink, setNavLink }) {
+
+function Header({ username, headerTitle, setHeaderTitle }) {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
@@ -34,20 +36,11 @@ function Header({ username, headerTitle, setHeaderTitle, navLink, setNavLink }) 
     setHeaderTitle(title);
   }, [title]);
 
-  const getBackPath = () => {
-    if (currentPath.startsWith('/assetFolder/assetMasterDisplay')) return '/assetFolder/pages/assetMasterList';
-    if (currentPath.startsWith('/assetFolder/createAsset')) return '/assetFolder/pages/assetMasterList';
-    if (currentPath.startsWith('/assetMovement/pages/JOFormPage')) return '/Home/Movement';
-    if (currentPath.startsWith('/systemSetup/user/userProfile')) return '/Home/SystemSetup';
-    if (currentPath === '/assetFolder/pages/assetMasterList' || currentPath === '/assetFolder/pages/referentialPage') return '/Home/AssetMasterPage';
-    return null;
-  };
-
   const backPath = getBackPath();
 
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
+  
   const handleMenuClose = () => setAnchorEl(null);
-
     const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
@@ -62,8 +55,7 @@ function Header({ username, headerTitle, setHeaderTitle, navLink, setNavLink }) 
   }
 
   const handleBackChange = () => {
-
-    setNavLink(backPath)
+    navigate(backPath)
   }
 
   return (
@@ -93,11 +85,11 @@ function Header({ username, headerTitle, setHeaderTitle, navLink, setNavLink }) 
       <header className="items-center p-2 pl-6 tracking-wider text-black bg-blue-100 md:flex">
         <button className="transition-transform duration-150 active:translate-y-0.5 hover:scale-x-95">
           {isHomeTab 
-            ? ( <Button>
-                  <HomeIcon sx={{ fontSize: 30, marginRight: 2 }} />
+            ? ( <Button onClick={handleBackChange}>
+                  <HomeIcon sx={{ fontSize: 30, color: 'Black' }} />
                 </Button>) 
-            : ( <Button onChange= {handleBackChange}>
-                  <ChevronLeftIcon sx={{ fontSize: 30, marginRight: 2 }} />
+            : ( <Button onClick= {handleBackChange}>
+                  <ChevronLeftIcon sx={{ fontSize: 30, color: 'Black'  }} />
                 </Button>)
           }
         </button>

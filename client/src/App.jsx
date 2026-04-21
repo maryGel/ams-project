@@ -25,15 +25,9 @@ const getInitialTitle = () => {
   return savedTitle ? savedTitle : 'Asset Management System';
 };
 
-// To initialize the nav link based on the current page
-const getInitialNavLink = () => {
-  const savedLink = localStorage.getItem('navLink');
-  return savedLink;
-};
 
 function App() {
   const [headerTitle, setHeaderTitle] = useState(getInitialTitle);
-  const [navLink, setNavLink] = useState(getInitialNavLink);
   const [username, setUsername] = useState(() => localStorage.getItem('username') || 'User');
 
   // To save the header title to localStorage whenever it changes
@@ -42,11 +36,6 @@ function App() {
     setHeaderTitle(newTitle);
   };
 
-  // To save the nav link to localStorage whenever it changes
-  const saveNavLinkUpdate = (newLink) => {
-    localStorage.setItem('navLink', newLink);
-    setNavLink(newLink);
-  };
 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -73,8 +62,6 @@ function App() {
             <Layout 
               headerTitle={headerTitle}
               setHeaderTitle={setHeaderTitle}
-              navLink={navLink}
-              setNavLink={setNavLink}
               username={username}
               isMobile={isMobile}
             />
@@ -86,8 +73,6 @@ function App() {
                 headerTitle={headerTitle}
                 setHeaderTitle={saveTitleUpdate}
                 username={username}
-                navLink={navLink}
-                setNavLink={saveNavLinkUpdate}
                 isMobile={isMobile}
               />
           } />
@@ -97,7 +82,6 @@ function App() {
           <Route path="/assetFolder/pages/assetMasterList" element={
             <AssetMasterListPage 
               setHeaderTitle={saveTitleUpdate}
-              setNavLink={setNavLink}
             />
           } />
           

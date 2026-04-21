@@ -44,13 +44,9 @@
       connection.query(sql, [cleanJONo], (error, result)=>{
         connection.release();
 
-        if(error){
-          return res.status(500).json({error: 'Database query failed jo_h'})
-        }
-
-        if(result.length === 0){
-          return res.status(404).json({error: 'JO header not found'})
-        }
+        if(error) return res.status(500).json({error: 'Database query failed jo_h'})
+        
+        if(result.length === 0) return res.status(404).json({error: 'JO header not found'})        
 
         res.json(result[0]);
       });
