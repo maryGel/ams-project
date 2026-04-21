@@ -3,10 +3,8 @@ import { db } from "../server.js";
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
 
-
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
-
 
 // ... Login ...
 router.post("/", (req, res) => {
@@ -19,7 +17,8 @@ router.post("/", (req, res) => {
     });
   }
 
-  const sql = "SELECT * FROM user0000inv WHERE user = ?";
+  // Updated SQL to include MULTI_DEPT field
+  const sql = "SELECT * FROM `user0000inv` WHERE user = ?";
 
   db.query(sql, [user], async (err, results) => {
     if (err) {
@@ -54,7 +53,7 @@ router.post("/", (req, res) => {
       // Auto-upgrade to bcrypt hash
       const newHash = await bcrypt.hash(password, 10);
       db.query(
-        "UPDATE user0000inv SET password = ? WHERE user = ?",
+        "UPDATE `user0000inv` SET password = ? WHERE user = ?",
         [newHash, user],
         (updateErr) => {
           if (updateErr) {
@@ -71,21 +70,98 @@ router.post("/", (req, res) => {
       });
     }
 
-    // 3) Generate JWT
-      const token = jwt.sign(
-        {
-          user: dbUser.user, // Use 'user' to match DB
-          Admin: dbUser.Admin === 1 // Use 'Admin' to match Middleware
-        },
-        JWT_SECRET,
-        { expiresIn: "1d" }
-      );
+    // Process MULTI_DEPT field
+    let departments = [];
+    if (dbUser.MULTI_DEPT) {
+      // Split by pipe and trim whitespace
+      departments = dbUser.MULTI_DEPT.split('|')
+        .map(dept => dept.trim())
+        .filter(dept => dept.length > 0);
+    }
+
+    // 3) Generate JWT with department information
+    const token = jwt.sign(
+      {
+        user: dbUser.user,
+        Admin: dbUser.Admin === 1,
+        departments: departments, // Include departments in JWT
+        multiDept: dbUser.MULTI_DEPT || null // Original MULTI_DEPT string
+      },
+      JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    // Send response with department information
     res.json({
       success: true,
       message: "Login successful",
-      user: dbUser.user ,
+      user: dbUser.user,
       Admin: dbUser.Admin === 1,
+      departments: departments, // Array of departments
+      multiDept: dbUser.MULTI_DEPT || null, // Original string
       token,
+    });
+  });
+});
+
+// Get user departments (useful for frontend to refresh permissions)
+router.get("/user-departments/:username", (req, res) => {
+  const { username } = req.params;
+  const authHeader = req.headers.authorization;
+  
+  // Basic token verification (optional but recommended)
+  if (authHeader) {
+    const token = authHeader.split(' ')[1];
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      // Ensure user is requesting their own data or is admin
+      if (decoded.user !== username && !decoded.Admin) {
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized to access this user's departments"
+        });
+      }
+    } catch (err) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid or expired token"
+      });
+    }
+  }
+
+  const sql = "SELECT MULTI_DEPT, Admin FROM `user0000inv` WHERE user = ?";
+  
+  db.query(sql, [username], (err, results) => {
+    if (err) {
+      console.error("❌ Error fetching user departments:", err);
+      return res.status(500).json({
+        success: false,
+        message: "Database error"
+      });
+    }
+
+    if (!results.length) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    const userData = results[0];
+    let departments = [];
+    
+    if (userData.MULTI_DEPT) {
+      departments = userData.MULTI_DEPT.split('|')
+        .map(dept => dept.trim())
+        .filter(dept => dept.length > 0);
+    }
+
+    res.json({
+      success: true,
+      username: username,
+      isAdmin: userData.Admin === 1,
+      departments: departments,
+      multiDept: userData.MULTI_DEPT || null
     });
   });
 });
@@ -111,17 +187,31 @@ router.get("/health", (req, res) => {
 
 // Test table (temporary)
 router.get("/test-table", (req, res) => {
-  db.query("SHOW TABLES LIKE 'username0000inv'", (err, results) => {
+  db.query("SHOW TABLES LIKE 'user0000inv'", (err, results) => {
     if (err) {
       console.error("Table check error:", err);
       return res.status(500).json({ error: err.message });
     }
 
     if (results.length === 0) {
-      return res.json({ message: "Table 'username0000inv' does not exist" });
+      return res.json({ message: "Table 'user0000inv' does not exist" });
     }
 
-    res.json({ message: "Table 'username0000inv' exists", results });
+    // Also check the structure
+    db.query("DESCRIBE `user0000inv`", (descErr, descResults) => {  
+      if (descErr) {
+        return res.json({ 
+          message: "Table 'user0000inv' exists", 
+          results 
+        });
+      }
+      
+      res.json({ 
+        message: "Table 'user0000inv' exists", 
+        structure: descResults,
+        hasMultiDept: descResults.some(col => col.Field === 'MULTI_DEPT')
+      });
+    });
   });
 });
 

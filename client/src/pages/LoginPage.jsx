@@ -15,6 +15,7 @@ function LoginPage({setHeaderTitle, setUsername}) {
 
   const navigate = useNavigate();
 
+  // Update the handleLogin function in LoginPage.jsx
   const handleLogin = async (e) => {
     setHeaderTitle("Asset Management System");
 
@@ -40,11 +41,35 @@ function LoginPage({setHeaderTitle, setUsername}) {
       setDebugInfo(`Response received! Status: ${res.status}`);
       
       if (res.data.success) {
+        // Store basic auth data
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('token', res.data.token);
-        localStorage.setItem('Admin', res.data.Admin === 1 );
+        localStorage.setItem('Admin', res.data.Admin === 1);
         localStorage.setItem('username', localUsername.trim());
+        
+        // Store department information
+        if (res.data.departments) {
+          localStorage.setItem('userDepartments', JSON.stringify(res.data.departments));
+          console.log('User departments:', res.data.departments);
+        }
+        
+        if (res.data.multiDept) {
+          localStorage.setItem('multiDept', res.data.multiDept);
+        }
+        
+        // Store in session storage as well for additional security
+        sessionStorage.setItem('userDepartments', JSON.stringify(res.data.departments || []));
+        sessionStorage.setItem('isAdmin', res.data.Admin === 1);
+        
         if (setUsername) setUsername(localUsername.trim());
+        
+        // Show success message with department info (optional)
+        if (res.data.departments && res.data.departments.length > 0) {
+          console.log(`✅ Login successful - Departments: ${res.data.departments.join(', ')}`);
+        } else if (!res.data.Admin) {
+          console.warn('⚠️ User has no departments assigned');
+        }
+        
         navigate('/Home');
       } else {
         setErrorMsg(res.data.message || "Login failed");

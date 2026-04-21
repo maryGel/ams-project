@@ -12,7 +12,7 @@
         }
 
         const sql = 'SELECT * FROM jo_h';
-
+ 
         connection.query(sql, (err, results) => {
           connection.release();
             if(err){

@@ -209,11 +209,11 @@ function SearchOverlay({ isOpen, onClose, docHeaders, onSelectDoc, selectedAsset
                               <span className='text-sm font-semibold tracking-wide text-blue-500' >
                                 {result.FacName}
                               </span>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1}}>
+                              <Box sx={{ display: 'flex', alignItems: 'center'}}>
                                 <span className='text-xs tracking-wide text-gray-500' >
                                   {result.FacNO}
                                 </span>
-                                <span className='text-sm font-semibold tracking-wide text-blue-500' >
+                                <span className='pt-1 text-sm font-semibold tracking-wide text-blue-500' >
                                   {result.JO_No || result.TR_No || result.AD_No || result.AAFNo}
                                 </span>
                                 {selected && (
@@ -227,7 +227,7 @@ function SearchOverlay({ isOpen, onClose, docHeaders, onSelectDoc, selectedAsset
                                   </span>
                                 )}
                               </Box>
-                                  <div className='p-1'>
+                                  <div>
                                     {result.Remarks && (
                                       <div className="mt-1 text-xs text-gray-500">
                                         Remarks: {result.Remarks}
