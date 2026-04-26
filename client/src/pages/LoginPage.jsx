@@ -134,107 +134,113 @@ function LoginPage({setHeaderTitle, setUsername}) {
                 </div>
               )}
 
-            <TextField
-              fullWidth
-              variant="outlined"
-              placeholder="Username"
-              value={localUsername}
-              onChange={(e) => setLocalUsername(e.target.value)}
-              disabled={isLoading}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PersonIcon sx={{ color: '#9ca3af' }} /> {/* gray-400 */}
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                // The Container Styling
-                '& .MuiOutlinedInput-root': {
-                  backgroundColor: 'white',      // bg-white
-                  borderRadius: '2rem',          // rounded-xl (12px is standard for xl)    
-                  // The Border (Normal State)
-                  '& fieldset': {
-                    borderColor: '#e5e7eb',      // border-gray-200
-                    borderWidth: '1px',
-                  },                  
-                  // The Border (Hover State)
-                  '&:hover fieldset': {
-                    borderColor: '#d1d5db',      // border-gray-300 (slight darken on hover)
-                  },                  
-                  // The Border (Focused State)
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#3b82f6',      // blue-500 (or keep gray if you prefer)
-                    borderWidth: '1px',          // Prevents the border from getting thick
-                  },
-                },
-                // 2. The Label Styling
-                '& .MuiInputLabel-root': {
-                  color: '#6b7280',              // text-gray-500
-                  '&.Mui-focused': {
-                    color: '#3b82f6',            // Matches focus border
-                  },
-                },
-              }}
-            />
+              <form className='flex flex-col gap-2'>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="Username"
+                  value={localUsername}
+                  onChange={(e) => setLocalUsername(e.target.value)}
+                  disabled={isLoading}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PersonIcon sx={{ color: '#9ca3af' }} /> {/* gray-400 */}
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    // The Container Styling
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'white',      // bg-white
+                      borderRadius: '2rem',          // rounded-xl (12px is standard for xl)    
+                      // The Border (Normal State)
+                      '& fieldset': {
+                        borderColor: '#e5e7eb',      // border-gray-200
+                        borderWidth: '1px',
+                      },                  
+                      // The Border (Hover State)
+                      '&:hover fieldset': {
+                        borderColor: '#d1d5db',      // border-gray-300 (slight darken on hover)
+                      },                  
+                      // The Border (Focused State)
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#3b82f6',      // blue-500 (or keep gray if you prefer)
+                        borderWidth: '1px',          // Prevents the border from getting thick
+                      },
+                    },
+                    // 2. The Label Styling
+                    '& .MuiInputLabel-root': {
+                      color: '#6b7280',              // text-gray-500
+                      '&.Mui-focused': {
+                        color: '#3b82f6',            // Matches focus border
+                      },
+                    },
+                  }}
+                />
 
-            <TextField
-              type="password"
-              className="rounded-md"
-              placeholder='Password'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isLoading}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <KeyIcon sx={{ color: '#9ca3af' }} /> {/* gray-400 */}
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                // The Container Styling
-                '& .MuiOutlinedInput-root': {
-                  backgroundColor: 'white',      // bg-white
-                  borderRadius: '2rem',          // rounded-xl (12px is standard for xl)    
-                  // The Border (Normal State)
-                  '& fieldset': {
-                    borderColor: '#e5e7eb',      // border-gray-200
-                    borderWidth: '1px',
-                  },                  
-                  // The Border (Hover State)
-                  '&:hover fieldset': {
-                    borderColor: '#d1d5db',      // border-gray-300 (slight darken on hover)
-                  },                  
-                  // The Border (Focused State)
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#3b82f6',      // blue-500 (or keep gray if you prefer)
-                    borderWidth: '1px',          // Prevents the border from getting thick
-                  },
-                },
-                // 2. The Label Styling
-                '& .MuiInputLabel-root': {
-                  color: '#6b7280',              // text-gray-500
-                  '&.Mui-focused': {
-                    color: '#3b82f6',            // Matches focus border
-                  },
-                },
-              }}
-            />
+                <TextField
+                  type="password"
+                  className="rounded-md"
+                  placeholder='Password'
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <KeyIcon sx={{ color: '#9ca3af' }} /> {/* gray-400 */}
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{
+                    // The Container Styling
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'white',      // bg-white
+                      borderRadius: '2rem',          // rounded-xl (12px is standard for xl)    
+                      // The Border (Normal State)
+                      '& fieldset': {
+                        borderColor: '#e5e7eb',      // border-gray-200
+                        borderWidth: '1px',
+                      },                  
+                      // The Border (Hover State)
+                      '&:hover fieldset': {
+                        borderColor: '#d1d5db',      // border-gray-300 (slight darken on hover)
+                      },                  
+                      // The Border (Focused State)
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#3b82f6',      // blue-500 (or keep gray if you prefer)
+                        borderWidth: '1px',          // Prevents the border from getting thick
+                      },
+                    },
+                    // 2. The Label Styling
+                    '& .MuiInputLabel-root': {
+                      color: '#6b7280',              // text-gray-500
+                      '&.Mui-focused': {
+                        color: '#3b82f6',            // Matches focus border
+                      },
+                    },
+                  }}
+                />
 
-            <button
-              type="submit"
-              className={`p-2 m-2 text-white rounded transition-colors ${
-                isLoading
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-black hover:bg-blue-700'
-              }`}
-              onClick={handleLogin}
-              onKeypress={handleLogin}
-              disabled={isLoading}
-            >
-              {isLoading ? 'Logging in...' : 'Login'}
-            </button>
+                <button
+                  type="submit"
+                  className={`p-2 m-2 text-white rounded transition-colors ${
+                    isLoading
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-black hover:bg-blue-700'
+                  }`}
+                  onClick={handleLogin}              
+                  disabled={isLoading}
+                  onKeyDown={(e) => {
+                    if(e.key === 'Enter' && !isLoading){
+                      handleLogin();
+                    }
+                  }}
+                >
+                  {isLoading ? 'Logging in...' : 'Login'}
+                </button>
+              </form>
 
             <h4 className="pl-2 text-sm text-left text-blue-600 cursor-pointer hover:underline">
               Forgot password?

@@ -103,18 +103,9 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
   if (!user || !password) {
     return res.status(400).json({ error: 'Username and password are required' });
   }
+  
 
-  try {
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    const checkSql = 'SELECT user FROM user0000inv WHERE user = ?';
-    const insertSql = `
-      INSERT INTO user0000inv 
-      (user, password, fname, mname, lname, xPosi, xDept, Admin, Log, xlevel, Approver, xSection, MULTI_DEPT, MULTI_APP) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-    const params = [user, passwordHash, fname, mname, lname, xPosi, xDept, Admin, Log, xlevel, Approver, xSection, MULTI_DEPT, MULTI_APP];
-
+  try{
     db.getConnection((err, connection) => {
       if (err) return res.status(500).json({ error: 'Database connection error' });
 
